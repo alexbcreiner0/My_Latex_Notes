@@ -1,0 +1,133 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{cancel}
+% Package for making turing machine diagrams %
+\usepackage{tikz}
+\usetikzlibrary{chains,fit,shapes}
+% Packages for algorithms %
+\usepackage{algorithm}
+\usepackage{algorithmic}
+% Package which has the nice looking empty set symbol (\varnothing)
+\usepackage{amssymb}
+% Package with the ceiling function
+%\usepackage{mathtools}
+%\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\usepackage{bm}
+\usepackage{braket}
+\usepackage{theoremref}
+
+\title{IP and PSPACE Notes}
+\author{Alex Creiner}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{problem}{Problem}
+
+\theoremstyle{plain}
+\newtheorem{example}{Example}[section]
+
+\theoremstyle{theorem}
+\newtheorem{fact}{Fact}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+
+\begin{document}
+
+\maketitle
+An interactive proof system is a protocol between two machines, a \textbf{prover} $P$ and a \textbf{verifier} $V$. have no bounds on it's time or space complexity. Since the prover is unbounded it makes no difference whether or not it is a deterministic machine, a quantum machine, For $\bm{IP}$, the verifier will operate in polynomial time, while the prover will or any other kind of machine. On the other hand the verifier is probabilistic in the sense that it has the ability to flip coins (which are private to the verifier). The prover and the verifier have a shared input $x$, and the prover attempts to \textit{convince} the verifier that $x \in L$ (whether it is or not). The two machines send messages back and forth over special designated information channels. Eventually, the verifier decides to accept or reject. A language $L$ is said to be decided by an \textbf{interactive proof system} (IPS) if the conditional probability that the verifier $V$ accepts $x$ given that $x \in L$ is at least $\frac{2}{3}$, and the conditional probability that the verifier $V$ rejects $x$ given that $x \notin L$ is also at least $\frac{2}{3}$. If the verifier operates in polynomial time, then the language $L$ is in the class $\bm{IP}$. Note that $\bm{NP} \subseteq \bm{IP}$, since any $\bm{NP}$ machine can be seen as an interactive proof system in which the verifier doesn't use it's coin flips and the interaction is only the prover $P$ sending a single message to $V$. \par 
+Consider the graph isomorphism problem - given two graphs $G$ and $H$, are they isomorphic? Clearly this problem is in $\bm{NP}$ and is therefore also in $\bm{IP}$. The graph non-isomorphism problem is therefore in $\bm{co-NP}$ but not necessarily $\bm{NP}$ itself. But it \textit{is} in $\bm{IP}$. We describe the $\bm{IP}$ protocol which decides it. \par 
+We will see the input $x$ as a pair of graphs $(G,H)$. As we said, both the prover and verifier have this input available to them. The verifier starts the process off. It uses it's random coin flips to create a random permutation of both graphs $G$ and $H$. Call them $G'$ and $H'$ respectively. Recall that a permutation of a graph is always isomorphic to the graph itself. Thus $G \cong H$
+\begin{theorem}
+	For almost all oracles $A$, $\bm{IP}^A \neq \bm{PSPACE}^A$
+\end{theorem}
+\begin{proof}
+	Our test language will be 
+	\begin{align}
+		L_A = \{1^n: \textrm{ the number of strings of length $n$ in $A$ is odd} \}
+	\end{align}
+	This is clearly always in $\bm{PSPACE}^A$. Fix a polynomial time verifier $V$ (not a full protocol) with strict runtime $n^c$ (by strict, we mean that this runtime is exact for \emph{all} oracles $A$. Let $opt_V(A,x)$ denote the probability that $V$ accepts an input $x$ when paired with an optimal prover $P$. If $V$ is part of an interactive proof system for some language $L$, then
+	\begin{align}
+		& x \in L \implies opt_V(A,x) > \frac{2}{3} \\
+		& x \notin L \implies opt_V(A,x) < \frac{1}{3}
+	\end{align}
+	Note that the first of these is specific to the prover that $V$ is paired with, while the second is true regardless of the prover. In other words, $V$ has some question in mind to answer for itself regardless of the prover it's paired with, and has the capacity to scrutinize and reject bullshit arguments. It therefore suffices to pair $V$ with the optimal prover $P$. If $V$ doesn't decide some language $L$ when paired with this optimal prover, then it isn't part of an interactive proof system at all. Conversely if $V$ does form an interactive proof system when paired with an optimal prover, then that will be the same language for all provers which pair with $V$ to make an optimal proof system. \par 
+	Suppose we were to show that the set of oracles $A$ such that $V^A$ constitutes an interactive proof system for $L_A$ (when paired with an optimal prover) has measure $0$. Then the probability that \emph{some} verifier constitutes an interactive proof system for $L_A$ is bounded below the sum of the probabilities that $V^A$ decides $L_A$ for all $V$, which is always $0$, and therefore the probability that $L_A \in \bm{IP}^A$ is $0$ as well by monotonicity (and the fact that there are countably many $V$'s. Thus this suffices to complete the proof. We proceed to show that the set of oracles $A$ such that $V^A$ constitutes a proof system for $L_A$ under the optimal prover $P$ has measure $0$. \par 
+	To start, note that since the runtime $n^c$ is strict, for a particular string $x$ of length $n$, the computation of $V^A(x)$ depends only on strings up to (and not including) length $n^c$. Let $A^{n^c}$ denote the `initial segment' of $A$ up to strings of length $n^c$, and so on. Then if $A^{n^c} = B^{n^c}$ then the computation of $V^B(x)$ and $V^A(x)$ are identical. Let $seg(n)$ denote the set of all subsets of strings of length less than $n^c$, i.e. the set of all possible $A^{n^c}$. Let $C(n)$ denote the set of all $\beta \in seg(n)$ such that $V^{\beta}$ correctly decides $1^n$, specifically. What we are going to essentially show is that $|C(n)| < \frac{2}{3}|seg(n)|$. This is intuitively very close to proving our desired result, since it shows that the probability of a random oracle correctly deciding $1^n$ is less than $\frac{2}{3}$. Then it appears that the probability of a random oracle correctly deciding \emph{all} $1^n$ is the measure of the intersection of all of these probabilities, which is very likely $0$. The issue, of course, is that these events need not be independent. We must show that given an initial oracle of some length $n$, that the probability of being in $C(n)$ is minimally dependent on $C(m)$ for $m > n$ at the same time. \par 
+	Let $N$ be large enough that $2^N > 18N^c$. For $\alpha \subseteq \{0,1\}^n$, let $B(\alpha,n)$ denote the collection of $\beta \in seg(n)$ such that $\beta$ extends $\alpha$ up to length $n^c$. We first show the following lemma: \par 
+	\vspace{10mm}
+	For all $n \geq N$ and for all $\alpha \in \{0,1\}^{<n}$, $|B(\alpha,n)\cap C(n)| \leq \frac{2}{3}|B(\alpha,n)|$. I.e. given \emph{any} fixed $\alpha$ of length $n$, the set of finite extensions of length $n^c$ which correctly decide $L_A(1^n)$ is $\frac{2}{3}$ of the overall set, as if the $\alpha$ hadn't been fixed at all. \vspace{10mm}
+	\par On the input $1^n$ and with access to an oracle $\beta \in seg(n)$, the verifier $V$ interacts with the optimal prover and makes queries of various strings to $\beta$. Let $Q(\beta,q)$ be the probability  (over $V$'s coin tosses) that $V(1^n)$ queries $q$. Since $n^c$ is a strict upper bound on the running time of $V$, for every $n$ and every sequence of coin tosses made by $V^{\beta}$ on input $1^n$, the machine makes less than $n^c$ queries. Thus for every $\beta \in seg(n)$ we have
+	\begin{align}
+		\sum_{q \in \{0,1\}^n}Q(\beta,q) = \sum_{q \in \{0,1\}^n} \sum_{\textrm{paths l}} Q(\beta,q|l)P(l) &=\sum_{\textrm{paths l}}\sum_{q \in \{0,1\}^n}Q(\beta,q|l)P(l) \\ &= \sum_{\textrm{paths l}}\sum_{q \textrm{ queried along l}}Q(\beta,q|l)\frac{1}{2^{n^c}} \\
+		&\leq \sum_{\textrm{paths l}} \sum_{q \textrm{ queried along l}} 1 * \frac{1}{2^{n^c}} \\
+		&\leq \sum_{\textrm{paths l}} \frac{n^c}{2^{n^c}} \\
+		& = 2^{n^c}\frac{n^c}{2^{n^c}} = n^c
+	\end{align} 	
+	I don't know why I needed to explain it to myself this way but I did. Now suppose by way of contradiction that for all $q \in \{0,1\}^n$, a larger fraction of the $\beta$'s in $B(\alpha,n)$ than $\frac{3n^c}{2^n}$ have $Q(\beta,q) \leq \frac{1}{3}$. Then
+	\begin{align}
+		\sum_{\beta \in B(\alpha,n)} \sum_{q \in \{0,1\}^n} Q(\beta,q) \leq \sum_{\beta \in B(\alpha,n)}n^c = |B(\alpha,n)|n^c
+	\end{align}
+	By what we showed above. But additionally by our hypothesis we have 
+	\begin{align}
+		\sum_{\beta \in B(\alpha,n)} \sum_{q \in \{0,1\}^n} Q(\beta,q) &= \sum_{q \in \{0,1\}^n} \sum_{\beta \in B(\alpha,n)} Q(\beta,q) \\
+		&> \sum_{q \in \{0,1\}^n} \frac{3n^c}{2^n}|B(\alpha,n)|\frac{1}{3} \\
+		&= \sum_{q \in \{0,1\}^n} \frac{n^c}{2^n}|B(\alpha,n)| = n^c|B(\alpha,n)|
+	\end{align}
+	Thus we have a quantity which is simultaneously bigger and smaller than $n^c|B(\alpha,n)|$, a contradiction. Thus we can be sure there exists a particular $q \in \{0,1\}^n$ such that for all but a $\frac{3n^c}{2^n}$ fraction of the $\beta$'s in $B(\alpha,n)$, $Q(\beta,q) \leq \frac{1}{3}$. Fix such a string $q$. \par 
+	Now, let $\beta$ be an oracle in $B(\alpha,n)$ such that $1^n \in L_{\beta}$. and let $\beta^{(q)}$ denote the oracle which contains all strings except for $q$. We claim that 
+	\begin{align}
+		opt_V(\beta^{(q)},1^n) \geq opt_V(\beta,1^n)-Q(\beta,q)
+	\end{align}
+	It is clear that the difference should be small since by definition of $q$ it is mostly irrelevent for most of the $\beta$'s, but to understand this exact statement, consider the prover $P'$ which uses the same strategy on $V^{\beta}(1^n)$ as whatever the optimal prover $P$ would use for $V^{\beta^{(q)}}(1^n)$. On the computational paths in which $V^{\beta^{(q)}}(1^n)$ would never query $q$, $P'$ would behave identically to the actual optimal prover for $V^{\beta}$. But we know that only a $Q(\beta,q)$ fraction of the paths ask about $q$ by definition. 
+	\begin{align}
+		opt_V(\beta^{(q)},1^n) &= P(V^{\beta^{(q)}} \textrm{ accepts}) \\
+		&\geq P(V^{\beta^{(q)}}(1^n) \textrm{ accepts under optimal prover and doesn't query q}) \\
+		&= P(V^{\beta^{(q)}}(1^n) \textrm{ accepts under optimal prover}) - P(V^{\beta^{(q)}} \textrm{ accepts under optimal prover and does query q}) \\
+		&\geq P(V^{\beta}(1^n) \textrm{ accepts under optimal prover}) - P(V^{\beta^{(q)}} \textrm{queries q}) \\
+		 &= opt_V(\beta,1^n) - Q(\beta,q)
+	\end{align} 
+	Now note that if $1^n \in L_{\beta}$ then $1^n \notin L_{\beta^{(q)}}$ by definition of our test language. We now exploit this. We claim that whenever $Q(\beta,q) < \frac{1}{3}$, the verifier $V$ must be incorrect in determining membership for either $L_{\beta}$ or $L_{\beta^{(q)}}$. To see this, assume such a $q$ and suppose that $V^{\beta}(1^n)$ accepts and $1^n \in L_{\beta}$. Then $opt_V(\beta,1^n) > \frac{2}{3}$. But then by our identity we have that $opt_V(\beta^{(q)},1^n) > \frac{1}{3}$, meaning that $V^{\beta^{(q)}}$ is failing to properly discern that $1^n$ is not in $L_{\beta^{(q)}}$. Assume $V^{\beta}(1^n)$ rejects and $1^n \notin L_{\beta}$. For both $V^{\beta}$ and $V^{\beta^{(q)}}$ to be correct, we must have then that $V^{\beta^{(q)}}(1^n)$ accepts, i.e. has a probability of acceptance greater than $\frac{2}{3}$. But then by an identical argument we get that the probability of $V^{\beta}$ itself accepting is too high, so that it is failing to discern non-membership just as $V^{\beta^{(q)}}$ was in the previous case. Thus regardless of the situation, one of these machines is making an error. \par 
+	By our choice of $q$, $Q(\beta,q) < \frac{1}{3}$ for at least a $1-\frac{3n^c}{2^n}$ fraction of the $B(\alpha,n)$. In the worst case, every pair $(\beta,\beta^{(q)})$ will be jointly have this property, halving our lower bound on the set of pairs $(\beta,\beta^{(q)})$ which have that property. So at least a $1-2\frac{3n^c}{2^n}$ fraction of the pairs have the property that $Q(\beta,q) < \frac{1}{3}$. Note that by our choice of $n$ such that $2^n > 18n^c$, we have
+	\begin{align}
+		1-\frac{6n}{2^n} > 1-\frac{6}{18} = \frac{2}{3}
+	\end{align}
+	So this is at least $\frac{2}{3}$ of the pairs. Thus when grouping the elements of $B(\alpha,n)$ into pairs, $V$ fails on one or the other of the elements, and thus fails on $\frac{1}{2}\frac{2}{3} = \frac{1}{3}$ of all elements of $B(\alpha,n)$ itself. \par 
+	This proves the lemma and thus the bulk of the proof. We just need to send it off. The following lemma allows us to cascade our results downward as we need to: \par 
+	\vspace{10mm}
+		Let $n_i=N^{c^i}$ for some $i$ (with $N$ and $c$ as we've already defined them), and let $R_i$ be the collection of finite sets $\beta \in seg(n_i)$ such that for all $r \leq n_i$, $V^{\beta}$ correctly determines whether $1^r$ is in $L_{\beta}$. Then for all $i \geq 0$, $|R_i| \leq \left(\frac{2}{3}\right)^i|seg(n_i)|$
+	\vspace{10mm}
+	\par test
+\end{proof}
+\begin{lemma}
+	Let $A$ be a tame oracle. Then $\bm{NP}^A \subseteq \bm{PSPACE}^A \subseteq \bm{IP}^A$. 
+\end{lemma}
+\begin{proof}
+	Our first task will be to show that the operation of any relativized machine under these circumstances are still both space bounded in a certain sense. In the case of $\bm{PSPACE}^A$ this is obviously true in any sense by definition. In the case of $\bm{IP}^A$, consider a protocol defined by a verifier $V$ paired with it's optimal prover. This verifier is a nondeterministic machine operating in polynomial	time. In polynomial time it can only query polynomial length strings, and so remains space bounded in it's operation. Thus $\bm{IP}^A$ can only query strings up to it's runtime, say $n^k$. This will be important. \par 
+	Now, let $M^A$ be a $\bm{PSPACE}^A$ machine. Note that the operation of this machine can be broken down into the operation of a relativized $\bm{NP}^A$ machine followed by that of a non-relativized $\bm{PSPACE}$ machine. Let $M^A$ operate in space $n^k$. Then it can only query strings of length up to $n^k$. A relativized $\bm{NP}^A$ machine can create a lookup table by simply answering the question `does there exist a string of length $n$ in $A$' by guessing a string in the oracle for each length between $1$ and $n^k$. If it can't guess a string, then there are no strings in the oracle of that length. If it can guess the right string, then it can add that to the lookup table and be content that this is all of the strings in $A$ of that length since $A$ is tame. (Note that tameness is crucial here. If we didn't have this then it would not be clear that a lookup table could be created without access to a $\bm{coNP}^A$ machine, and $\bm{coNP}^A \subseteq \bm{IP}^A$ is famously a non-relativizing result!) Now the operation of the non-relativized machine which decides the same language as $M^A$ using the lookup table can be also decided by a non-relativized $\bm{IP}$ protocol (with access to the same lookup table), since $\bm{PSPACE} \subseteq \bm{IP}$. Moreover $\bm{NP}^A \subseteq \bm{IP}^A$ as well since $\bm{NP}^A$ is simply the special case of $\bm{IP}$ where the prover and verifier only communicate once. Thus there is an $\bm{IP}^A$ protocol for creating the same lookup table. We thus have an $\bm{IP}^A$ protocol for creating the lookup table and an $\bm{IP}$ protocol for using that lookup table to arrive at the same answers as $M^A$. Thus $L(M^A) \in \bm{IP}^A$, and we have that $\bm{PSPACE}^A \subseteq \bm{IP}^A$. 
+\end{proof}
+Now let 
+\[ \bm{I} = \{A: \bm{PSPACE}^A \subseteq \bm{IP}^A\} \]
+It immediately follows from the above result that $\bm{I}$ is Ramsey positive. Since $\bm{I}$ is clearly Borel like the others, any infinite oracle has to contain a suboracle for either $\bm{I}$ or it's complement. Consider, therefore, any infinite oracle $A$. Every infinite oracle has a tame suboracle $B$. Moreover all subsets of a tame oracle are tame. Thus this $B$ has to be homogeneous for $\bm{I}$. We can go further than this however. Let $[a,A]$ be a basic open Ellentuck set. The body $A$ clearly has a tame sub-body $B$, while the strings represented by the finite initial stem $a$ can simply be hardcoded into any machine. Thus $[a,B]$ is homogeneous for $\bm{I}$. It follows that $\bm{I}$ is Ramsey 1. 
+\begin{theorem}
+	$\bm{I}$ is Ramsey $1$. 
+\end{theorem}
+\begin{lemma}
+	Let $A$ be a tame oracle, and $\bm{NTIME}(f(n)) \subseteq \bm{C} \subseteq \bm{SPACE}(f(n))$ for some complexity class $\bm{C}$, and let $\bm{C} \subseteq \bm{D}$. Then $\bm{NTIME}(f(n))^A \subseteq \bm{C}^A \cap \bm{D}^A$. Moreover the actual relationship between two classes both containing $\bm{NTIME}(f(n))$ and contained within $\bm{SPACE}(f(n))$ will remain the same relativized to $A$. We have a machine $M^A$, which can be factored into two machines, one relativized, and one unrelativized
+	\begin{align}
+		M^A(x) = R^A(x) \circ M'(x) = R^A(x) \circ N'(x)
+	\end{align}
+\end{lemma}
+\begin{proof}
+	What we did in the above proof was essentially `factor out' all of the potential usefulness of $A$ as an $\bm{NP}^A$ computation, using the space bound on the lesser class. In other words, a tame oracle $A$ is simple enough that no space bounded machine can squeeze any more use from it than a relativized $\bm{NP}$ machine can. Thus for two classes which are both just as powerful as a relativized $\bm{NP}^A$ machine, the oracle $A$ won't have any effect on their comparison. $\bm{NP}$ and $\bm{P}$ being separated by a tame oracle (namely the Solovay language) shows that nondeterminism can be used to squeeze more value out of certain simple problems (namely, tame ones) then determinism could on it's own.  
+\end{proof}
+\begin{proof}
+	What we were showing with the above example is just a special case of this. To have a tame oracle is to have an oracle which can't be `squeezed' for usefulness 
+\end{proof}
+How to interpret these results? Consider the above construction, in which we took a complexity class which always contained $\bm{NP}^A$. In this situation 
+\end{document}

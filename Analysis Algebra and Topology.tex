@@ -1,0 +1,1085 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsthm}
+% Package for making turing machine diagrams %
+\usepackage{tikz}
+\usetikzlibrary{chains,fit,shapes}
+% Packages for algorithms %
+\usepackage{algorithm}
+\usepackage{algorithmic}
+% Package which has the nice looking empty set symbol (\varnothing)
+\usepackage{amssymb}
+% Package with the ceiling function
+%\usepackage{mathtools}
+%\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\usepackage{braket}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{bm}
+
+\title{Vanilla Math Notes (Topology, Algebra, Analysis)}
+\author{Alex Creiner}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{problem}{Problem}
+\newtheorem{thesis}{The Church-Turing Thesis}
+
+\theoremstyle{plain}
+\newtheorem{example}{Example}[section]
+
+\theoremstyle{theorem}
+\newtheorem{fact}{Fact}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{claim}{Claim}[section]
+
+
+\begin{document}
+\maketitle
+\section{Set Theory}
+Throughout more foundational subjects of mathematics, we are dealing with families of sets, formally realized as collections coming out of the power set of some universal set. 
+\section{Topology}
+	\begin{definition}
+		A \textbf{topology} on a set $X$ is a subset of the power set $\tau \subseteq \mathcal{P}(X)$ satisfying the following conditions:
+		\begin{itemize}
+			\item[(i)] $\varnothing,X \in \tau$
+			\item[(ii)] $\tau$ is closed under arbitrary unions
+			\item[(iii)] $\tau$ is closed under finite intersections
+		\end{itemize}
+		The pair $(X,\tau)$ is called a \textbf{topological space}. The elements of $\tau$ are called \textbf{open sets}. The set $\sigma = \neg \tau =  \{X-U: U \in \tau\}$ is the collection of \textbf{closed sets}
+	\end{definition}
+	Immediately by definition we have that the closed sets are closed under intersections and finite unions, and contain the sets $X$ and $\varnothing$. If $X$ is a topological space and $x \in X$, a \textbf{neighborhood} (abbreviated nbhd) of $x$ is a set $U$ which contains an open set containing $x$. That is, there exists a $V \in \tau$ such that $x \in V \subseteq U$. Many topology books and most books which indirectly use topology restrict this definition by requiring that neighborhoods be open. By default we will use the definition I've stated, but sometimes will deviate and say when we are doing so. 
+	\par What these axioms for a topology really give us is a way to think about 'inside' and 'outside', as we will see with the next definitions:
+	\begin{definition}
+		If $X$ is a topological space, and $E \subseteq X$, the \textbf{closure} of $E$ in $X$ is the set
+		\[ \overline{E} = Cl(E) = \bigcap\{K \subseteq X: K \in \neg \tau \wedge E \subseteq K\} \]
+	I.e. it's the intersection of all closed sets containing $E$, and so can be viewed as the smallest closed set containing $E$. The \textbf{interior} of $E$ in $X$ is the set
+	\[ E^{\circ} = Int(E) = \bigcup\{G \subseteq X: G \in \tau \wedge G \subseteq E \} \]
+	I.e. it's the union of all open sets contained in $E$, and so can be viewed as the largest open set inside of $E$.
+	\end{definition}
+	Obviously, $\overline{E}$ is always closed and $E^{\circ}$ is always open, for any $E$.
+	\begin{lemma}
+		If $A \subseteq B$, then $\overline{A} \subseteq \overline{B}$ and $A^{\circ} \subseteq B^{\circ}$.
+	\end{lemma}
+	\begin{proof}
+		$B \subseteq \overline{B}$, so if $A \subseteq B$ then $A \subseteq \overline{B}$. But by definition $\overline{A}$ is the smallest closed set containing $A$, and so we must have that $\overline{A} \subseteq \overline{B}$. Now, clearly $A \subseteq A^{\circ}$, so if $A \subseteq B$, we have $A^{\circ} \subseteq B$. Thus $A^{\circ}$ is an open set contained in $B$, and so $A^{\circ} \subseteq B^{\circ}$, since $B^{\circ}$ is the largest of the sets with this this property.
+	\end{proof}
+	\begin{theorem}
+		The following are true for the closure operation
+		\begin{itemize}
+			\item[(a)] $E \subseteq \bar{E}$
+			\item[(b)] $\overline{\overline{E}} = \bar{E}$
+			\item[(c)] $\overline{A \cup B} = \bar{A} \cup \bar{B}$
+			\item[(d)] $\bar{\varnothing} = \varnothing$
+			\item[(e)] $E$ is closed in $X$ iff $\bar{E} = E$
+		\end{itemize}
+		Also, given a set $X$ and a mapping $A \mapsto \bar{A}$ on the power set of $X$ which satisfies properties (a) through (d), if we define closed sets via (e), then the resulting collection of open sets is a topology on $X$, whose closure operation is the operation we began with to define the topology.  
+	\end{theorem}
+	\begin{proof}
+		(a) is obvious. (b) is also obvious - the smallest open set containing the closure of $E$ is of course the set itself. To show (c), first note that $\bar{A} \cup \bar{B}$ is a finite union of closed sets, so is closed, and clearly contains $A \cup B$ by property (a). Thus we must have that $\overline{A \cup B} \subseteq \bar{A} \cup \bar{B}$. On the other hand, since $A,B \subseteq A \cup B$, it follows that $\bar{A},\bar{B} \subseteq \overline{A \cup B}$, and so $\bar{A} \cup \bar{B} \subseteq \overline{A \cup B}$. Thus, $\overline{A \cup B} = \bar{A} \cup \bar{B}$. Property (d) follows from the fact that $\varnothing$ is closed by definition, and property (e) is an identical argument to the one made for (b).
+		\par Now for the second part of the statement - suppose we have a 'closure' operation $A \mapsto \bar{A}$ which satisfied properties (a) - (d), and the closed sets are defined by property (e). Note that if $A \subseteq B$, then since $\bar{B} = \overline{A \cup (B-A)} = \bar{A} \cup \overline{(B-A)}$, so $\bar{A} \subseteq \bar{B}$ (note we needed to show this because it isn't one of the 4 properties we have assumed.) Now suppose that $F_{\lambda}$ is a closed set for each $\lambda \in I$. Then clearly $\bigcap F_{\lambda} \subseteq F_{\lambda'}$ for any fixed $\lambda'$, we have by the above that $\overline{\bigcap F_{\lambda}} \subseteq \bar{F_{\lambda'}}$, and so $\overline{\bigcap F_{\lambda}} \subseteq \bigcap \bar{F_{\lambda}} = \bigcap F_{\lambda}$ (where the last equality follows via property (e)). But clearly it is also the case that $\bigcap F_{\lambda} \subseteq \overline{\bigcap F_{\lambda}}$, and so we have that $\overline{\bigcap F_{\lambda}}  = \bigcap F_{\lambda}$, i.e. the intersection is closed. Thus arbitrary intersections of closed sets are closed. 
+	 \par Now to show that finite unions of closed sets are closed. Suppose $F_1,...,F_n$ are closed via (e). Then $\overline{F_1 \cup \ldots \cup F_n} = \bar{F_1} \cup \ldots \cup \bar{F_n} = F_1 \cup \ldots \cup F_n$, and so we have that the union $F_1 \cup \ldots \cup F_n$ is closed. $\varnothing$ is closed trivially, and $\bar{X} \subseteq X$ because everything is, so $X = \bar{X}$, i.e. $X$ is also closed. Thus, we have that this definition of closed defines a topology.
+		\par It remains to show that the closure operation given by the topology is the same as the operation we began with. That is, for a set $A$, we need to confirm that $\bar{A}$ is indeed the smallest closed set containing $A$. Note that since $\overline{(\bar{A})} = \bar{A}$ by (c), we have that $\bar{A}$ is always closed, and we also know that $A \subseteq \bar{A}$ by (a). If $K$ is any closed set containing $A$, then $\bar{A} \subseteq \bar{K} = K$, so $\bar{A}$ is the smallest closed set containing $A$. 
+	\end{proof}
+	The significance of the above theorem, aside from defining the basic rules for the closure operation, is that we can define a topology by simply defining a closure operation, rather than specifying the open or closed sets directly. As an example of this, we build a useful topology called the \textbf{cofinite topology}. Let $X$ be any infinite set, and for each $A \subseteq X$, define $\bar{A}$ by $\bar{A} = A$ if $A$ is finite, and $\bar{A} = X$ otherwise. Note that by this definition, the closed sets are precisely the finite sets, along with $X$ and $\varnothing$, and thus the open sets are precisely those sets for which the complement is closed, i.e. sets which are co-finite. The definition very clearly satisfies properties (a)-(d): it's practically trivial to check them. So the theorem has served us well. 
+	\par We next note that interior and closure are dual notions: 
+	\begin{fact}
+		For a set $E$ when the underlying universe $X$ is clear, we use $E^c := X-E$. For a topological space $X$, we have
+		\[ (E^{\circ})^c = \overline{E^c} \]
+		\[ (\bar{E})^c = (E^c)^{\circ} \]
+	\end{fact}
+	\begin{proof}
+		For the first, note that $x \in (E^{\circ})$ iff $x \notin E^{\circ}$ iff for every open set $U \subseteq E$, $x \notin U$, i.e. iff $x \notin \bigcup_{\lambda \in I} U_{\lambda}$, where $I$ indexes the collection of all open subsets of $E$. But then by DeMorgan this is equivalent to saying that $x \in \bigcap_{\lambda \in I} U_{\lambda}^c$, and $U$ is an open subset of $E$ iff $U^c$ is a closed set containing $E^c$, so this is precisely the intersection of all closed sets containing $E^c$, i.e. $x \in \overline{E^c}$. The second identity is an identical argument.
+	\end{proof}
+	\begin{theorem}
+		The  following are true for the interior operation
+		\begin{itemize}
+			\item[(a)] $E^{\circ} \subseteq E$
+			\item[(b)] $(E^{\circ})^{\circ} = E^{\circ}$
+			\item[(c)] $(A \cap B)^{\circ} = A^{\circ} \cap B^{\circ}$
+			\item[(d)] $X^{\circ} = X$
+			\item[(e)] $E$ is open in $X$ iff $E^{\circ} = E$
+		\end{itemize}
+		Also, given a set $X$ and a mapping $A \mapsto A^{\circ}$ on the power set of $X$, which satisfies properties (a) through (d), if we define open sets via (e), then the resulting collection of open sets is a topology on $X$. 
+	\end{theorem}
+	\begin{proof}
+		Properties (a),(b),(d), and (e) are as obvious as the similar facts for closure. To show (c), we note that by the above fact, we have the identity $E^{\circ} = \overline{E^c}^c$. Thus
+		\[ (A \cap B)^{\circ} = (\overline{(A \cap B)^c)})^c = (\overline{A^c \cup B^c})^c = (\overline{A^c} \cup \overline{B^c})^c = (\overline{A^c})^c \cap (\overline{B^c})^c = A^{\circ} \cap B^{\circ} \]
+		Now, if we specify an operation satisfying properties (a) through (d), and define openness by (e), then we can define a closure operation in terms of our interior operation as $\bar{E} := ((E^c)^{\circ})^c$, and note that under the supposed topology, $E$ would be closed iff $E^c$ is open, i.e. iff $(E^c)^{\circ} = E^c$ iff $((E^c)^{\circ}))^c = (E^c)^c = E$, i.e. $E$ closed iff $\bar{E} = E$. Also note that properties (a) through (d) of the closure theorem are immediately implied to apply to our closure operation here, as the assumed properties (a) through (d) directly translate to those. Thus, the implicit closure operation and definition of what it means to be closed defines a topology, whose closure operation coincides, and this in turn coincides with the open sets we've defined here.
+	\end{proof}
+	Finally, we define a boundary operator:
+	\begin{definition}
+		For a set $E$ in a topological space $X$, define the \textbf{boundary} or the \textbf{frontier} of $E$ to be the set $\partial E := \overline{E} \cap \overline{E^c}$.
+	\end{definition}
+	A topology can be defined via a boundary operator just as well as it can be defined with the closure or interior operators, but we won't go there. Instead, we will state some simple facts about it:
+	\begin{fact}
+		For any set $E$ in a topological space $X$, we have
+		\begin{itemize}
+			\item[(a)] $\overline{E} = E \cup \partial E $
+			\item[(b)] $E^{\circ} = E - \partial E$
+			\item[(c)] $X = E^{\circ} \cup E \cup (X-E)^{\circ}$
+		\end{itemize}
+	\end{fact}
+	\begin{proof}
+		
+	\end{proof}
+	\par The following notions will prove to be extremely useful tools in the study of topological spaces.
+	\begin{definition}
+		A \textbf{filter} $\mathcal{F}$ on a set $S$ is a nonempty collection of nonempty subsets of $S$ with the following properties:
+		\begin{itemize}
+			\item[(i)] If $F_1,F_2 \in \mathcal{F}$, then $F_1 \cap F_2 \in \mathcal{F}$. 
+			\item[(ii)] If $F \in \mathcal{F}$ and $F \subseteq F'$, then $F' \in \mathcal{F}$.
+		\end{itemize}
+		A subcollection $\mathcal{F}_0$ of $\mathcal{F}$ is a \textbf{filter base} for $\mathcal{F}$ iff each element of $\mathcal{F}$ contains some element of $\mathcal{F}_0$ as a subset. I.e. if
+		\[ \mathcal{F} = \{F \subseteq S: F_0 \subseteq F \textrm{ for some }F_0 \in \mathcal{F}\} \]
+	\end{definition}
+	\begin{fact}
+	A set $\mathcal{C} \subseteq \mathcal{P}(S)$ is a filter base for \textit{some} filter $\mathcal{F}$ iff whenever $C_1,C_2 \in \mathcal{C}$, there is a $C_3 \in \mathcal{C}$ such that $C_3 \subseteq C_1 \cap C_2$. Namely, that filter is $\mathcal{F} = \{F \subseteq X: C \subseteq F \textrm{ for some }C \in \mathcal{C} \}$
+	\end{fact}
+	\begin{proof}
+		Condition $(ii)$ is clearly satisfied for $\mathcal{F}$, with the condition of $\mathcal{C}$ being a filter base also satisfied trivially. Let $F_1,F_2 \in \mathcal{F}$, with $C_1,C_2 \in \mathcal{C}$ such that $C_1 \subseteq F_1, C_2 \subseteq F_2$. Then by hypothesis, there is a $C_3 \in \mathcal{C}$ such that $C_3 \subseteq C_1 \cap C_2 \subseteq F_1 \cap F_2$, and so $F_1 \cap F_2 \in \mathcal{F}$, and thus we have that $\mathcal{F}$ is a filter.
+	\end{proof}
+	Note that if $(X,\tau)$ is a topological space and $x \in X$, then the collection 
+	\[\mathcal{N}_x = \{N \subseteq X: N \textrm{ is a neighborhood of }x\} \]
+	is clearly a filter, and furthermore has the obvious filter base:
+	\[ \mathcal{B}_x = \{U \in \tau: x \in U \} \]
+	This is why some textbooks prefer to define neighborhoods this way. We call $\mathcal{N}_x$ the \textbf{neighborhood filter} for $x$, and $\mathcal{B}_x$ a neighborhood base of $\tau$ at $x$. Neighborhood bases don't have to be unique, and so we have the following definition:
+	\begin{definition}
+		Let $X$ be a topological space, and $x \in X$. A \textbf{neighborhood base} for $x$ is a filter base for the neighborhood filter $\mathcal{N}_x$.
+	\end{definition}
+	\begin{lemma}
+		Let $\mathcal{N}_x$ be the neighborhood filter of a space $X$ at $x$. Then the following properties hold:
+		\begin{itemize}
+			\item[(a)] If $U \in \mathcal{N}_x$, then $x \in U$
+			\item[(b)] If $U,V \in \mathcal{N}_x$, then $U \cap V \in \mathcal{N}_x$
+			\item[(c)]If $U \in \mathcal{N}_x$, then there is a $V \in \mathcal{N}_x$ such that $U \in \mathcal{N}_y$ for each $y \in V$.
+			\item[(d)] If $U \in \mathcal{N}_x$ and $U \subseteq V$, then $V \in \mathcal{N}_x$. 
+			\item[(e)] $G \subseteq X$ is open iff $G$ contains a nbhd of each of its points.
+		\end{itemize}
+		Furthermore, suppose that for each $x \in X$, we have a collection $\mathcal{N}_x$ which satisfies properties (a) through (d), and define 'open' by property (e). Then the resulting collection of open sets defines a topology on $X$, with the neighborhood filters at each point being the $\mathcal{N}_x$.
+	\end{lemma}
+	\begin{proof}
+		First suppose we have a topology $\tau$ and a neighborhood filter $\mathcal{N}_x$. That properties (a),(b),and (d) hold is trivial. As for (c), and let $V = U^{\circ}$. Then for each $y \in V = U^{\circ}$, $V$ is an open set containing $y$ which is contained in $U$, so $U \in \mathcal{N}_y$. To prove (e), note that if $G$ is open, then it is automatically a nbhd of each of it's points, and conversely, if $G$ contains a nbhd $V_x$ for each $x \in G$, then $G = \bigcup_{x \in G} V_x$, i.e. $G$ is a union of open sets and hence open. 
+		\par Now we prove the second part of the lemma. Suppose $\mathcal{N}_x$ is a collection of nonempty sets satisfying (a)-(d) for each $x \in X$, and define openness by (e). Vacuously, $\varnothing$ is open. Suppose $X$ itself was not open. Then there exists an $x \in X$ which doesn't have a neighborhood, i.e. $\mathcal{N}_x = \varnothing$, but this contradicts our assumption of nonemptyness, so $X$ must be open.
+		 It is clear that (e) holds across unions of sets which share that property. Finally, suppose that $G_1,G_2$ are open, and $G_1 \cap G_2 = \varnothing$. Let $x \in G_1 \cap G_2$. Let $U \subseteq G_1, V \subseteq G_2$ be nbhds of $x$. Then $U,V \in \mathcal{N}_x$, so by (b), $U \cap V \in \mathcal{N}_x$. But $U \cap V \subseteq G_1 \cap G_2$, so $G_1 \cap G_2$ contains a nbhd of $x$, namely $U \cap V$, and so is open. This completes the proof.
+	\end{proof}
+	The above lemma gives us a way to define topologies by specifying a filter for each point. It would be nicer and simpler if we could define a topology by specifying a filter \textit{base} at each point, each of which would act as a natural nbhd base, and the next theorem tells us how to do that.
+	\begin{theorem}
+		Let $\mathcal{B}_x$ be a nbhd base for $x \in X$, a topological space. Then we have that 
+		\begin{itemize}
+			\item[(a)] If $V \in \mathcal{B}_x$, then $x \in V$
+			\item[(b)] If $V \in \mathcal{B}_x$, then there is a $V_0 \in \mathcal{B}_x$ such that if $y \in V_0$, then there is some $W \in \mathcal{B}_y$ with $W \subseteq V$. 
+			\item[(c)] $G \subseteq X$ is open iff it contains a basic nbhd of each of it's points.
+		\end{itemize}
+		More importantly, if for each $x$ in some set $X$ we define a nonempty filter base $\mathcal{B}_x$ satisfying properties (a) and (b), and we define openness by property (c), then this defines a topology on $X$, with $\mathcal{B}_x$ being a nbhd base for each point. 
+	\end{theorem}
+	\begin{proof}
+		Let $\mathcal{B}_x$ be a filter base for $x \in X$, a topological space. Let $V \in \mathcal{B}_x$. Then $V \in \mathcal{N}_x$, and so $x \in V$ by property (a) of the lemma. For (b), again since $V \in \mathcal{N}_x$, there exists by (c) of the lemma a $Q \in \mathcal{N}_x$ such that $V \in \mathcal{N}_y$ for each $y \in Q$. Now $Q$ is a neighborhood, so it contains a set $V_0 \in \mathcal{B}_x$. For each $y \in V_0$, we have that $V \in \mathcal{N}_y$, and so there is a $W \in \mathcal{B}_y$ such that $W \subseteq V$, giving us the property. By (e) above, $G$ is open iff it contains a nbhd of each of it's points, but by definition of a filter base this is true iff it contains a basic nbhd of each of it's points.
+		\par Now for the important part - for each $x \in X$ we specify a filter base $\mathcal{B}_x$ satisfying properties (a) and (b), and define openness by property (c). Note that since filters are nonempty, it must follow that each of these $\mathcal{B}_x$ bases are themselves nonempty collections. We wish to show that the collection of open sets is a topology on $X$. Since this is an equivalent definition of openness as (e) from the lemma, We show that this defines a topology on $X$ by showing that the neighborhood filters $\mathcal{N}_x$ satisfy the properties from our lemma. Properties (b) and (d) of the lemma are clearly true by virtue of $\mathcal{N}_x$ being a filter. Property (a) of the lemma is true via property (a) of this theorem being assumed. Finally, (d) of the lemma is clearly inherited from (b) as hypothesis about $\mathcal{B}_x$. Thus, the filters defined by proxy of our $\mathcal{B}_x$ filter bases satisfy properties (1)-(4) of the lemma, so our definition of openness defines a valid topology on $X$. 
+	\end{proof}
+	That discussion was very technical, but it yields a powerful tool for defining very strange topologies very easily. We simply specify a filter base at each point, and verify that two very simple properties hold. We define a very useful example now, the Sorgenfry line. 
+	TODO
+	\begin{definition}
+		If $(X,\tau)$ is a topological space, a \textbf{base} (or a \textbf{basis}) for $\tau$ is a collection $\mathcal{B} \subseteq \tau$ such every open set is a union of elements of $\mathcal{B}$. 
+	\end{definition}
+	\begin{fact}
+		$\mathcal{B}$ is a base for \textit{some} topology on X iff 
+		\begin{itemize}
+			\item[(a)] $X = \bigcup_{B \in \mathcal{B}} B$
+			\item[(b)] If $B_1,B_2 \in \mathcal{B}$, with $p \in B_1 \cap B_2$, then there is a set $B_3 \in \mathcal{B}$ such that $p \in B_3 \subseteq B_1 \cap B_2$.
+		\end{itemize}
+	\end{fact}
+	\begin{proof}
+		todo
+	\end{proof}
+	\begin{definition}
+		Let $X_{\alpha}$ be a set for each $\alpha \in A$. The \textbf{Cartesian product} of the sets $X_{\alpha}$ is the set
+		\[ \prod_{\alpha \in A} X_{\alpha} = \left\{ x: A \to \bigcup_{\alpha \in A}: x(\alpha) \in X_{\alpha} \textrm{ for each } \alpha \in A \right\} \]
+		I.e. the set of all functions from an index set to the associated indexed set. These functions are known as \textbf{ordered tuples}. We will typically denote $x_{\alpha} := x(\alpha)$. $X_{alpha}$ is referred to as the $\alpha^{th}$ \textbf{coordinate} of $x$. The Space $X_{\alpha}$ is called the $\alpha^{th}$ \textbf{factor space}. The maps $\pi_{\beta}: \prod X_{\alpha} \to X_{\beta}$ defined by $\pi_{\beta}(x) = x_{\beta}$ are called \textbf{projection maps}.
+	\end{definition}
+	\begin{fact}
+		The axiom of choice is equivalent to the assertion that the Cartesian product of a nonempty collection of nonempty sets is nonempty. 
+	\end{fact}
+	\begin{definition}
+	Let $(X_{\alpha},\tau_{alpha})$ be a collection of topological spaces. The \textbf{Tychonoff topology} or the \textbf{product topology} on $\prod X_{\alpha}$ is the topology generated by the following basis:
+	\[ \mathcal{B} = \{\prod U_{\alpha}: U_{\alpha} \textrm{ is open in $X_{\alpha}$ for each $\alpha \in A$, and for all but finitely many coordinates, $U_{\alpha} = X_{\alpha}$}\} \]
+	\end{definition}
+	\begin{definition}
+		A \textbf{metric} on a set $X$ is a function $d:X \times X \to \mathbb{R}$, such that the following are true for all $x,y \in X$.
+		\begin{itemize}
+			\item[(i)] $d(x,y) \leq d(x,z)+d(y,z)$ for any $z \in X$
+			\item[(ii)] $d(x,y) = d(y,x)$
+			\item[(iii)] $d(x,y) \geq 0$, with $d(x,y) = 0$ iff $x=y$
+		\end{itemize}
+	\end{definition}
+\subsection{Category}
+%definitions introduced: seperable, dense, nowhere dense
+\begin{definition}
+	A set $A \subseteq X$, with $(X,\tau)$ a topological space. We say that $A$ is \textbf{dense} in $X$ if for all open sets $U \in \tau$, $U \cap A \neq \varnothing$. On the other hand, we say that $A$ is \textbf{nowhere dense} if $\bar{A}$ contains no empty sets - i.e. has empty interior. Stated more concisely, $A$ is nowhere dense if $\bar{A}^{\circ} = \varnothing$. A space is \textbf{separable} if it has a countable dense set. 
+\end{definition}
+The first thing to do is confirm that dense and nowhere dense are indeed dual notions. To see this, note that $A$ is nowhere dense iff for all open sets $U$, $U$ is not a subset of $\bar{A}$. But $U$ not being a subset of $\bar{A}$ is equivalent to saying that $U$ has a nonempty intersection with $\bar{A}^c = (A^c)^{\circ}$. Thus $A$ is nowhere dense iff \textit{the interior} of it's complement is dense. Furthermore, note that for any set $A$, $A$ is nowhere dense iff it's closure is nowhere dense. To see this, note:
+\[ \bar{\bar{A}} = \bar{A} \implies \bar{\bar{A}}^{\circ} = \bar{A}^{\circ} \]
+Thus we have that $\bar{bar{A}}^{\circ} = \varnothing \iff \bar{A}^{\circ} = \varnothing$. Thus it not so much dense sets and nowhere dense sets which are dual notions, so much as \textit{closed} nowhere dense sets and \textit{open} dense sets.  
+\begin{lemma}
+	A set $A \subseteq X$ is nowhere dense iff for all nonempty open sets $U$, there exists another nonempty open set $V$ contained in $U$ which is disjoint from $A$. I.e. any open set at all, even those that intersect with $A$, contains a finer set which avoids $A$.
+\end{lemma}
+\begin{proof}
+	Suppose first that a set $A$ is nowhere dense. Let $U$ be a nonempty open set, and let $V = U-\bar{A}$. Note the following of $V$: it's open, it's contained in $U$, and it's intersection with $\bar{A}$ must be empty. But of course if it's intersection with $\bar{A}$ is empty, then it's intersection with $A$ itself must also be empty. Thus $V$ is an open set contained in $U$ which is disjoint from $A$. It remains to show that $V$ is nonempty. To see this, note that since $\bar{A}$ has empty interior, $U$ can't possibly be contained in $A$, and so there must be an element in $U$ which is not in $\bar{A}$, and subsequently also in $V$ by definition.
+	\par Conversely, assume the antecedent and suppose that $A$ is not nowhere dense, so there exists a nonempty open set $U$ which is contained in $\bar{A}$. Then by hypothesis there must be a nonempty subset $V$ contained in $U$ and disjoint from $A$. This would necessitate that $V$ is entirely contained in the boundary of $A$, meaning that there exists a point $x \in V \cap \bar{A}$, where $V$ is a neighborhood of $x$. But then by the point-definition of closure, it must be that $V$ intersects $A$ (you're in the closure iff any open neighborhood of you intersects the original set). This is a contradiction of our hypothesis, and so it must be the case that $\bar{A}^{\circ} = \varnothing$. 
+\end{proof}
+\begin{theorem}
+	The collection $\mathcal{I}$ of nowhere dense sets in a space $X$ is an ideal. 
+\end{theorem}
+\begin{proof}
+	Suppose $A \in \mathcal{I}$, and $B \subseteq A$. Then $\bar{B} \subseteq \bar{A}$, so $\bar{B}^{\circ} \subseteq \bar{A}^{\circ} = \varnothing$, and so $\bar{B}^{\circ} = \varnothing$, i.e. $B \in \mathcal{I}$. Next, if $A,B \in \mathcal{I}$, and $U \in \tau$ is arbitrary, then by the lemma above there exists nonempty a nonempty open $V_0 \subseteq U$ such that $V_0 \cap A = \varnothing$. But then by a reapplication of this lemma, we can find a nonempty open $V_1 \subseteq V_0$ such that $V_1 \cap B = \varnothing$. But then $(V_1 \cap A)\cup (V_1 \cap B) = V_1 \cap (A\cup B) = \varnothing$, and so $V_1$ is a nonempty open set contained in $U$ which is disjoint from $A \cup B$, so by the converse of the above lemma, $A \cup B$ is nowhere dense, i.e. $A\cup B \in \mathcal{I}$. Finally, since $\varnothing$ is obviously nowhere dense, we have that $\mathcal{I}$ is an ideal.   
+\end{proof}
+It of course immediately follows that the set of all dense sets whose interior is also dense is a natural filter on $X$. 
+\begin{theorem}
+	A set $D$ is dense in $X$ iff $\bar{D} = X$.
+\end{theorem}
+\begin{proof}
+	For any arbitrary point $x$, if $U$ is an open neighborhood of $x$, then $U \cap D \neq \varnothing \implies x \in \bar{D}$. Thus $\bar{D} = X$. Conversely if $\bar{D} = X$, then for any nonempty open set $U$, picking a random $x \in U$ we have $x \in \bar{D} \implies U \cap D \neq \varnothing$, i.e. $D$ is dense in $X$.
+\end{proof}
+\begin{theorem}
+	A space which is second countable must also be separable.
+\end{theorem}
+\begin{proof}
+	If $X$ is second countable, then it has a countable basis $\mathcal{B} = \{U_n\}_{n \in \omega}$. Pick a representative $x_n \in U_n$ for each $n$. Let $D$ be the countable set consisting of all such $x_n$. Let $U$ be an arbitrary open set in $X$. Then there exists a subsequence of basis elements $\{U_{n_k}\}_{k \in \omega}$ such that $U = \bigcup_{k=1}^{\infty}U_{n_k}$. Now for any $k \in \omega$, $U_{n_k} \subseteq U$, so of course it must be that $x_{n_k} \in U$, i.e. $U \cap D \neq \varnothing$. Thus $D$ is dense in $X$.
+\end{proof}
+With this notion of topological largeness and smallness, one might hope to next use these notions to characterize the complexity of a space. For instance, since the nowhere dense sets form an ideal, we know that 'any finite union of small sets is small'. However, what about countable unions? Consider $\mathbb{Q}$, which can be written as a countable union of all of it's elements as singletons, each of which is a closed set, and thus equal to their closures. The interior of each of these singleton sets is empty, since the singleton sets themselves aren't open, and so we can write \textit{the entire space itself} as a countable union of nowhere dense sets. From this it appears that the level of detail in $\mathbb{Q}$ isn't quite the same level of detail of a space which can't be written like this. 
+\begin{definition}
+	We say that a set $A$ in a topological space $X$ is \textbf{meager} (or of \textbf{a set of first category} if it can be written as the countable union of closed, nowhere dense sets. A set is \textbf{comeager} if it's complement is meager - that is, if it can be written as a countable intersection of open, dense sets. A set which is nonmeager is often referred to as \textbf{a set of second category}. Note that a second category set is not necessarily comeager.
+\end{definition}
+Note that the meager sets immediately form a $\sigma$-ideal, by definition. However, on certain spaces like $\mathbb{Q}$, the notion of meagerness is worthless. We can formalize the problem by noting what has happened - it turned out that we could union a countable collection of closed nowhere dense, and end up with a set which \textit{isn't itself} nowhere dense. (Namely, we ended up with $\mathbb{Q}$ itself.) 
+\begin{definition}
+	A space $X$ is a \textbf{Baire space} any countable union of closed nowhere dense sets is itself nowhere dense. 
+\end{definition}
+Thus, $\mathbb{Q}$ is not a Baire space, and so in $\mathbb{Q}$ the notion of being meager doesn't correspond to a useful definition of smallness. The following theorem gives some sufficient conditions for a space to be Baire:
+\begin{theorem}[Baire Category Theorem]
+	A $G_{\delta}$ set in a compact $T_2$ space is always Baire.
+\end{theorem}
+\begin{proof}
+	todo
+\end{proof}
+\begin{corollary}
+	Any complete metric space is a Baire space, and any locally compact Hausdorff space is also a Baire space. 
+\end{corollary}
+\begin{proof}
+	
+\end{proof}
+It immediately follows from the Baire category theorem that any Polish space is a Baire space. In particular, Cantor space is Baire. 
+
+\section{Analysis}
+\begin{definition}
+	An \textbf{algebra} on a set $X$ is a collection $\mathcal{A} \subseteq \mathcal{P}(X)$ which is closed under finite unions and complements. Note that by DeMorgan's laws, such a collection must also be closed under finite intersections. If $\mathcal{A}$ is closed further under not just finite but countable unions, then we call $\mathcal{A}$ a $\bm{\sigma}$\textbf{-algebra}.
+\end{definition}
+\begin{definition}
+	A \textbf{measurable space} is a pair $(X,\mathcal{M})$, where $X$ is a set, and $\mathcal{M}$ is a $\sigma$-algebra of subsets of $X$. The sets in $\mathcal{M}$ are called \textbf{measurable sets}. A \textbf{measure space} is a triple $(X,\mathcal{M},\mu)$, where $X$ and $\mathcal{M}$ are as they were before, and $\mu:\mathcal{M} \to [0,\infty]$ is called a \textbf{measure} on $X$. Measure functions are required to satisfy the following axioms:
+	\begin{itemize}
+		\item[(i)] $\mu(\varnothing) = 0$
+		\item[(ii)] If $\{E_k\}_{k \in \omega}$ is a countable sequence of disjoint measurable sets, then 
+		\[ \mu \left( \bigcup_{k=1}^{\infty}E_k \right) = \sum_{k=1}^{\infty} \mu(E_k) \]
+	\end{itemize}
+	The second axiom is known as \textbf{countable additivity}.
+\end{definition}
+That we are calling any set along with a particular collection of subsets of it a measurable space, with no direct mention of an actual measure, suggests that there is a natural or easy way to define a measure given the sets. This is indeed the case: Given an arbitrary function on \textit{any} collection of subsets of $X$, one can from that uniquely define a measure on $X$, and it is not difficult to ensure that the collection of measurable sets is a desired $\sigma$-algebra. 
+\par If you would like to say that cardinality represents the size of a set, then it might be appropriate to say that a measure represents the 'space occupied' by a set. These things could coincide, but they don't have to. More specifically, if $(X,\mathcal{M})$ is a measurable space, and we define $\nu(M)$ to equal the cardinality of $M$ if $M$ has a finite number of elements, and $\infty$ otherwise, then $\nu$ is clearly a measure on $(X,\mathcal{M})$. $\nu$ is referred to as the \textbf{counting measure} on $X$. 
+\begin{theorem}
+	Let $(X,\mathcal{M},\mu)$ be a measure space. Then we have the following:
+	\begin{itemize}
+	\item[Finite Additivity] For any finite disjoint collection $\{E_k\}_{k=1}^n$ of measurable sets, 
+	\[ \mu \left( \bigcup_{k=1}^n E_k \right) = \sum_{k=1}^n \mu(E_k) \]
+	\item[Monotonicity] If $A$ and $B$ are measurable sets, and $A \subseteq B$, then $\mu(A) \leq \mu(B)$. 
+	\item[Excision] If $A \subseteq B$ and $\mu(A) < \infty$, then $\mu(B-A) = \mu(B) - \mu(A)$. In particular then, if $\mu(A) = 0$, then $\mu(B-A) = \mu(B)$.
+	\item[Countable Monotonicity] For any countable collection $\{E_k\}_{k=1}^{\infty}$ of measurable sets that covers a measurable set $E$, 
+	\[ \mu(E) \leq \sum_{k=1}^{\infty} \mu(E_k) \]
+	\end{itemize}
+\end{theorem}
+\begin{proof}
+	Finite additivity is nearly trivial - just set $E_k = \varnothing$ for $k > n$, and appeal to the fact that $\mu(\varnothing) = 0$. Now by finite additivity, simple observe that for any sets $A,B$, $B-A$ is disjoint from $A$, and so if $A \subseteq B$, then $B = A \cup B-A$, and so 
+	\[ \mu(B) = \mu(A \cup (B-A)) =  \mu(A) + \mu(B-A) \]
+Subtracting $\mu(A)$ from both sides yields excision. Monotonicity immediately follows from excision, since now if $B \subseteq A$, then 
+	\[0 \leq \mu(B-A) = \mu(B)-\mu(A) \]
+Adding $\mu(A)$ to both sides of this equation yields monotonicity. Finally, for countable monotonicity, let $E$ be a set covered by a sequence of measurable $\{E_k\}_{k \in \omega}$, and let $G_1 = E_1$, $G_2 = E_2-E_1$, $G_3 = E_3-(E_2 \cup E_1)$, and so forth, i.e.
+	\[ G_k = E_k - \left[ \bigcup_{i=1}^{k-1} E_i \right] \]
+	for each $k \geq 2$. Note that the $G_k$ are just the $E_k$'s but 'hollowed out' so as to all be disjoint. In particular, it is clear that in addition to being disjoint, we have that $G_k \subseteq E_k$ for each $k$, and that $\bigcup_{k \in \omega} G_k = \bigcup_{k \in \omega} E_k$. Then 
+	\[\mu(E) \leq \mu \left( \bigcup_{k \in \omega} E_k \right) = \mu \left( \bigcup_{k \in \omega} G_k \right) = \sum_{k \in \omega} \mu(G_k) \leq \sum_{k \in \omega} \mu(E_k) \]
+\end{proof}
+\begin{theorem}[Continuity of Measure]
+	\begin{itemize} We have the following:
+		\item[(a)] If $\{A_k\}_{k \in \omega}$ is an ascending sequence of measurable sets (i.e. $A_{k+1}$ contains $A_k$ for each $k$), then 
+		\[ \mu \left( \bigcup_{k \in \omega} A_k \right) = \lim_{k \to \infty} \mu(A_k) \]
+		\item[(b)] If $\{B_k\}_{k\in \omega}$ is a descending sequence of measurable sets such that $\mu(B_1) < \infty$ (by descending we mean $B_{k+1}$ is contained in $B_k$ for each $k$), then 
+		\[ \mu \left( \bigcap_{k \in \omega} B_k \right) = \lim_{k \to \infty} \mu(B_k) \]
+	\end{itemize}
+\end{theorem}
+\begin{proof}
+	todo
+\end{proof}
+To derive the general theory of measure spaces, we should begin by deriving a natural measure on sets of real numbers. By an \textbf{interval}, we mean a set of the form $(a,b),[a,b),(a,b]$, or $[a,b]$, where $-\infty \leq a \leq b \leq \infty$, and with the restriction that $b \neq -\infty$, and $a \neq \infty$. If $a \neq -\infty$ and $b \neq \infty$, then we call the interval \textbf{bounded}, else it's \textbf{unbounded}. We will define the \textbf{length} of an interval $I$, denoted $l(I)$, to be $\infty$ if $I$ is unbounded, and $b-a$ otherwise. Let's agree that whatever we settle on as the natural measure on sets of real numbers, it should be the case that the measure of any interval is it's length. 
+\par Now we consider an arbitrary set of real numbers, $A$. The idea is to approximate the measure of $A$ by approximating $A$ itself covers consisting of intervals. First, we'll let $\mathcal{A}$ denote the collection of all countable covers of $A$ by open intervals, i.e. 
+\[ \mathcal{A} = \left\{\{I_k\}_{k \in \omega}: A \subseteq \bigcup_{k \in \omega}I_k\right\} \] For a set $A$ of real numbers, we define the \textbf{Lebesgue outer measure} of $A$ to be the value
+\[ m^*(A) = \inf_{\{I_k\} \in \mathcal{A}} \left\{ \sum_{k\in \omega} l(I_k) \right\} \]
+Note that this function has a defined value on every set. Thus, assuming it were a measure, we would have that $(\mathbb{R},\mathcal{P}(\mathbb{R}),m^*)$ would be a measure space. 
+\begin{fact}
+	We have monotonicity. I.e. if $A \subseteq B$, then $m^*(A) \leq m^*(B)$
+\end{fact}
+\begin{proof}
+	If $A \subseteq B$, then any cover of $B$ by intervals will also be a cover of $A$. Thus the outer measure of $A$ is obtained by taking an infimum over an if anything, larger set collection of covers than $B$, and can only be smaller.
+\end{proof}
+\begin{fact}
+	$m^*(\varnothing) = 0$. In fact, the Lebesgue outer measure of any countable set is always $0$. 
+\end{fact}
+\begin{proof}
+	Note that for all $n \geq 1$, we have that the single interval $(-\frac{1}{n},\frac{1}{n})$ is a cover of $\varnothing$. Of course, the length of this singleton interval is $\frac{2}{n}$. Thus for all $n \geq 1$, we have that $m^*(\varnothing) \leq \frac{2}{n}$. But then letting $n \to \infty$, we must concede that $m^*(\varnothing) = 0$. 
+	\par For the countable sets clause, let $C = \{c_k\}_{k=1}^{\infty}$ be countable, and $\epsilon > 0$. For each $k$, let $I_k = (c_k-\frac{\epsilon}{2^{k+1}},c_k+\frac{\epsilon}{2^{k+1}})$. Then clearly this defines a countable cover of $C$ by open intervals, and furthermore for each $k$, $l(I_k) = \frac{2\epsilon}{2^{k+1}} = \frac{\epsilon}{2^k}$. Thus by definition
+	\[ 0 \leq m^*(C) \leq \sum_{k=1}^{\infty} \frac{\epsilon}{2^k} = \epsilon \]
+This inequality holds for any $\epsilon > 0$, and so we must conclude that $m^*(C) = 0$. 
+\end{proof}
+So the first axiom required for a measure function, that the measure of the empty set be $0$, is satisfied. Approaching the second one will require some preliminary facts about our function. The first of these confirms that our definition of outer measure is reasonable in that it agrees with the idea we are trying to generalize:
+\begin{fact}
+	The Lebesgue outer measure of an interval is it's length.
+\end{fact}
+\begin{proof}
+	We begin with the case of the closed bounded interval $[a,b]$. Let $\epsilon > 0$. The open interval $(a-\epsilon,b+\epsilon)$ contains $[a,b]$, so we have immediately that $m^*([a,b]) \leq l((a-\epsilon,b+\epsilon)) = b-a+2\epsilon$. Since the left hand side doesn't depend on epsilon, it follows that $m^*([a,b]) \leq b-a$. It remains to show that $m^*([a,b]) \geq b-a$. Let $\{I_k\}_{k=1}^{\infty}$ be a countable collection of open intervals covering $[a,b]$. If any of these intervals is unbounded, then the sum of their outer measures will be infinite, and so since we already know that $m^*([a,b])$ is finite, we may exclude these from consideration. Since $[a,b]$ is compact, by Heine-Borel there must be a finite subcollection of these intervals which also covers $[a,b]$, and thus we may pick a finite $n$ such that $\{I_k\}_{k=1}^n$ covers $[a,b]$. We wish to show that the sum of these lengths is greater than or equal to $b-a$. If this is the case, than the infimum of the sums of the lengths of all covers must also be greater than $b-a$ in general, and we will have obtained our inequality. \par
+Now, choose the interval $I_k$ which contains $a$. Let $I_k = (a_1,b_1)$. Then obviously $a_1 < a < b_1$. Suppose $b_1 \geq b$. Then the length of this one interval alone is greater than $b-a$, which is what we're trying to show. Suppose it isn't then. Then $b_1 \in [a,b)$, and since $b_1 \notin (a_1,b_1)$, it must be in one of the other intervals. Let this second interval containing $b_1$ be $(a_2,b_2)$. Then $a_2 < b_1 < b_2$. If $b_2 \geq b$, we have 
+\[ \sum_{k=1}^n l(I_k) \geq (b_1 - a_1) + (b_2-a_2) = b_2-(a_2-b_1)-a_1 > b_2-a_1 > b-a \]
+Which is, again, what we're trying to show. Keep assuming that the $b_i$'s obtained are less than $b$, until it terminates - that is we find a $b_i \geq b$. Then we have a subcollection of our already finite subcollection $\{(a_k,b_k)\}_{k=1}^N$ such that $a_1 < a$, $a_{k+1} < b_k$ for $1 \leq k \leq N-1$, and $b_N \geq b$. Then in this general case we have
+\begin{align*}
+	\sum_{k=1}^n l(I_k) &\geq \sum_{k=1}^N l((a_k,b_k)) \\
+		&= (b_N-a_N)+(b_{N-1} - a_{N-1}) + \ldots + (b_1-a_1) \\
+		&= b_N-(a_N-b_{N-1}) - \ldots - (a_2-b_1) - a_1 > b_N-a_1 > b-a
+\end{align*}
+Thus we finally have our inequality, and have shown that $m^*([a,b]) \geq b-a$, and therefore $m^*([a,b]) = b-a$. \par
+Next, if $I$ is any bounded interval, then given $\epsilon > 0$, there are going to be two closed, bounded intervals $J_1 \subseteq I \subseteq J_2$ such that $l(I)-\epsilon > l(J_1)$ and $l(J_2) < l(I)+\epsilon$. Note that by our results for closed bounded intervals, $m^*(J_1) = l(J_1)$ and $m^*(J_2) = l(J_2)$. Thus with this along with monotonicity of outer measure, we have
+\[ l(I)-\epsilon < m^*(J_1) \leq m^*(I) \leq m^*(J_2) < l(I)+\epsilon \]
+Thus the outer measure of $I$ is within epsilon of it's length, where $\epsilon$ was arbitrary. Thus it must in fact equal it's length. \par 
+Finally, assume $I$ is an unbounded interval. Then for any natural number $n$, there must be a bounded subinterval $J \subseteq I$ such that $l(J) = n$. By monotonicity this means that $m^*(I) \geq m^*(J) = n$, but since $n$ was arbitrary, we may let it become arbitrarily large, showing that $m^*(I) = \infty$, what we defined as it's length. 
+\end{proof}
+\begin{fact}
+	Outer measure is translation invariant. That is, for any set $A$ and any number $y$,
+	\[ m^*(A+y) = m^*(A) \]
+\end{fact}
+\begin{proof}
+	This follows from the fact that $\{I_k\}_{k=1}^{\infty}$ is an open cover of $A$ iff $\{I_k+y\}_{k=1}^{\infty}$ is an open cover of $A+y$, and that the sum of the lengths of these related covers are always clearly the same. Thus the set of numbers we are taking the infimum of are in both cases the same set, and result in the same outcome.
+\end{proof}
+\begin{fact}
+	The Lebesgue outer measure is countably subadditive. That is, if $\{E_k\}_{k \in \omega}$ is any countable collection of sets, disjoint or not, then 
+	\[ m^*\left( \bigcup_{k \in \omega}E_k \right) \leq \sum_{k \in \omega} m^*(E_k) \]
+\end{fact}
+\begin{proof}
+	If any of the $E_k$'s  has infinite outer measure, then the inequality holds trivially. Thus assume that all of the outer measures of these sets have finite outer measure. Let $\epsilon > 0$. By the definition of outer measure, for any natural number $k$, there is a countable cover of $E_k$ by open intervals $\{I_{k,i}\}_{i=1}^{\infty}$ such that $\sum_{i=1}^{\infty}l(I_{k,i}) < m^*(E_k)+\frac{\epsilon}{2^k}$. Then the master collection of all of these covers of all of these $E_k$ sets must itself be a countable cover of the union $\bigcup_{k=1}^{\infty}$, and therefore we have
+\begin{align*}
+	m^*\left( \bigcup_{k=1}^{\infty} E_k \right) &\leq \sum_{i,k=1}^{\infty} l(I_{k,i}) = \sum_{k=1}^{\infty}\left[\sum_{i=1}^{\infty} l(I_{k,i}) \right] \\
+		&< \sum_{k=1}^{\infty} m^*(E_k)+\frac{\epsilon}{2^k} = \sum_{k=1}^{\infty} m^*(E_k)+\epsilon\sum_{k=1}^{\infty}(\frac{1}{2})^k \\
+		&= \sum_{k=1}^{\infty} m^*(E_k) + \epsilon
+\end{align*} 
+This strict inequality holds for any $\epsilon > 0$, so letting $\epsilon$ go to $0$ converts the $<$ to a $\leq$, but this is the inequality we were setting out to prove.
+\end{proof}
+Thus, while we still aren't sure if the Lebesgue outer measure is countably additive or even finitely additive, we can at least now rule out the possibility that there exist disjoint sets $A,B$ with the property that $m^*(A \cup B) > m^*(A)+m^*(B)$. The outer measure of the union of two disjoint sets is either smaller or equal, but never bigger. 
+Recall that one of the consequences of being a measure was having a property called monotonicity: if $A \subseteq B$, then $\mu(A) \leq \mu(B)$. This fact followed immediately from finite additivity, which itself immediately followed from countable additivity - our second axiom for what qualifies as a measure. What we show now is that given a set $E \subseteq \mathbb{R}$ with $m^*(E) > 0$, we can always construct a superset $E \subseteq V$, such that $m^*(V) = 0$. This contradicts monotonicity, and shows that without any alteration, the Lebesgue outer measure is \textit{not} fully itself a measure by our axioms. For simplicity, we will let $E = [0,1]$. Note that we know already that $m^*([0,1]) = 1$. \par
+First, for any nonempty set of real numbers $[0,1]$, let us define two points $x,y \in [0,1]$ to be \textbf{rationally equivalent} if their difference $x-y \in \mathbb{Q}$. We claim that this is an equivalence relation: Clearly it is both transitive and reflexive. It is symmetric because if $x-y \in \mathbb{Q}$, and $y-z \in \mathbb{Q}$, then $x-z = x-y+y-z = (x-y)+(y-z)$, the sum of two rationals and thus rational. Thus, this notion of rational equivalence partitions $\mathbb{R}$ into a collection of disjoint equivalence classes. \par
+We now invoke the axiom of choice. By AC, there exists a choice function which we can employ to pluck a single real number out of each of these sets. Let $\mathcal{C}$ be the set of all such representatives. Note that for all $x,y \in \mathcal{C}$, $x$ is \textit{not} rationally equivalent to $y$, because any two of these guys comes from a different equivalence class. Thus for any $x,y \in \mathcal{C}$, the difference $x-y$ is \textit{never} rational. 
+\par Consider any two distinct rationals $q,w$, and in particular consider the sets $\mathcal{C}+q$, $\mathcal{C}+w$. Suppose there were a point $x$ in both of these sets. Then there exists a $y \in \mathcal{C}$ such that $x+q=y+w \implies x-y = w-q$, but then $x$ is rationally equivalent to $y$. Certainly it can't be the case that $x=y$, since then we would have that $w=q$, which we said already was not the case. Thus $x\neq y$, but $x,y \in \mathcal{C}$ and $x,y$ are rationally equivalent, contradiction. Thus our set $\mathcal{C}$ has the property that for any two distinct rationals $q,w$, $\mathcal{C}+q$ and $\mathcal{C}+w$ are always disjoint. \par
+Now, let $Q=\{q_n\}_{n \in \omega}$ be an enumeration of the rational numbers contained in the bounded interval $[-1,1]$. We note that
+\[ [0,1] \subseteq \bigcup_{q \in Q} \mathcal{C}+q \subseteq [-1,2] \]
+To see the first inclusion, let $x \in [0,1]$. Then $x$ is rationally equivalent to $v$ for some $v \in \mathcal{C}$, i.e. $x-v$ is rational. but $|x-v| \leq 1$, so the rational $q$ which equals $x-v$ has to be contained in $[-1,1]$. Thus $x = v+q$ for some $v \in \mathcal{C}$ and some $q \in [-1,1]$, meaning it is in one of the sets under our union. The second inclusion is more obvious: the biggest number that can be in any of the sets $\mathcal{C}+q$ is going to be of the form $x-1$ or $x+1$ for some $x$ very close to $0$, or some $x$ very close to $1$, respectively. I.e. between $-1$ and $2$. \par
+Now, suppose that $(\mathbb{R},\mathcal{P}(\mathbb{R}),m^*)$ was a measure space. Then by monotonicity, the fact that the Lebesgue outer measure of an interval is it's length, and the fact that each $\mathcal{C}+q$ set is disjoint allowing for an application of countable additivity, we have the following:
+\[ 1 \leq \sum_{q \in Q} m^*(\mathcal{C}+q) \leq 3 \]
+But by translation invariance, $m^*(\mathcal{C}+q) = m^*(\mathcal{C})$ for each $q$. Supposing that $m^*(\mathcal{C}) > 0$ leads to an immediate contradiction then, because it would follow that the series in the middle of this inequality diverges to infinity. It must follow then that $m^*(\mathcal{C})=0$. Thus, our inequality says that $1<0$, a final contradiction. 
+\par It follows from this argument that \textit{something} has gone very wrong. We must conclude from all of this that in order to have $m^*$ function as a valid measure of the size of a set of real numbers, we have to concede that not all sets will be measurable - i.e. at least under the axiom of choice, some sets will fail to 'fit in' with our measurement tool. We define now a subclass of sets to be considered valid to measure under the Lebesgue outer measure:
+\begin{definition}
+	A set $E \subseteq \mathbb{R}$ is \textbf{Lebesgue measurable} (or if context permits, simply \textbf{measurable}), if for any set $A \subseteq \mathbb{R}$, we have
+	\[ m^*(A) = m^*(A \cap E) + m^*(A \cap E^c) \]
+\end{definition}
+To begin understand the motivation for this definition, note that what it effectively is, is a loosening of the requirement of finite additivity. Pause for a moment and note that if finite additivity held for the Lebesgue outer measure, then all sets would be Lebesgue measurable. Another thing to note about this definition is that if $A$ and $B$ are disjoint sets and just one of them is measuable, say $A$, then
+	\[m^*(A \cup B) = m^*([A \cup B] \cap A)+m^*([A \cup B] \cap A^c) = m^*(A)+m^*(B) \]
+I.e. if a set is measurable, then it 'acts' finitely additively with every other set, measurable or otherwise. Also note that since the Lebesgue outer measure is finitely subadditive, it is always the case regardless of measurability that
+$m^*(A) \leq m^*(A \cap E) + m^*(A \cap E^c)$. Thus, we actually have that a set $E$ is measurable iff $m^*(A) \geq m^*(A \cap E) + m^*(A \cap E^c)$, since this along with finite subadditivity would demand equality. Since this inequality holds trivially when $m^*(A) = \infty$, it follows that in showing that a set $E$ is measurable, we only ever need to consider sets $A$ which have finite outer measure. \par
+Note that $\varnothing$ is measurable and so is $\mathbb{R}$, trivially. Also trivial is that if a set is measurable, then so is it's complement.
+\begin{fact}
+	Any set of outer measure $0$ is measurable.
+\end{fact}
+\begin{proof}
+	Let $E$ be any set with outer measure $0$. Let $A$ be any set. By monotonicity of the outer measure, we have that $m^*(A \cap E) \leq m^*(E) = 0$, and $m^*(A \cap E^c) \leq m^*(A)$. Thus
+	\[ m^*(A) \geq m^*(A \cap E^c) = 0+m^*(A+E^c) = m^*(A\cap E) + m^*(A \cap E^c) \]
+	Thus $E$ is measurable.
+\end{proof}
+\begin{fact}
+	The union of a finite collection of measurable sets is measurable.
+\end{fact}
+\begin{proof}
+	Let $E_1,E_2$ be measurable, and let $A$ be any set. Then applying both assumptions, we have
+	\begin{align}
+		 m^*(A) &= m^*(A \cap E_1) + m^*(A \cap E_1^c) \\
+		 	&= m^*(A \cap E_1) + m^*[(A \cap E_1^c) \cap E_2] + m^*[(A \cap E_1^c) \cap E_2^c] \\
+		 	&= m^*(A \cap E_1) + m^*[(A \cap E_1^c) \cap E_2] + m^*[A \cap (E_1 \cup E_2)^c] \\
+		 	&\geq m^*[A \cap (E_1 \cup E_2)] + m^*[A \cap (E_1 \cup E_2)^c]
+	\end{align}
+	Where the last inequality follows from the fact that $(A \cap E_1) \cup (A \cap E_1^c \cap E_2) = A \cap (E_1 \cup E_2)$ and subadditivity. Thus we have that $E_1 \cup E_2$ is measurable. The inductive step is trivial. 
+\end{proof}
+Thus we have that the Lebesgue measurable sets form an algebra. It remains to show that they form a $\sigma$-algebra, but this is an important first step. First from this we can show that when we restrict our attention to the Lebesgue measurable sets, we at least obtain finite additivity:
+\begin{lemma}
+	Let $A$ be any set and $\{E_1,E_2,...,E_n\}$ a finite collection of disjoint measurable sets. Then
+	\[ m^*\left( A\cap \left[ \bigcup_{k=1}^n E_k \right] \right) = \sum_{k=1}^n m^*(A \cap E_k) \] 
+\end{lemma}
+\begin{proof}
+	For the case $n=1$, the statement is trivial. Assume the statement holds up to $n-1$. Note that
+	\[ A \cap \left[ \bigcup_{k=1}^n E_k \right] \cap E_n = A \cap E_n \]
+Also from drawing the picture it's clear that
+	\[ A \cap \left[ \bigcup_{k=1}^n E_k \right] \cap E_n^c = A \cap \left[ \bigcup_{k=1}^{n-1} E_k \right] \]
+Now since $E_n$ is measurable, we have that
+\[ m^*\left( A\cap \left[ \bigcup_{k=1}^n E_k \right] \right) = m^*\left( A\cap \left[ \bigcup_{k=1}^n E_k \right] \cap E_n \right) + m^*\left( A\cap \left[ \bigcup_{k=1}^n E_k \right] \cap E_n^c \right)	\]
+Plugging in our set theoretic identities yields
+	\[ m^*\left( A\cap \left[ \bigcup_{k=1}^n E_k \right] \right) = m^*(A \cap E_n) + m^*\left( A \cap \left[ \bigcup_{k=1}^{n-1} E_k \right] \right) \]
+But then by the inductive hypothesis, we have
+\begin{align*}
+	m^*\left( A\cap \left[ \bigcup_{k=1}^n E_k \right] \right) = m^*(A \cap E_n) + \sum_{k=1}^{n-1}m^*(A \cap E_k) = \sum_{k=1}^n m^*(A \cap E_k)
+\end{align*}
+\end{proof}
+\begin{corollary}
+	Letting $A = \mathbb{R}$ in the above identity gives us finite additivity, i.e. if $\{E_1,...,E_n\}$ is a finite disjoint collection of measurable sets, then
+	\[ m^* \left( \bigcup_{k=1}^nE_k \right) = \sum_{k=1}^n m^*(E_k) \]
+\end{corollary}
+We can now extend these results to countable collections
+\begin{fact}
+	The union of a countable collection of measurable sets is measurable.
+\end{fact}
+\begin{proof}
+	Let $\{E_k\}_{k=1}^{\infty}$ be a collection of measurable sets. We want to show that $E=\bigcup_{k=1}^{\infty}$ is measurable, and as a first step we construct this set out of disjoint measurable sets in the following way. Define $A_1 = E_1$. Then, for each $k \geq 2$, define
+	\[ A_k = E_k - \bigcup_{i=1}^{k-1}A_i \]
+So $A_2 = E_2 - A_1$, and so forth. Each $A_k$ is measurable, since each $A_k$ is the finite intersection of a measurable set ($E_k$) and the complements of inductively already measurable sets, and so measurability of $A_k$ is given by now knowing that the Lebesgue measurable sets form an algebra. Furthermore, it's clear that $E = \bigcup_{k=1}^{\infty}A_k$, and so $E$ can be seen as the union of a collection of disjoint measurable sets. Thus without loss of generality we will assume that this process has been done already, doing away with the $A_k$ sets and just assuming that the original $E_k$ were disjoint already. \par
+Now let $A$ be a set, and $n \in \mathbb{N}$. Define $F_n = \bigcup_{k=1}^n E_k$. Note that each $F_n$ is measurable. Furthermore since for each $n$ $F_n \subseteq E$, we have that $E^c \subseteq F_n^c$. Thus by measurability of $F_n$ and monotonicity of the outer measure,
+\[ m^*(A) = m^*(A \cap F_n) + m^*(A \cap F_n^c) \geq m^*(A \cap F_n) + m^*(A \cap E^c) \]
+Now using our lemma, we can say
+\[ m^*(A \cap F_n) = \sum_{k=1}^n m^*(A \cap E_k) \]
+Plugging this into the inequality above yields
+\[ m^*(A) \geq \sum_{k=1}^n m^*(A \cap E_k)) + m^*(A \cap E^c) \]
+Since the left hand side of this inequality depends not at all on $n$, we then have
+\[ m^*(A) \geq \sum_{k=1}^{\infty} m^*(A \cap E_k) + m^*(A \cap E^c) \]
+But my countable subadditivity
+\[m^*(A \cap E) =  m^*\left(A \cap \bigcup_{k=1}^{\infty}E_k \right) = m^*\left(\bigcup_{k=1}^{\infty} A \cap E_k \right) \leq \sum_{k=1}^{\infty} m^*(A \cap E_k) \]
+Thus 
+\[ m^*(A) \geq m^*(A \cap E) + m^*(A \cap E^c) \]
+And thus $E$ is measurable.
+\end{proof}
+Thus we have that the Lebesgue measurable sets indeed form a $\sigma$-algebra. If this definition is to make any sense though, it must be the case that every interval is measurable. Next we show this.
+\begin{fact}
+	Every interval is measurable.
+\end{fact}
+\begin{proof}
+	First we show that for every $a \in \mathbb{R}$, that the interval $(a,\infty)$ is measurable. Let $A$ be any set, but assume that $a \notin A$. (If it is, replace $A$ with $A - \{a\}$. This clearly creates no fundamentally more optimal covers of $A$ by open intervals, and thus leaves the measure of $A$ unchanged.) Let $A_1 = (-\infty,a) \cap A$, and $A_2 = (a,\infty)$. Let $\{I_k\}_{k \in \omega}$ be any cover of $A$ by open intervals. Then for each $k$, let $I_k' = I_k \cap (-\infty,a)$, and $I_k'' = I_k \cap (a,\infty)$.
+	
+	 Note that for each $k$, we clearly have that $l(I_k) = l(I_k')+l(I_k'')$. Furthermore the collections $\{I_k'\}_{k \in \omega}$ and $\{I_k''\}_{k \in \omega}$ are covers of $A_1$ and $A_2$ respectively. Thus by definition of outer measure, $m^*(A_1) \leq \sum_{k \in \omega} l(I_k')$ and $m^*(A_2) \leq \sum_{k \in \omega} l(I_k'')$, and so 
+\begin{align*}
+	m^*(A_1)+m^*(A_2) &\leq \sum_{k \in \omega} l(I_k') + \sum_{k \in \omega} l(I_k'') = \sum_{k \in \omega}l(I_k')+l(I_k'') = \sum_{k \in \omega} l(I_k)
+\end{align*}
+Thus what we've shown is that for any cover of $A$ by a countable collection of intervals $\{I_k\}_{k \in \omega}$, we have that
+\[ m^*(A_1)+m^*(A_2) \leq \sum_{k \in \omega} l(I_k) \]
+and so we can conclude that $m^*(A_1) + m^*(A_2) \leq m^*(A)$. But then replacing $A_1$ and $A_2$ we see what we've shown is that 
+\[ m^*(A) \geq m^*(A \cap (a,\infty)) + m^*(A \cap (a,\infty)^c) \]
+i.e. we have shown that $(a,\infty)$ is measurable. From this we can show that all other intervals are measurable by exploiting the fact that measurable sets form a $\sigma$-algebra. For starters, $[a,\infty) = \bigcup_{k=1}^{\infty} (a-\frac{1}{k},\infty)$, and so $[a,\infty)$ is measurable. By complementation we then have that $(-\infty,b)$ and $(-infty,b]$ are measurable for any $b \in \mathbb{R}$, and by intersecting two of these tails we can obtain any set of the form $(a,b),[a,b),(a,b]$, or $[a,b]$. Thus all intervals are measurable. 
+\end{proof}
+Since any open set is by definition the countable union of open intervals, we now have that every open set is measurable. Furthermore, since every closed set is by definition the complement of an open set, we also have that every closed set is also measurable. Throughout the analysis notes, we will call a countable intersection of open sets a $G_{\delta}$ set, and a countable union of closed sets an $F_{\sigma}$ set. Similarly, an $F_{\sigma \delta}$ set will be a countable intersection of $F_{\sigma}$ sets, and so forth. The collection of all sets of any of these forms is known as the \textbf{Borel Hierarchy}. The Borel hierarchy can alternatively be defined as the smallest $\sigma$-algebra containing the intervals. We let $\mathcal{B}$ denote the set of all Borel sets. We have the following important theorem summarizing our work so far:
+\begin{theorem}
+	The collection $\mathcal{M}$ of Lebesgue measurable sets in $\mathbb{R}$ is a $\sigma$-algebra, and contains every Borel set. 
+\end{theorem}  
+A smaller but nonetheless important closure property of Lebesgue measurability is translation invariance:
+\begin{fact}
+	The translate of any measurable set is measurable.
+\end{fact}
+\begin{proof}
+	Let $E$ be a measurable set, and $A$ be any other set. Then using translation invariance of outer measure and the measurability of $E$, we have 
+	\begin{align*}
+		m^*(A) = m^*(A-y) &= m^*((A-y)\cap E) + m^*((A-y)\cap E^c) \\
+						&= m^*([(A-y)\cap E]+y)+m^*([(A-y)\cap E^c]+y) \\
+						&= m^*(A \cap (E+y)) + m^*(A \cap (E^c+y)) \\
+						&= m^*(A \cap (E+y)) + m^*(A \cap (E+y)^c)
+	\end{align*}
+	Thus $E+y$ is measurable.
+\end{proof}
+Finally we are ready to prove that when we restrict our attention to the Lebesgue measurable sets, we have countably additivity.
+\begin{fact}
+	Let $\{E_k\}_{k \in \omega}$ be a countable disjoint collection of Lebesgue measurable sets. Then 
+	\[ m^*\left( \bigcup_{k=1}^{\infty} E_k \right) = \sum_{k=1}^{\infty} m^*(E_k) \]
+\end{fact}
+\begin{proof}
+	We will show that the above equation holds as an inequality in both cases, demonstrating equality. The $\leq$ inequality is already known to be true due to outer measure being countable subadditive. We need the other direction. Towards this end, we make use of our already known finite additivity. That is, since the $E_k$ are measurable and disjoint, we know that for any $n$
+	\[ m^*\left(\bigcup_{k=1}^n E_k \right) = \sum_{k=1}^n m^*(E_k) \]
+But of course it is the case for any $n$, $\bigcup_{k=1}^n E_k \subseteq \bigcup_{k=1}^{\infty} E_k$, and so by monotonicity of outer measure we have
+\[ m^*\left(\bigcup_{k=1}^{\infty} E_k \right) \geq \sum_{k=1}^n m^*(E_k) \]
+The left hand side of this inequality is independent of $n$ however, and thus we can say
+\[ m^*\left(\bigcup_{k=1}^{\infty} E_k \right) \geq \sum_{k=1}^{\infty} m^*(E_k)\]
+Which is precisely the inequality we were looking for. The result follows. 
+\end{proof}
+This confirms that restricting our attention to the Lebesgue measurable sets results in a measurable space. By restricting our attention, we of course mean restricting the domain of the Lebesgue outer measure, which we now make formal.
+\begin{definition}
+	Let $\mathcal{M}$ be the collection of Lebesgue measurable sets. Define the \textbf{Lebesgue measure} $m: \mathcal{M} \to [0,\infty]$ by $m(A) = m^*(A)$.
+\end{definition}
+\begin{theorem}
+	$(\mathbb{R},\mathcal{M},m)$ is a measurable space. If $\mathcal{B}$ again denotes the Borel sets, and we define $m$ to be the restriction of the domain to $\mathcal{B}$, then $(\mathbb{R},\mathcal{B},m)$ is also a measure space.
+\end{theorem}
+We can finally return home to considering measure spaces abstractly. We need to consider what happened with the Lebesgue measure. The 'natural' definition didn't work out the way we needed it to, and we were forced to restrict the domain of sets we wished to measure, to a collection which turned out to be a $\sigma$-algebra. What we would like to do is automate this process, of defining functions which \textit{we would like} to be measures, and then refining that function into an actual measure. The Lebesgue outer measure will serve as the template for this general process. \par 
+To do this, let us inspect the process leading us to the Lebesgue measure more closely. Our process consisted of three steps:
+\begin{itemize}
+	\item[(1)] We decided on a function $\mu:\mathcal{S} \to [0,\infty]$, where $\mathcal{S} \subseteq \mathcal{P}(\mathbb{R})$. Specifically, our set $\mathcal{S}$ was the intervals, and $\mu$ was the length of an interval. Note that we only did this because it seemed like the the intuitive thing to do. Any special properties belonging to the set $\mathcal{S}$, or to the function $\mu$, which allowed the overall process to succeed in the way that it did, were serendipitous, and will need to be identified in the abstract.
+	\item[(2)] We defined out of this function a new function $\mu^*:\mathcal{P}(\mathbb{R}) \to [0,\infty]$, by defining 
+	\[ \mu^*(E) = \inf \left\{\sum_{k=1}^{\infty} \mu(E_k): \{E_k\}_{k =1}^{\infty} \subseteq \mathcal{S} \textrm{ is a cover of $E$}  \right\} \]
+There will have to be some details addressed in the general case. For instance, in the case of intervals, we never had to worry about a set that \textit{didn't have} a cover in the family on which we defined $\mu$. Again, like step (1), we will need to identify anything serendipitous which occurred. By defining $\mu^*$, we extended our intuitive idea of a function $\mu$ from a specific set to all sets.
+	\item[(3)] We defined what it meant to be measurable with respect to the function defined in step (2). Specifically, we defined $E$ to be measurable if for all sets $A$,
+	\[ \mu^*(A) = \mu^*(E \cap A) + \mu^*(A \cap E^c) \]
+It then turned out that by restricting the domain of $\mu^*$ to create a new, final function $\bar{\mu}$ defined just these measurable sets, the resulting collection was a $\sigma$-algebra, and the resulting function $\bar{\mu}$ was a measure on this set. 
+\end{itemize}
+The important thing to note immediately about this process is that steps 2 and 3 are locked in place: they are entirely defined by step 1. Thus, whether this process works in general, will depend \textit{entirely} on decisions made regarding our initial set function $\mu$. To realize the truly necessary properties of the function in step 1 for this process to work, we will work backwards. First, we will identify the key properties of the Lebesgue outer measure which were necessary for step 3 to result in a measure space. Then we will identify the key properties of the original set function and family of sets that lead the outer measure of step 2 to have those properties. \par 
+
+First, we can note that closure of measurable sets under complementation will always be given immediately by the definition of measurable - no assumptions about the outer measure need to be made to have this. Thus to have an algebra of measurable sets, the properties which the outer measure needs to have are those required to recycle our proof that a finite union of Lebesgue measurable sets is measurable. This proof required the assumptions that the outer measure be finitely subadditive, as well as monotone. Thus, we add these properties to the list. To have closure under countable unions, we needed the outer measure to not just be finitely subadditive but countably so. Countable additivity also requires on only these properties - countable subadditivity and monotonicity. Thus these two properties are all that are required for the collection of measurable sets to form a $\sigma$-algebra, and for the second axiom of measurability be satisfied. The first one is simpler - we just need that the measure of the empty set be $0$. Since the measure $\bar{\mu}$ is just a restriction of $\mu^*$, we have the additional simple requirement then that $\mu^*(\varnothing) = 0$. \par 
+We now know what properties we need an outer measure to have. To make the requirements simpler, we combine two of them together into one assumption.
+\begin{definition}
+	A set function $\mu:\mathcal{S} \to [0,\infty]$ defines on some collection $\mathcal{S}$ of subsets of a set $X$ is called \textbf{countable monotone} if whenever a set $E \in \mathcal{S}$ is covered by a countable collection $\{E_k\}_{k=1}^{\infty} \subseteq \mathcal{S}$, then 
+	\[ \mu(E) \leq \sum_{k=1}^{\infty} \mu(E_k) \]
+\end{definition}
+\begin{fact}
+	A set function $\mu:\mathcal{S} \to [0,\infty]$ is countably monotone iff it is both countably subadditive and monotone.
+\end{fact}
+\begin{proof}
+	Suppose that $\mu:\mathcal{S} \to [0,\infty]$ is countably monotone. Then if $\{E_k\}_{k=1}^{\infty} \subseteq \mathcal{S}$ is a countable collection, certainly $\bigcup_{k=1}^{\infty}E_k$ is a covered by this collection, and so we have countable subadditivity. Similarly, if $A,B \in \mathcal{S}$ and $A \subseteq B$, then the single set collection $B$ is a countable cover of $A$, and so countable monotonicity implies that $\mu(A) \leq \mu(B)$. Thus we have monotonicity. \par
+	Conversely, suppose that $\mu$ is both countably subadditive and monotone. Suppose that $E \in \mathcal{S}$ is covered by the countable collection $\{E_k\}_{k=1}^{\infty} \subseteq \mathcal{S}$. Then $E \subseteq \bigcup_{k=1}^{\infty} E_k$, so monotonicity and countable subadditivity combined imply
+	\[ \mu(E) \leq \mu \left( \bigcup_{k=1}^{\infty} E_k \right) \leq \sum_{k=1}^{\infty} \mu(E_k)  \]
+	And so $\mu$ is countably subadditive, completing the proof.
+\end{proof}
+\begin{definition}
+	A function $\mu^*:\mathcal{P}(X) \to [0,\infty]$ is an \textbf{outer measure} if it is countable monotone and $\mu^*(\varnothing) = 0$. \par
+	Furthermore, if $\mu^*$ is an outer measure, then we call a set $E \subseteq X$ \textbf{measurable with respect to} $\bm{\mu^*}$ if for every subset $A \subset X$, 
+	\[ \mu^*(A) = \mu^*(A \cap E) + \mu^*(A \cap E^c) \]
+\end{definition}
+By the observations we've made so far, we can say the following:
+\begin{theorem}
+	Let $\mu^*$ be an outer measure on $X$, and let $\mathcal{M}$ be the collection of $\mu^*$-measurable sets in $X$. Let $\bar{\mu}$ denote the restriction of $\mu^*$ to these sets. Then $\mathcal{M}$ is a $\sigma$-algebra, $\bar{\mu}$ is a measure, i.e. $(X,\mathcal{M},\bar{\mu})$ is a measure space.
+\end{theorem}
+Next, we work our way further up towards step 1. The outer measures we care about came from starting with a (for now) arbitrary function $\mu:\mathcal{S} \to [0,\infty]$, where $\mathcal{S}$ is a (for now) arbitrary subset of $\mathcal{P}(X)$, and extending this to a function on every set via infimums of covers. It turns out with some extremely minor addressing of details, that this infimum definition \textit{always} results in an outer measure. 
+\begin{definition}
+	Let $\mathcal{S}$ be an arbitrary collection of subsets of a set $X$ and $\mu:\mathcal{S} \to [0,\infty]$ an arbitrary set function. Define the function $\mu^*:\mathcal{P}(X) \to [0,\infty]$ as follows. First, we require that $\mu^*(\varnothing) = 0$. Second, if $E \subseteq X$ cannot be covered by a countable collection of sets in $\mathcal{S}$, then define $\mu^*(E) = \infty$. Otherwise, define 
+	\[ \mu^*(E) = \inf \left\{\sum_{k=1}^{\infty} \mu(E_k): \{E_k\}_{k =1}^{\infty} \subseteq \mathcal{S} \textrm{ is a cover of $E$}  \right\} \]
+	We call $\mu^*$ the \textbf{outer measure induced by} $\bm{\mu}$. 
+\end{definition} 
+The name of this wouldn't be justified unless this was always an outer measure, and we can confirm that this is the case by, as before, looking at back at our properties of the Lebesgue outer measure, inspecting those proofs, and identifying what was assumed. There is perhaps an initial urge to be a bit careful, because back in that setting we took for granted in those proofs that countable covers of arbitrary sets existed. However, we never really assumed that at all. We just forgot to say that if a countable cover \textit{didn't} exist, then the measure was infinite. We note this, acknowledge our mistake, and go back to proof by reckless inspection. Monotonicity of the outer measure followed trivially from the infimum based definition. It did there, and it does here. A quick inspection of the proof of countable subadditivity confirms that every line of it can be recycled - while it was more complicated to prove, the result followed entirely from set theoretical observations and the definition of outer measure. Thus, we have the following theorem confirmed:
+\begin{theorem}
+	For any collection $\mathcal{S} \subseteq X$, and any function $\mu:\mathcal{S} \to [0,\infty]$, the outer measure induced by $\mu$ is indeed an outer measure.
+\end{theorem}
+Putting our observations together crystallizes this construction of going from an arbitrary function on an arbitrary collection of sets to a full on measure space:
+\begin{definition}
+	Let $\mathcal{S}$ be a collection of subsets of $X$, and $\mu:\mathcal{S} \to [0,\infty]$ a set function, and $\mu^*$ the outer measure induced by $\mu$. Then the measure $\bar{\mu}$ that is the restriction of $\mu^*$ to the $\sigma$-algebra $\mathcal{M}$ of $\mu^*$-measurable sets is called the \textbf{Caratheodory measure induced by} $\bm{\mu}$. It's always a measure, i.e. $(X,\mathcal{M},\bar{\mu})$ is always a measure space.
+\end{definition}
+Recall that our original goal was to identify the properties of the set function $\mu$ and the collection of sets $\mathcal{S}$ necessary for this process of extension to work and generate a measure space. We appear to have our answer - none at all. However, this is a bit of a false promise. While our function $\bar{\mu}$ is generated uniquely out of $\mu$, there is no guarantee that it is a true \textit{extension} of $\mu$. That is to say, either or both of the following problems may arise:
+\begin{itemize}
+	\item[(1)] $\bar{\mu}$ might not agree with $\mu$ on some or all of the sets in $\mathcal{S}$. 
+	\item[(2)] Some or all of the sets in $\mathcal{S}$ might not be measurable, in which case the domain of $\bar{\mu}$ isn't a true expansion from our original set.
+\end{itemize}
+Thus, by an \textbf{extension} of $\mu$, what we mean is that $\mathcal{S} \subseteq \mathcal{M}$, the measurable sets under the extension, and that $\mu(E) = \bar{\mu}(E)$ for all sets $E \in \mathcal{S}$. The facts about the Lebesgue measure corresponding to these two potential issues were that the outer measure of an interval is it's length, and that all intervals were measurable. Both of these proofs rely on facts intrinsic to intervals, specifically. The proof that the outer measure of an interval was it's length even went so far as relying on the Hahn Banach theorem, so we can't hope to recycle these in any way for abstract collections of sets. The details here are subtle. \par 
+Our original inspiration set/function combo, the intervals with the length function, had two properties which we took for granted: finite additivity, and countable monotonicity. We begin by showing that in order for the Caratheodory measure induced by a set to truly be an extension of the original combo, that combo must these properties, at least. (Perhaps more.)
+\begin{fact}
+	Let $\mathcal{S} \subseteq X$ and $\mu:\mathcal{S} \to [0,\infty]$. Then if the Caratheodory measure induced by $\mu$ is an extension of $\mu$, it must be the case that $\mu$ is both finitely additive and countably monotone, and, if $\varnothing \in \mathcal{S}$, that $\mu(\varnothing) = 0$.
+\end{fact}
+\begin{proof}
+	The empty set clause goes without saying. To show the other two requirements, note that since $\bar{\mu}$ is a measure, it is finitely additive, and since $\bar{\mu}$ is an extension of $\mu$, it must agree with $\bar{\mu}$ on all sets in $\mu$'s domain, and further $\mathcal{S} \subseteq \mathcal{M}$, and so clearly $\mu$ must be finitely additive by inheritance. Countable monotonicity is an identical argument.
+\end{proof}
+What we're looking for are necessary and sufficient conditions on $\mu$ and $\mathcal{S}$ for $\bar{\mu}$ to extend $\mu$. We've identified a couple of necessary conditions for $\mu$, and with one more assumption about the collection $\mathcal{S}$, we obtain sufficiency. Unfortunately, even despite this, a wrench is going to be thrown into our plans, and we won't \textit{quite} be done yet. To say a collection of sets $\mathcal{S}$ is said to be \textbf{closed under the formation of relative complements} (or, if we aren't insane, \textbf{closed under differences}), we mean that whenever $A,B \in \mathcal{S}$, the difference $A-B \in \mathcal{S}$. We can guess what closure under finite intersections means. Note that any nonempty collection which is closed under differences must contain the empty set, since $A - A = \varnothing$. Also note that closure under differences is in fact a strengthening of the condition of being closed under intersections, since for any sets $A,B$, $A \cap B = A - (B - A)$.
+\begin{definition}
+	A function $\mu:\mathcal{S} \to [0,\infty]$ is called a \textbf{premeasure} provided it is both countably monotone and finitely additive.
+\end{definition} 
+\begin{theorem}
+	Let $\mu:\mathcal{S} \to [0,\infty]$ be a premeasure on a nonempty collection $\mathcal{S}$ of subsets of $X$ that is closed under differences. Then the Caratheodory measure induced by $\mu$ is an extension of $\mu$. (We call it the \textbf{Caratheodory extension} of $\mu$. Yes, the, but that's to be shown later.)
+\end{theorem}
+\begin{proof}
+\end{proof}
+Where's the problem? Aren't we done? Well, no. To see the issue, lets once again consider our inspiration case of $\mathcal{S}$ being the set of all intervals, and $\mu$ being length. While it is clearly the case that $\mu$ here is a premeasure, it is not at all the case that $\mathcal{S}$ is closed under differences! This means that we went slightly too far with our condition above. That $\mu$ be a premeasure and $\mathcal{S}$ be closed under differences is sufficient, and that $\mu$ be a premeasure is necessary, but it would seem that the two of these properties together fails to be necessary. Thus, we need to somehow relax the condition on $\mathcal{S}$. We take a moment to consider various structures on families of sets.
+\begin{definition}
+	A nonempty collection $\mathcal{S}$ of subsets of $X$ is called a \textbf{ring} provided it is closed under finite unions and finite differences. (It's called a ring because it is one, in the algebraic sense, with addition defined to be the \textbf{symmetric difference} $A \Delta B = (A-B) \cup (B-A)$ and multiplication defined to be intersection. $\varnothing$ is the additive identity.) Note that rings are necessarily also closed under finite intersections, and that a ring which contains the universe $X$ is closed under complements, and is thus an algebra. \par 
+	We call $\mathcal{S}$ a \textbf{semiring} if it is closed under finite intersections and has the following additional property: Whenever $A,B \in \mathcal{S}$, there is a finite disjoint collection $C_1,C_2,...,C_n$ of sets in $\mathcal{S}$ such that the difference $A-B = \bigcup_{k=1}^n C_k$. I.e. $\mathcal{S}$ isn't necessarily closed under differences, but differences always result in finite collections of elements of $\mathcal{S}$. A semiring which contains $X$ is called a \textbf{semialgebra}. (A semiring in modern algebra appears to be a ring in which elements aren't assumed to have an additive identity, but if that seems to disagree with the definition here since every set is it's own additive inverse under the symmetric difference. So this vocabulary seems awful unless I'm missing something.)
+\end{definition} 
+Note that the intervals clearly form a semiring (and in fact a semialgebra) but not a ring: $[3,8] - [4,5] = [3,4) \cup (5,8]$. Also note that since closure under finite differences implies closure under finite intersections, and by the fact that $A \cup B = (A\Delta B)\Delta (A\cap B)$, the property of $\mathcal{S}$ which we identified above as a sufficient condition was actually the property of being a ring by the above definition. Thus, what we have so far is that if $\mu$ is a premeasure, and $\mathcal{S}$ is a ring, then the Caratheodory measure induced by $\mu$ is an extension of $\mu$. The truly necessary condition is obtained by relaxing the condition of being a ring to that of being a semiring. \par 
+The idea is that we can always 'complete' semiring, extending it to an actual ring, by just unioning all of the disjoint collections that give differences, and adding those unions to the collection. It turns out that if $\mu$ is a premeasure defined on a semiring, and we carry out this completion, then there is a unique extension of $\mu$ to a premeasure on the completion.
+\begin{fact}
+	The above claim is true.
+\end{fact} 
+\begin{proof}
+	To make the 'completion' idea above formal, let $\mathcal{S}$ be a semiring, and let $\mathcal{S}'$ be the collection of unions of finite disjoint collections of sets in $\mathcal{S}$. Then for any two $A,B \in \mathcal{S}'$, we have that $A = \bigcup_{k=1}^n A_k$, $B = \bigcup_{l=1}^m B_k$, where $A_1,...,A_n$ and $B_1,...,B_m$ are disjoint collections of sets from $\mathcal{S}$. First, we wish to show that $A \cap B \in \mathcal{S}$. To see this, note that $A \cap B$ is just a big intersection of all sets of the form $A_k \cap B_l$. Since $\mathcal{S}$ is a semiring, sets of this form must be in $\mathcal{S}$, and so this is just a big intersection of sets in $\mathcal{S}$. So in fact, $A \cap B \in \mathcal{S} \subseteq \mathcal{S}'$. Thus $\mathcal{S}$ is closed under intersections. Next, to observe closure under finite unions, observe that $A \cup B = (A-B) \cup (B-A) \cup (A \cap B)$, and that all three of these sets are disjoint. Now $A-B$ and $B-A$ are in $\mathcal{S}'$ since each of these is a disjoint union of sets in $\mathcal{S}$ by definition of a semiring, and $\mathcal{S}'$ is precisely the union of these. (And of course, since the disjoint collection unioning to $A-B$ itself must be disjoint from $B-A$.) As we noted above, $A \cap B \in \mathcal{S}$, and so this union representing $A\cup B$ is in fact a disjoint union of sets in $\mathcal{S}$, and thus is in $\mathcal{S}'$. So $\mathcal{S}'$ is closed under finite unions and intersections. From this we can obtain that $\mathcal{S}'$ is closed under differences: 
+	\begin{align}
+		A-B &= \bigcup_{k=1}^n A_k \cap \left[ \bigcap_{l=1}^m B_l^c \right]
+			= \bigcup_{k=1}^n \bigcap_{l=1}^m A_k \cap B_l^c \\
+			&= \bigcup_{k=1}^n \bigcap_{l=1}^m A_k - B_l
+	\end{align}
+Now by definition of a semiring, each difference $A_k-B_l$ is the union of a disjoint collection of sets from $\mathcal{S}$, i.e. $A_k-B_l \in \mathcal{S}'$ for each $k,l$. Thus since $\mathcal{S}'$ is closed under finite unions and intersections, the difference $A-B \in \mathcal{S}'$, and we have that $\mathcal{S}'$ is a ring. \par 
+Now, let $\mu:\mathcal{S} \to [0,\infty]$ be a premeasure on $\mathcal{S}$. We extend $\mu$ to $\mathcal{S}'$ in the obvious way: for a disjoint union $E = \bigcup_{k=1}^n A_k$ of sets in $\mathcal{S}$, define $\mu'(E) = \sum_{k=1}^n \mu(A_k)$. Since there could be multiple disjoint unions which union to any given set $E$, it needs to be confirmed that this is a well defined function. To observe this, let $B_1,...,B_l$ be some other disjoint collection from $\mathcal{S}$ unioning to $E$. The trick here is to observe that for each $A_k$,  \[  A_k = A_k \cap E = A_k \cap \left( \bigcup_{l=1}^m B_l \right) = \bigcup_{l=1}^m B_l \cap A_k \]
+Since each of these $B_l \cap A_k$ sets are disjoint, and also in $\mathcal{S}$, it follows then from finite additivity that
+\[ \mu(A_k) = \sum_{l=1}^m \mu(B_l \cap A_k) \]
+Similarly, it is the case that for each $l=1,...,m$, $\mu(B_l) = \sum_{k=1}^m \mu(B_l \cap A_k)$. Thus, 
+\begin{align} 
+\sum_{k=1}^n \mu(A_k) &= \sum_{k=1}^n \left[ \sum_{l=1}^m \mu(B_l \cap A_k) \right]
+					= \sum_{l=1}^m \left[ \sum_{k=1}^n \mu(B_l \cap A_k) \right]
+					= \sum_{l=1}^m \mu(B_l)
+\end{align}
+Thus we have that $\mu'$ is well defined. Next, we need to show that $\mu'$ is a premeasure. If $E_1,...,E_n$ is a finite disjoint collection of sets in $\mathcal{S}'$, then $E_k = \bigcup_{l=1}^m E^k_l$, where each $E^k_l \in \mathcal{S}$. But then the union of all of these disjoint sets from $\mathcal{S}'$ is itself the union of a bigger collection of disjoint sets from $\mathcal{S}$, and so by definition of $\mu'$, the measure of the union of this collection is the sum of all of the measures, which can be rearranged and put back together piecemeal to the measures of each individual $E_k$, showing finite additivity. For monotonicity, 
+\end{proof}
+
+%An important and noteworthy property of the Lebesgue measure which need not be true about general measures is that every set with measure $0$ was measurable. This leads one to the following definition:
+%\begin{definition}
+%	A measure space $(X,\mathcal{M},\mu)$ is \textbf{complete} if $\mathcal{M}$ contains every subset of a set of measure $0$. That is, if $E \subseteq \mathcal{M}$ and $\mu(E) 0$, then every subset of $E$ is also in $\mathcal{M}$.
+%\end{definition}
+
+\section{Linear Algebra}
+\begin{definition}
+		A \textbf{vector space} is a triple $(V,F,\phi)$, where $V$ is an abelian group, the elements of which are called \textbf{vectors}, and $F$ is a field, the elements of which are called \textbf{scalars}. $\phi: F \times V \to V$ is a group action, allowing scalars to \textit{act} on the vectors by 'multiplication'. If $\vec{v} \in V$ and $a \in F$, then we will denote $\phi(a,\vec{v}) := a\vec{v}$, reminiscent of multiplication. Recall that by group action, we mean that $a(b\vec{v}) = (ab)\vec{v}$, and that $1\vec{v} = \vec{v}$, where $1$ is the identity of $F$. In addition to this, we will require that scalars can distribute over a sum of vectors, and vice versa. That is, $(a+b)\vec{v} = a\vec{v}+b\vec{v}$, and $a(\vec{u}+\vec{v}) = a\vec{u}+a\vec{v}$.
+	\end{definition}
+	The typical field of scalars for us will be the complex numbers, and sometimes the reals. Unless otherwise noted, the field will be assumed to be $\mathbb{C}$. For a complex number of the form $z = x+iy$, recall that the \textbf{conjugate} of $z$ is $\bar{z} = x-iy$. Sometimes we will also use the notation $z^*$ instead of $\bar{z}$. We begin with some elementary facts about vector spaces:
+	\begin{fact}
+		The additive identity of any binary operation which has one is unique. In particular, the zero vector is unique. 
+	\end{fact}
+	\begin{proof}
+		Suppose that $\vec{w}$ has the property that $\vec{u}+\vec{w} = \vec{w}+\vec{u}=\vec{u}$ for all $\vec{u} \in V$. Then in particular $\vec{0}+\vec{w} = \vec{w}$, but also $\vec{0}+\vec{w} = \vec{w}+\vec{0} =\vec{0}$. Thus $\vec{w} = \vec{0}+\vec{w} = \vec{0}$. 
+	\end{proof}
+	\begin{fact}
+		Additive inverses are unique for any associative binary operation, when they exist. So additive inverses of vectors are unique.
+	\end{fact}
+	\begin{proof}
+		Let $\vec{u}$ be an arbitrary vector, and suppose $\vec{w}$ has the property that $\vec{u}+\vec{w} = \vec{0}$. Then $(-\vec{u})+(\vec{u}+\vec{w}) = (-\vec{u})+\vec{0} \implies (-\vec{u}+\vec{u})+\vec{w} = -\vec{u} \implies \vec{0}+\vec{w} = -\vec{u} \implies \vec{w} = \vec{u}$.
+	\end{proof}
+	\begin{fact}
+		Let $-1$ be the additive inverse of $1$, the identity scalar. Then $(-1)\vec{v} = -\vec{v}$, the additive inverse of $\vec{v}$, for any $\vec{v} \in V$.
+	\end{fact}
+	\begin{proof}
+		$\vec{v} + (-1)\vec{v} = (1+(-1))\vec{v} = 0\vec{v} = 0$. Thus it follows that $-\vec{v} = (-1)\vec{v}$.
+	\end{proof}
+	\begin{fact}
+		For any vector $\vec{u}$, $0\vec{u} = \vec{0}$, and for any scalar $c$, $c\vec{0} = \vec{0}$
+	\end{fact}
+	\begin{proof}
+		For the first part, begin with the observation that $0\vec{u} = (0+0)\vec{u} = 0\vec{u}+0\vec{u}$. Then we have
+		\begin{align*}
+			& 0\vec{u} + (-0\vec{u}) = [0\vec{u}+0\vec{u}] + (-0\vec{u}) \\
+		&\implies 0\vec{u} + (-0\vec{u}) = 0\vec{u} + [0\vec{u}+(-0\vec{u})] \\
+		&\implies \vec{0} = 0\vec{u}+\vec{0} \\
+		&\implies \vec{0} = 0\vec{u}		
+		\end{align*}
+		For the second part, we begin similarly with the observation $c\vec{0}=c(\vec{0}+\vec{0}) = c\vec{0} + c\vec{0}$. Then we have
+		\begin{align*}
+			& c\vec{0}+(-c\vec{0}) = [c\vec{0}+c\vec{0}] + (-c\vec{0}) \\
+			&\implies c\vec{0}+(-c\vec{0}) = c\vec{0}+[c\vec{0}+(-c\vec{0}] \\
+			&\implies \vec{0} = c\vec{0}+\vec{0} \\
+			&\implies \vec{0} = c\vec{0}
+		\end{align*}
+	\end{proof}
+	
+	\par An expression of the form $\sum_{i=1}^n a_i\vec{v}_i$ is called a \textbf{linear combination} of the $\vec{v}_i$ vectors. If $B \subseteq V$, then the \textbf{span} of $B$, denoted $span(B)$, is the set of all linear combinations of vectors in $B$. Note that at present, this sum \textit{has} to be finite. In order for infinite sums of vectors to be defined, we would need to define some notion of convergence, which itself would require us to imbue the vector space with topological properties. We will do this later.
+	\par The \textbf{dimension} of a space $V$, denoted $dim(V)$ is the minimum cardinality of a set of vectors $B$ such that $V = span(B)$. A \textbf{basis} (more specifically, a \textbf{Hamel basis}) for a vector space $V$ is a collection of vectors $B$ such that $|B| = dim(V)$ and $span(B) = V$. Note again what is and is not allowed to be infinite here. The cardinality of the basis set itself could be finite, countable, uncountable, whatever. To claim that $B$ is a basis is to claim that every vector can be written as a \textit{finite} sum of these, because we don't, and in fact can't, always define what infinite sums even mean. If $B = \{\vec{b}_{\alpha}\}_{\alpha \in I}$ is a basis for $V$, and $\vec{v} = \sum_{i \in J} a_i\vec{b}_i$ is an arbitrary vector in $V$, then we refer to the coefficients $a_i$ as the \textbf{B-coordinates} of $\vec{v}$, or if the basis in question is fixed simply as the coordinates. If no scalar multiple of $\vec{b}_{\alpha}$ isn't required to 'construct' $\vec{v}$, then we assume the $B$-coordinate is $0$. Note, $I$ can be any ordinal, hence why I'm using the greek letter $\alpha$ to index $B$. $J$ however, is finite (for now). Note that assuming that these representations are unique, we can uniquely identify vectors by their coordinates. For instance, if $dim{V} = n$ for some $n < \infty$, it is natural to look at vectors in $V$ as being in $\mathbb{C}^n$, regardless of what $V$ actually is:
+	\[ \vec{v} = \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix} \]
+	An immediate goal will be to make this idea precise, with the notion of an isomorphism - algebraic sameness. Note the way that this natural identification carries even into infinite dimensional spaces: If $\dim{V}$ is countable, then in the same sense vectors in $V$ are naturally identified as sequences of numbers, and in the case that $\dim{V}$ is size continuum, vectors are naturally functions $\vec{v}:\mathbb{R} \to \mathbb{C}$. Our first goals however, need to be confirming that these representations are in fact unique, and to obtain a more functional definition of the dimension of a space. To this end, we define the notion of linear independence. 
+	\begin{definition}
+		We say that a set of vectors $\{\vec{v}_i\}_{i \in I}$ is \textbf{linearly independent} if the equation
+		\[ \sum_{i\in I} a_i\vec{v}_i = \vec{0} \]
+	only has the \textbf{trivial solution}. That is to say, is only satisfied when $a_i=0$ for all $i \in I$.
+	\end{definition} 
+	\begin{theorem}
+		If $S = \{\vec{v}_i\}_{i \in I}$ is a linearly independent set, then every vector in $span\{S\}$ has a unique representation as a linear combination of the vectors in $S$. Note that no linearly independent set can ever contain $\vec{0}$.
+	\end{theorem}
+	\begin{proof}
+		Let $\vec{v} = \sum_{i\in I} a_i\vec{v}_i = \sum_{i \in I} b_i\vec{v}_i$. Then \[ \sum_{i \in I} (a_i-b_i)\vec{v}_i = \vec{v}-\vec{v} = \vec{0} \]
+		But since the set $S$ is linearly independent, the coefficients $a_i-b_i$ must all be $0$. This of course implies $a_i=b_i$ for all $i\in I$, and so the these representations are identical. 
+	\end{proof}
+	\begin{corollary}
+		A set $B \subseteq V$ is a basis for $V$ iff it is a maximally sized set of linearly independent of vectors from $V$.
+	\end{corollary}
+	\begin{proof}
+		Suppose that $B = \{\vec{b}_i\}_{i \in I}$ is a basis for $V$, that is, a minimally sized set of vectors such that $V = span(B)$. We need to show that $B$ is a linearly independent set, and that it is the largest possible set with this property. Suppose $B$ isn't linearly independent, i.e. there exists a set of  scalars $\{a_i\}_{i\in I}$, at least some of which are nonzero, (say $a_k$ for some $k$) such that 
+		\[ \sum_{i \in I} a_i \vec{b}_i = \vec{0} \]
+	But then $\vec{b}_k = \sum_{i \neq k} -\frac{a_i}{a_k} \vec{b}_i$, i.e. $\vec{b}_k$ is in the span of the rest of the vectors in $B$, even without it. Thus any other vector in $V$ which uses a nonzero $\vec{b}_k$ coefficient could be rewritten in terms of the rest of $B$, and so this contradicts the minimality of $B$. Thus a basis set needs to be linearly independent. Clearly then this is a maximally sized linearly independent set, because if we added any other vectors $\vec{v}$ to $B$, then since $V = span(B)$, $\vec{v}$ can already be written as a linear combination of the vectors in $B$, i.e. 
+	\[ \vec{v} = \sum_{i \in I} v_i \vec{b}_i \implies \sum_{i \in I} v_i \vec{b}_i - \vec{v} = \vec{0} \]
+	So unless $\vec{v} = \vec{0}$ we have a nontrivial solution to the equation determining linear dependence. 
+	\par Conversely, suppose that $B$ is a maximally sized linearly independent set of vectors in $V$. First suppose that there exists a vector $\vec{v} \notin span(B)$. Then the equation
+	\[ \sum_{i \in I} a_i \vec{b}_i + a\vec{v} = \vec{0} \] 
+	has only the trivial solution, and so $B \cup \{\vec{v}\}$ is still linearly independent, contradicting maximality. Thus $V = span(B)$. Note that if we plucked out any vector from this set, then we would no longer have this property, since there is no way to write any one the $\vec{b}_i$ vectors as a linear combination of the others. 
+\end{proof}
+When does a vector space $V$ have a basis? The answer is always, probably:
+\begin{theorem}
+	The assumption that every vector space has a basis is equivalent to the axiom of choice.
+\end{theorem}
+\begin{proof}
+	todo
+\end{proof}
+\begin{definition}
+	Let $V_1,V_2$ be vector spaces \textit{over the same scalar field, $F$}. A \textbf{linear transformation} is a mapping  $T:V_1 \to V_2$ such that for all $\vec{u},\vec{v} \in V_1$, and all scalars $a$, we have that $T(\vec{u}+\vec{v} = T(\vec{u})+T(\vec{v})$, and $T(a\vec{u}) = aT(\vec{u})$. If $V_2 = \mathbb{C}$, then we call $T$ a \textbf{linear functional}. A bijective linear transformation between spaces $V_1,V_2$ is called an \textbf{isomorphism}. If there exists an isomorphism between $V_1$ and $V_2$, then we way these spaces are \textbf{isomorphic}.
+\end{definition}
+Linear transformations are 'purely algebraic' transformations, in that they act on the coordinates of whatever we are calling a vector, independently of any other details. It is also the case that a linear transformation is defined completely by specifying its action on a fixed set of basis elements. For instance, if $T:V \to W$ is a linear transformation, and $\vec{v} = \sum_{i=1}^n v_i\vec{b}_i$ is an arbitrary vector expressed as a linear combination of vectors in some basis $B$, then 
+\[ T(\vec{v}) = T\left(\sum_{i=1}^n v_i\vec{b}_i\right) = \sum_{i=1}^n v_i T(\vec{b_i}) \]
+The following fact then becomes clear:
+\begin{fact}
+	Any finite dimensional vector space $V$ over a field $F$, with $dim(V) = n$, is isomorphic to $F^n$. (So if the field is $\mathbb{C}$, then $V$ is isomorphic to $\mathbb{C}^n$, and so forth.)
+\end{fact}
+Before proving this, it will be useful to define the \textbf{standard basis} for $\mathbb{C}^n$ (or $\mathbb{R}^n$) to be the set 
+\[E = \{\vec{e}_1,\vec{e}_2,...\vec{e}_n\} = \left\{\begin{pmatrix} 1 \\ 0 \\ 0 \\ \vdots \\ 0 \end{pmatrix}, \begin{pmatrix} 0 \\ 1 \\ 0 \\ \vdots \\ 0 \end{pmatrix},..., \begin{pmatrix} 0 \\ 0 \\ 0 \\ \vdots \\ 1 \end{pmatrix} \right\}  \]
+Trivially, this is a basis for $\mathbb{C}^n$.
+\begin{proof}
+	Let $B = \{\vec{b}_1,\vec{b}_2,...,\vec{b}_n\}$ be a basis for a vector space $V$. Define the linear transformation $T$ via $T(\vec{b}_1) = \vec{e}_1$, $T(\vec{b}_2) = \vec{e}_2$,...,$T(\vec{b}_n) = \vec{e}_n$. Note that this transformation is simply a formalization of the natural association we had earlier between vectors in an abstract vector space and lists of numbers defined by their coordinates. It is clear then that $T$ is a bijection, and therefore an isomorphism.  
+\end{proof}
+Let's turn our attention to linear transformations on $\mathbb{C}^n$ temporarily. Recall that this is a vector space in the sense that addition and scalar multiplication of vectors is done coordinate-wise. Most introductory linear algebra classes begin by innocently defining a matrix times a vector as shorthand for linear combinations. That is, they define
+\[ \begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}\begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix} = v_1\vec{a}_1+v_2\vec{a}_2 + \ldots + v_n\vec{a}_n \]
+I.e. for an $m \times n$ matrix $A$, and a vector in $\vec{v} \in \mathbb{C}^n$, $A\vec{v}$ is defined to be the vector obtained from taking a linear combination of the columns of $A$, where the weights for each column are the entries of $\vec{v}$. For this reason, an $m \times n$ matrix can only be allowed to 'act' on a vector which has a number of entries equal to the number of columns of $A$. From here, matrices become objects representing 'actions'. An $m \times n$ matrix $A$ \textit{acts} on a vector $\vec{v} \in \mathbb{C}^n$ by multiplication, transforming it into a new vector in $\mathbb{C}^m$. This notation becomes justified by inspecting the way that a matrix acts on the standard basis vectors. $A\vec{e}_i = \vec{a}_i$ for each $i=1,...,n$. Thus the columns of a matrix can be naturally interpreted as the action that the matrix performs to the standard basis vectors. Next, the following observation is made:
+\begin{fact}
+	For any matrix $A \in \mathbb{C}^{m\times n}$ and vectors $\vec{v},\vec{w} \in \mathbb{C}^n$, and any scalars $c$ we have 
+	\begin{itemize}
+		\item[(1)] $A(\vec{v} + \vec{w}) = A\vec{v}+A\vec{w}$.
+		\item[(2)] $A(c\vec{v}) = c(A\vec{v})$.
+	\end{itemize}
+\end{fact}
+\begin{proof}
+	Let $A = \begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}$, $v_1,...,v_n$ and $w_1,...,w_n$ denote the standard coordinates of $\vec{v}$ and $\vec{w}$, respectively. Then
+	\begin{align}
+		A(\vec{v}+\vec{w}) &= \begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}\begin{pmatrix} v_1+w_1 \\ v_2+w_2 \\ \vdots \\ v_n+w_n \end{pmatrix} \\ &= (v_1+w_1)\vec{a}_1+(v_2+w_2)\vec{a}_2 + \ldots + (v_n+w_n)\vec{a}_n \\
+		&= (v_1\vec{a}_1+v_2\vec{a}_2 + \ldots + v_n\vec{a}_n) + (w_1\vec{a}_1+w_2\vec{a}_2 + \ldots + w_n\vec{a}_n) \\
+		&= A\vec{v} + A\vec{w}
+	\end{align}
+	Also
+	\begin{align}
+		A(c\vec{v}) &= \begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}\begin{pmatrix} cv_1 \\ cv_2 \\ \vdots \\ cv_n \end{pmatrix} \\ &= cv_1\vec{a}_1+cv_2\vec{a}_2 + \ldots + cv_n\vec{a}_n \\
+		&= c(v_1\vec{a}_1 + v_2\vec{a}_2 + \ldots v_n\vec{a}_n \\
+		&= c(A\vec{v})
+	\end{align}
+\end{proof}
+The consequence of this simple observation is that for any matrix $A \in \mathbb{C}^{m \times n}$, the function $T:\mathbb{C}^n \to \mathbb{C}^m$ defined by $T(\vec{x}) = A\vec{x}$ is a linear transformation. We call any transformation defined by a matrix like this a \textbf{matrix transformation}. From here, the following fundamental realization connects the theory of matrices with the theory of linear transformations on $\mathbb{C}^n$ at the root:
+\begin{theorem}
+	For any linear transformation $T:\mathbb{C}^n \to \mathbb{C}^m$, there exists a unique $m \times n$ matrix $A$ such that $T(\vec{x}) = A\vec{x}$ for all $\vec{x} \in \mathbb{C}^n$. Thus, linear transformations from $\mathbb{C}^n$ to $\mathbb{C}^m$ and matrix transformations are \textit{equivalent}.
+\end{theorem}
+\begin{proof}
+	Let $T:\mathbb{C}^n \to \mathbb{C}^m$ be a linear transformation. Define the columns of $A$ by $\vec{a}_i = T(e_i)$, for $i = 1,...,n$. Then for any vector $\vec{x} \in \mathbb{C}^n$, noting that 
+	\[ \vec{x} = \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{pmatrix} = \sum_{i=1}^n x_i\vec{e_i} \] we see that
+	\[ T(\vec{x}) = \sum_{i=1}^n x_iT(e_i) = \sum_{i=1}^n x_i\vec{a}_i = A\vec{x} \]
+	To show uniqueness, suppose $T(\vec{x}) = B\vec{x}$ for some other $m \times n$ matrix $B$. If we were to assume $B \neq A$, then some column of $B$ must differ from the corresponding column of $A$. But then for that particular $i^{th}$ column, we have that $B\vec{e}_i = \vec{b}_i \neq \vec{a}_i = A\vec{e}_i$, and so $T(\vec{e}_i) = A\vec{e}_i = \vec{a}_i \neq B\vec{e}_i$, so we have a contradiction. Thus $A$ is unique. 
+\end{proof}
+The next fact cements one's intuition of what linear transformations from $\mathbb{C}^n \to \mathbb{C}^m$ actually are. By a \textbf{line through the origin}, we mean a set $L = span(\vec{v})$, where $\vec{v}$ is some nonzero vector in $\mathbb{C}^n$.
+\begin{fact}
+	$T:\mathbb{C}^n \to \mathbb{C}^m$ is a linear transformation iff for any line through the origin $L \subseteq \mathbb{C}^n$, the image of this line under the transformation $T$, i.e. $T[L]$, is itself a line through the origin in $\mathbb{C}^m$. 
+\end{fact}
+\begin{proof}
+	todo
+\end{proof}
+\begin{example}
+	Consider the function $R_{\frac{\pi}{2}}$ which takes a vector $\vec{v} \in \mathbb{R}^2$, and rotates it by $\frac{\pi}{2}$ radians. By the above fact, it is clear that this is a linear transformation. Thus, this operation is a matrix transformation, and furthermore the matrix for it can be quickly derived by simply observing how it acts on the standard basis vectors. Clearly $\begin{pmatrix} 1 \\ 0 \end{pmatrix} \mapsto \begin{pmatrix} 0 \\ 1 \end{pmatrix}$, and $\begin{pmatrix} 0 \\ 1 \end{pmatrix} \mapsto \begin{pmatrix} -1 \\ 0 \end{pmatrix}$. Thus
+	\[ R_{\frac{\pi}{2}} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix} \]
+Note that we are using the \textit{same symbol} to denote both the rotation transformation, and the matrix which performs it. Now that we know these notions are equivalent, it is not simply unambiguous but in fact appropriate to do this. More generally, rotation by angle $\theta$ can be quickly derived as 
+	\[ R_{\theta} = \begin{pmatrix} \cos\theta & -sin\theta \\ sin\theta & \cos\theta \end{pmatrix} \]
+As another fundamental transformation, we can consider the transformation which takes a vector in $\mathbb{R}^2$ and scales it by some number, say $r$. It is easily seen that the matrix for this obviously linear transformation is 
+ 	\[ rI_2 = r\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} r & 0 \\ 0 & r \end{pmatrix} \] 
+ 	Where $I_2$ is itself a linear transformation which performs a very special action: \textit{nothing}. This matrix is known as the \textbf{identity} in $\mathbb{C}^2$, and there is another identity matrix of this sort, with $1$'s down the diagonal and $0$'s everywhere else, for any space $\mathbb{C}^n$. When the dimension of the space in question is clear, we will simply write $I$ to  represent it. 
+\end{example}
+\par Note that in the above matrix, we implicitly defined what it means to multiply a matrix by a scalar - simply do this coordinate-wise. Let us justify this, as well as define matrix addition, in terms of linear transformations. We define multiplying functions by scalars, as well as function addition, via $(cf+g)(x) = cf(x)+g(x)$. (Note that for what was just written, $f,g:V \to W$ must be a mapping between vector spaces! Furthermore 'addition' in the sense of the domain does not have to be the same as addition in the codomain!) We wish for the operations we define on matrices to reflect this. Let $A = \begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}, B=\begin{pmatrix} \vec{b}_1 & \vec{b}_2 & \ldots & \vec{b}_n \end{pmatrix}$, and $c$ a scalar. We wish for $(cA)\vec{x} = c(A\vec{x})$ for all $\vec{x}$. Similarly, if $B$ is an additional matrix, then we wish for $(A+B)\vec{x} = A\vec{x}+B\vec{x}$. Recall that the columns of a matrix represent the actions which the matrix takes on the standard basis vectors. Fix a standard basis vector $\vec{e}_i$. Then $(cA)\vec{e}_i = c(A\vec{e}_i) = c\vec{a}_i$, which is of course the vector $\vec{a}_i$ with all of the entries multiplied by $c$. Since all of $cA$'s columns must look like this, we conclude that $cA$ must be the matrix obtained by multiplying every entry of $A$ by the scalar $c$. Similarly, $(A+B)\vec{e}_i = A\vec{e}_i+B\vec{e}_i = \vec{a}_i+\vec{b}_i$. Thus each columns of the sum $A+B$ must be the sum of the corresponding columns in $A$ and $B$ respectively. Since vector addition is defined coordinate-wise, we conclude that the sum $A+B$ is the matrix obtained by performing the addition component-wise. So addition and scalar multiplication of matrices is done coordinate-wise. However, the column notation is useful in it's own right. To summarize:
+\begin{align}
+	cA+B = c\begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}+\begin{pmatrix} \vec{b}_1 & \vec{b}_2 & \ldots & \vec{b}_n \end{pmatrix} = \begin{pmatrix} c\vec{a}_1+\vec{b}_1 & c\vec{a}_2+\vec{b}_2 & \ldots & c\vec{a}_n+\vec{b}_n \end{pmatrix}
+\end{align} 
+Let $O$ denote the matrix which is entirely $0$'s. The dimension will be clear from context. We now state some elementary facts about these operations which should now be obvious:
+\begin{fact}
+	Let $A,B,C$ be matrices of the same dimension, $r,s$ be scalars. Then we have the following:
+	\begin{itemize}
+		\item[(a)] $A+B=B+A$
+		\item[(b)] $(A+B)+C = A+(B+C)$
+		\item[(c)] $A+O = A$
+		\item[(d)] $r(A+B) = rA+rB$
+		\item[(e)] $(r+s)A = rA+sA$
+		\item[(f)] $r(sA) = (rs)A$
+	\end{itemize}
+	Since vector addition and scalar multiplication is \textit{also} defined coordinate-wise, we can choose to see vectors as simply being single column matrices, in which case all of the facts above also apply to vectors, with $O$ replaced with $\vec{0}$. Also note that all of the above facts are clearly true for linear transformations over \textit{arbitrary} vector spaces.  
+\end{fact}
+It is worth noting that it is only by this similarity in the definitions of scalar multiplication and addition between matrices and vectors that we can choose to at any moment \textit{see} a vector as a matrix, whenever it is convenient. We take this for granted, but it is only allowable because the definitions of these operations is the same in both contexts. 
+\par We can now link things back to abstract finite dimensional vector spaces by our notion of isomorphism. Before doing so, let us for the rest of these notes assume that there is a standard fixed isomorphism between any finite dimensional vector space that we care about and the appropriate $\mathbb{C}^n$ or $\mathbb{R}^n$. We also need to make the very simple observation that the composition of two linear transformations is itself a linear transformation. This can be seen quickly by direct computation: If $T_1$ and $T_2$ are linear, then
+\[T_1(T_2(c\vec{x}+\vec{y}) = T_1(cT_2(\vec{x})+T_2(\vec{y})) = cT_1(T_2(\vec{x}))+T_1(T_2(\vec{y})) \]
+\begin{corollary}
+	Let $V$ and $W$ be finite dimensional vector spaces, with $dim(V) = n$, and $dim(W) = m$. Let $\phi:V \to \mathbb{C}^n$, $psi: V \to \mathbb{C}^m$ be the standardized isomorphisms we've agreed upon. Then the function $\vec{x} \mapsto \psi(T(\phi^{-1}(\vec{x})))$ is a linear transformation from $\mathbb{C}^n \to \mathbb{C}^m$. Note that if $\vec{x} \in \mathbb{C}^n$ is the representative of some vector $\vec{v} \in V$ by our isomorphism, then this transformation sends that representative to the representative of $T(\vec{v})$ which lives in $\mathbb{C}^m$. By the above theorem, this transformation has a matrix, $A$. For a linear transformation $T:V \to W$, we refer to the $A$ described here as \textbf{the matrix of $T$}. 
+\end{corollary}
+The following example illustrates the discussion we've had so far:
+\begin{example}
+	Consider $\mathbb{C}$. Since any complex number $z$ has the form $z = a+ib$, we can immediately see that $mathbb{C}$ can be viewed as a \textit{real} vector space, with basis set $B = \{1,i\}$. Thus $dim(\mathbb{C}) = 2$, and so $mathbb{C}$ is isomorphic to $\mathbb{R}^2$. (Note that as a \textit{complex} vector space, $\mathbb{C}$ is one dimensional, with basis set $B = \{1\}$. This is why scalar fields don't mix!) The standard isomorphism between $\mathbb{C}$ and $\mathbb{R}^2$ should be obvious: 
+	\[ \phi(1) = \begin{pmatrix} 1 \\ 0 \end{pmatrix}, \phi(i) = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \]
+	Thus the function $\phi$ can be seen as a formalization of where our notion of the \textit{complex plane} comes from. Consider the obviously linear transformation $T: \mathbb{C} \to \mathbb{C}$ defined by $T(z) = iz$. What is the matrix of this transformation? To find this, as before, we wish to inspect $T$'s action on the standard basis vectors, but now we do this by way of our isomorphism. $T(1) = i$ means that, in $\mathbb{R}^2$, $T$ sends $\begin{pmatrix} 1 \\ 0 \end{pmatrix}$ to $\begin{pmatrix} 0 \\ 1 \end{pmatrix}$. And $T(i) = i^2 = -1$ means that $\begin{pmatrix} 0 \\ 1 \end{pmatrix}$ gets sent to $\begin{pmatrix} -1 \\ 0 \end{pmatrix}$. Thus the matrix for 'multiplication by $i$' is 
+	\[ \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix} = R_{\frac{\pi}{2}} \]
+Thus multiplication by $i$ in $\mathbb{C}$ corresponds to rotation by $90$ degrees in $\mathbb{R}^2$! Similarly, it can be seen that for any fixed complex number $w = a+ib$, the transformation $T(z) = wz$ has the matrix
+	\[ \begin{pmatrix} a & b \\ -b & a \end{pmatrix} \]
+Sense can be made of this matrix by considering the polar form of $w$, i.e. $w = re^{i\theta}$, where $r = |w| = \sqrt(w^*w) = a^2+b^2$. Here $a = \cos\theta$, and $b = \sin\theta$, and plugging these into the matrix above yields
+	\[ \begin{pmatrix} a & b \\ -b & a \end{pmatrix} = \begin{pmatrix} r\cos\theta & r\sin\theta \\ -r\sin\theta & r\cos\theta \end{pmatrix} = r\begin{pmatrix} \cos\theta & \sin\theta \\ -\sin\theta & \cos\theta \end{pmatrix} = rR_{\theta} \]
+Thus, multiplication by $w$ can be seen as first rotating by the angle of $w$, and then scaling by it's magnitude. This is directly in line with what is seen when multiplying two complex numbers directly: If $z = se^{i\phi}$, then 
+\[ wz = re^{i\theta}se^{i\phi} = (rs)e^{i(\theta+\phi)} \]
+So the magnitude of the resulting product is $|w||s|$, and the angle is $\theta + \phi$, as we would expect from the matrix. 
+\end{example}
+\par Since matrices effectively \textit{are} linear transformations, it would only make sense to define matrix multiplication as the analog of function composition. Further supporting this decision would be the observation we made earlier, that the composition of two linear transformations is always itself a linear transformation. Thus, for two matrices $A,B$ representing the transformations $T_A,T_B$ respectively, the matrix product $AB$ should represent the transformation $T_A \circ T_B$. What this translates to is the following extremely innocent central requirement: Whatever the matrix product $AB$ is, it should be that for any vector $\vec{v}$,
+\[ (AB)\vec{v} = A(B\vec{v}) \]
+Despite it's innocence, this requirement fully defines matrix multiplication. Indeed, assume $AB$ is a matrix representing the above, and consider it's $i^{th}$ column. Recall that the columns of a matrix represent the action that the matrix performs to the corresponding standard basis vector. If $\vec{b}_i$ is the $i^{th}$ column of $B$, then we have 
+\[ (AB)\vec{e_i} = A(B\vec{e}_i) = A\vec{b}_i \]
+Therefore, matrix multiplication is defined by
+\begin{align}
+	AB = A\begin{pmatrix} \vec{b}_1 & \vec{b}_2 & \ldots & \vec{b}_n \end{pmatrix} = \begin{pmatrix} A\vec{b}_1 & A\vec{b}_2 & \ldots & A\vec{b}_n \end{pmatrix}
+\end{align}  
+Thus the matrix product $AB$ is obtained by taking each of the individual columns of $B$, and multiplying them by $A$. Of course, these individual matrix-vector products are only defined if the number of columns of $A$ equals the number of entries of the vector. However, the number of entries in the vectors $\vec{b}_i$ is the same as the number of rows of $B$. Since the number of rows of a matrix represents the codomain's dimension, and the number of columns represents the domain's dimension, it follows that the matrix product $AB$ should only be well defined when the number of \textit{rows} of $B$ matches the number of \textit{columns} of $A$, which is precisely the case here. 
+\par Thus in the same sense that matrices \textit{are} linear transformations, matrix multiplication \textit{is} function composition. A number of facts about matrix multiplication are immediately inherited from this. We summarize these results in a catalog of algebraic properties below:
+\begin{theorem}
+	Let $A,B,C$ be matrices of varying dimension (in other words assume that their products are defined wherever I'm using them). Let $r$ be a scalar. We have the following:
+	\item[(a)] Associativity, i.e. $A(BC) = (AB)C$
+	\item[(b)] Left distributivity, i.e. $A(B+C) = AB+AC$
+	\item[(c)] Right distributivity, i.e. $(B+C)A = BA+CA$
+	\item[(d)] $r(AB) = A(rB) = (rA)B$
+	\item[(e)] $IA = AI = A$
+\end{theorem}
+\begin{proof}
+	Let $A = \begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix}$, $B=\begin{pmatrix} \vec{b}_1 & \vec{b}_2 & \ldots & \vec{b}_n \end{pmatrix}$, and $C = \begin{pmatrix} \vec{c}_1 & \vec{c}_2 & \ldots & \vec{c}_n \end{pmatrix}$. Then for associativity we have
+	\begin{align*}
+		A(BC) &= A\begin{pmatrix} B\vec{c}_1 & B\vec{c}_2 & \ldots & B\vec{c}_n \end{pmatrix} \\
+		&= \begin{pmatrix} A(B\vec{c}_1) & A(B\vec{c}_2) & \ldots & A(\vec{c}_n \end{pmatrix} \\
+		&= \begin{pmatrix} (AB)\vec{c}_1 & (AB)\vec{c}_2 & \ldots & (AB)\vec{c}_n \end{pmatrix} = (AB)C
+	\end{align*}
+	 As for (b), note that $B+C = \begin{pmatrix} \vec{b}_1+\vec{c}_1 & \vec{b}_2+\vec{c}_2 & \ldots & \vec{b}_n+\vec{c}_n \end{pmatrix}$, and so
+	\begin{align*} A(B+C) &= A\begin{pmatrix} \vec{b}_1+\vec{c}_1 & \vec{b}_2+\vec{c}_2 & \ldots & \vec{b}_n+\vec{c}_n \end{pmatrix} \\
+	&= \begin{pmatrix} A(\vec{b}_1+\vec{c}_1) & A(\vec{b}_2+\vec{c}_2) & \ldots & A(\vec{b}_n+\vec{c}_n) \end{pmatrix} \\
+	&= \begin{pmatrix} A\vec{b}_1+A\vec{c}_1 & A\vec{b}_2+A\vec{c}_2 & \ldots & A\vec{b}_n+A\vec{c}_n \end{pmatrix} \\
+	&= \begin{pmatrix} A\vec{b}_1 & A\vec{b}_2 & \ldots & A\vec{b}_n \end{pmatrix} + \begin{pmatrix} A\vec{c}_1 & A\vec{c}_2 & \ldots & A\vec{c}_n \end{pmatrix} = AB+AC
+	\end{align*}
+	For (c), observe
+	\begin{align*}
+		(B+C)A &= (B+C)\begin{pmatrix} \vec{a}_1 & \vec{a}_2 & \ldots & \vec{a}_n \end{pmatrix} \\
+		&= \begin{pmatrix} (B+C)\vec{a}_1 & (B+C)\vec{a}_2 & \ldots & (B+C)\vec{a}_n \end{pmatrix} \\
+		&= \begin{pmatrix} B\vec{a}_1+ C\vec{a}_1 & B\vec{a}_2+C\vec{a}_2 & \ldots & B\vec{a}_n+C\vec{a}_n \end{pmatrix} \\
+		&= \begin{pmatrix} B\vec{a}_1 & B\vec{a}_2 & \ldots & B\vec{a}_n \end{pmatrix} + \begin{pmatrix} C\vec{a}_1 & C\vec{a}_2 & \ldots & C\vec{a}_n \end{pmatrix} = BA+CA
+	\end{align*}
+	It's worth noting the asymmetry between the proofs of (b) and (c). One would naturally assume these proofs look identical, but in fact they are each true for different reasons. (b) is true because of the linearity of matrix multiplication, and has nothing to do with our definition of matrix addition. (c) is the reverse of this. 
+	For (d), note that
+	\begin{align*}
+		r(AB) &= r\begin{pmatrix} A\vec{b}_1 & A\vec{b}_2 & \ldots & A\vec{b}_n \end{pmatrix}) \\
+		&= \begin{pmatrix} r(A\vec{b}_1) & r(A\vec{b}_2) & \ldots & r(A\vec{b}_n) \end{pmatrix}
+	\end{align*}
+	Noting that for each $i$, $r(A\vec{b}_i) = A(r\vec{b}_i)$, we can factor $A$ out once more to obtain that $r(AB) = A(rB)$. Noting that $rA = (rI)A$ shows why the action which produces $r(A\vec{b}_i)$ in each column is precisely $rA$, and so $r(AB) = (rA)B$. Finally, for $(e)$, we can simply recall that $I$ corresponds to the action which does nothing at all. That is, $I\vec{v} = \vec{v}$, always. Thus, it should be trivially clear that $IA = AI = A$. 
+\end{proof}
+It's worth seeing these elementary facts expressed algebraically about matrices, but it's also important understand that these are in fact more general facts about linear transformations. $A(BC) = (AB)C$ is true simply because function composition is always associative, and the matrix representations of these transformations are unique. And so forth. \par
+The spaces $\mathbb{C}^n$ and $\mathbb{R}^n$ have additional structure beyond addition and multiplication. The also have notions of length, distance, and angle. In fact, these notions are all closely related, via the classical \textbf{dot product}. Recall that for vectors $\vec{v},\vec{w} \in \mathbb{R}^n$, the dot product is given by 
+	\[ \vec{v} \cdot \vec{w} = \sum_{i=1}^n v_iw_i \]
+The dot product gains its importance via its close relationship to all of the geometric notions referenced above. In particular, we have that for any vector $\vec{v} \in \mathbb{R}^n$, 
+\[ \vec{v} \cdot \vec{v} = \sum_{i=1}^n v_i^2 = |\vec{v}|^2 \]
+I.e. the dot product of any vector with itself yields the length of the vector as a line segment in $\mathbb{R}^n$. Our primary concern is $\mathbb{C}^n$, however. In $\mathbb{C}$, the magnitude of a complex number $z=a+ib$ is defined to be the magnitude of $z$ as a real vector in $\mathbb{R}^2$, i.e. $|z|^2 = a^2+b^2$. The natural thing to do would be to extend this definition to $\mathbb{C}^n$ in the following way:
+\[ \vec{v} = \begin{pmatrix} z_1 \\ z_2 \\ \vdots \\ z_n \end{pmatrix} \implies |\vec{v}|^2 = \sum_{i=1}^n |z_i|^2 \] 
+This works in the sense that it can be shown to be a norm on $\mathbb{C}^n$. However, extending the dot product to complex numbers in the naive way (i.e. leaving it the same) won't produce the desirable consequence that $\vec{v} \cdot \vec{v} = |\vec{v}|^2$. To see where the problem arises, we have to identify the property we were taking for granted in $\mathbb{R}$. That property is the simple fact that
+\[ (\forall x \in \mathbb{R})x^2 = |x|^2 \]
+This is not true in $\mathbb{C}$. For a complex number $z = a+ib$, it's plain to see that $z^2 = a^2 + i2ab - b^2 \neq a^2+b^2$. What needs to be multiplied by $a+ib$ to obtain $a^2+b^2$? The answer is clearly the \textbf{conjugate} of $a+ib$, $a-ib$. Thus, define the \textbf{complex conjugate} of $z$ to be $z^* = a-ib$. Then the corresponding analog to the statement centered above is the following:
+\[ (\forall z \in \mathbb{C})z^*z = zz^* = |z|^2 \]
+This is what we took for granted in $\mathbb{R}$, conjugation, and we did so because clearly a complex number $z$ is real iff $z^* = z$. With this known, we can define the dot product in $\mathbb{C}^n$: For $\vec{v},\vec{w} \in \mathbb{C}^n$, define
+\[ \vec{v} \cdot \vec{w} = \sum_{i=1}^n v_i^*w_i \]
+This clearly yields the property that for any $\vec{v} \in \mathbb{C}^n$, $\vec{v} \cdot \vec{v} = \sum_{i=1}^n |v_i|^2$, properly connecting the dot product to the notion of length, and subsequently that of distance and angle. 
+\par The preceding discussion of the dot product was meant to motivate a more abstract definition for general vector spaces. Just as the abstract definition of linear transformations naturally corresponded to matrices, the abstract definition of an innner product, stated below, will naturally correspond to the dot product, either over $\mathbb{C}^n$, or that in $\mathbb{R}^n$.
+\begin{definition}
+		An \textbf{inner product} over a real or complex vector space $V$ is a mapping $\braket{\cdot,\cdot}: V \times V \to \mathbb{C}$ (or into $\mathbb{R}$) which satisfies the following properties for all vectors $\vec{u}, \vec{v}, \vec{w}$, and all scalars $a,b \in F$:
+	\begin{itemize}
+		\item Conjugate Symmetry: $\braket{u,v} = {\braket{v,u}}^*$
+		\item Linearity in Ket: $\braket{u,av+bw} = a\braket{u,v}+b\braket{u,w}$
+		\item Positive definite: $\braket{u,u} > 0$ (i.e. is real) with $\braket{u,u} = 0 \iff \vec{u} = \vec{0}$
+	\end{itemize}
+	A vector space $V$ which has an inner product defined on it is called an \textbf{inner product space}.
+	\end{definition} 
+	We will usually omit the vector 'hats' for vectors inside of the dot product argument, when there is no confusion. Note that if $V$ is a real vector space, that the conjugate symmetry axiom simply becomes commutativity, and as a consequence the linearity of the second argument in axiom two is extended to linearity in both arguments. For complex vector spaces, the extra complication doesn't amount to much. Where we don't have linearity in the first argument, we nonetheless have a sort of antilinearity:
+	\begin{align}
+		\braket{au+bv|w} &= \braket{w,au+bv}^* \\
+						 &= (a\braket{w,u} + b\braket{w,v})^* \\
+						 &= a^*\braket{w,u}^* + b^*\braket{w,v}^* \\
+						 &= a^*\braket{u,w} + b^*\braket{v,w}
+	\end{align}
+It should be clear that the dot products for $\mathbb{R}^n$ and $\mathbb{C}^n$ are both inner products via this definition. Our first goal should obviously be to confirm that the inner product produces defines a norm in the way we would hope, but that requires a few stepping stones. We will confirm this shortly, but towards that end we should first introduce the idea of projection. The following fact about vectors in $\mathbb{R}^n$ is elementary, but worth noting for motivational purposes:
+\begin{theorem}
+	For vectors $\vec{u},\vec{v} \in \mathbb{R}^n$, if $\theta$ is the angle between $\vec{u}$ and $\vec{v}$ then $\vec{u}\cdot \vec{v} = |\vec{u}||\vec{v}|cos\theta$.
+\end{theorem}
+\begin{proof}
+	By the law of cosines, if $c$ is the length of the line segment connecting the end of $\vec{v}$ with $\vec{u}$, then 
+	\[c^2 = |\vec{v}|^2 + \vec{u}|^2 -2|\vec{v}||\vec{u}|cos\theta \]
+	Now to review some facts about vector geometry, recall that the vector sum $\vec{u} + \vec{v}$ is the vector which ends at the same point as if extended the vector $\vec{v}$ from the vector $\vec{u}$ as opposed to from the origin. Vector subtraction can be defined from addition and scalar multiplication, via $\vec{u}-\vec{v} = \vec{u}+(-\vec{v})$. Note that since $\vec{v}+(\vec{u}-\vec{v}) = \vec{u}$, we can see the difference $\vec{u}-\vec{v}$ as the vector 'going from $\vec{v}$ to $\vec{u}$. (Up to translation of the vector from the origin to where it's supposed to be.) Thus, at least in $\mathbb{R}^n$, we have that $|\vec{u}-\vec{v}|$ is the length of the line segment connecting $\vec{u}$ with $\vec{v}$, and in the the context of our proof, equal to $c$. Thus
+	\begin{align*}
+		c^2 = |\vec{u}-\vec{v}|^2 &= (\vec{u}-\vec{v})\cdot(\vec{u}-\vec{v}) \\
+								  &= |\vec{u}|^2 + |\vec{v}|^2 -2\vec{u}\cdot\vec{v}
+	\end{align*}
+	Thus connecting these two equations for $c^2$ together and cancelling out terms yields the desired fact. 
+\end{proof}
+It follows then that two vectors $\vec{u},\vec{v}$ are perpendicular iff $cos\theta = 0$ iff $\vec{u}\cdot\vec{v} = 0$. This motivates an abstract definition of this concept in terms of our inner product:
+\begin{definition}
+	Let $V$ be an inner product space. We say that a set of vectors $A \subset V$ is \textbf{orthogonal} (or \textbf{perpendicular}) if for any $\vec{v},\vec{w} \in A$, $\braket{v,w}=0$.
+\end{definition}
+Note that even in over complex vector spaces, orthogonality is still a symmetric binary relation, since if $\braket{u,v} = 0$, then $\braket{v,u} = \braket{u,v}^* = 0^* = 0$. Orthogonality is a very special case of linear independence, as the next theorem shows:
+\begin{theorem}
+	Any orthogonal set of (nonzero) vectors in an inner product space must also be linearly independent.
+\end{theorem}
+\begin{proof}
+	Suppose an orthogonal set $A$ of vectors is linearly dependent. Then one of these guys, say $\vec{w}$, can be expressed as a linear combination of some set of vectors $\vec{v}_1,\vec{v}_2,...\vec{v}_n$, where $\vec{v}_i \neq \vec{w}$ for each $i$. That is
+	\[ \vec{w} = \sum_{i=1}^n a_i\vec{v}_i \]
+	Then note that
+	\begin{align*}
+		\braket{w,w} = \sum_{i=1}^na_i\braket{w,v_i} = 0
+	\end{align*} 
+	But since $\vec{w} \neq \vec{0}$, it follows by our third axiom of inner products that $\braket{w,w} > 0$, so this is a contradiction.
+\end{proof}
+\begin{definition}
+	Suppose $B$ is a basis for an inner product space with the additional property that $B$ is an orthogonal set. Then we call $B$ an \textbf{orthogonal basis} for $V$. 
+\end{definition}
+Now, picture in your head two vectors $\vec{u}$ and $\vec{v}$ in $\mathbb{R}^n$. There is a unique point on the line $span\{\vec{v}\}$ such that the vector going from this point to the tip of the vector $\vec{u}$ is \textit{perpendicular}
+ to the line itself. The \textbf{projection of $\vec{u}$ onto $\vec{v}$}, clumsily denoted $Proj_{\vec{v}}(\vec{u})$, is the vector corresponding to the point on the line which has this property. Note that the vector going from $Proj_{\vec{v}}(\vec{u})$ to is clearly $\vec{u}-Proj_{\vec{v}}(\vec{u})$, and that this line is always by definition perpendicular to $\vec{v}$ itself. We now derive a formula for this projection function. To do this, first note that $Proj_{\vec{v}}(\vec{u})$ is some scalar multiple of $\vec{v}$ itself, since it by definition lies on the span of $\vec{v}$. Thus we only need to determine the length of $Proj_{\vec{v}}(\vec{u})$. To do this, note that the angle between $Proj_{\vec{v}}(\vec{u})$ and $\vec{u}$ is the same as that between $\vec{u}$ and $\vec{v}$, call it $\theta$. Then by elementary trigonometry, we have that 
+\[ \cos\theta = \frac{|Proj_{\vec{v}}(\vec{u})|}{|\vec{u}|} \]
+\[ \implies |Proj_{\vec{v}}(\vec{u})| = |\vec{u}|\cos\theta = \frac{|\vec{u}||\vec{v}|\cos\theta}{|\vec{v}|} = \frac{\vec{u}\cdot\vec{v}}{|\vec{v}|} \]
+Now, the unit vector pointing in the $\vec{v}$ direction is $\frac{\vec{v}}{|\vec{v}|}$, and so we have that
+\[ Proj_{\vec{v}}(\vec{u}) = \frac{\vec{u}\cdot\vec{v}}{|\vec{v}|}\frac{\vec{v}}{|\vec{v}|} = \frac{\vec{u}\cdot\vec{v}}{\vec{v}\cdot\vec{v}}\vec{v} \]
+Now with this as our inspiration we define some ideas for abstract inner product spaces:
+\begin{definition}
+	Let $V$ be an inner product space, with $\vec{u},\vec{v}$ vectors in $V$. Define the \textbf{length} of $\vec{v}$, denoted $|\vec{v}|$, by $|\vec{v}| = \sqrt{\braket{v,v}}$. Define the \textbf{distance} between $\vec{u}$ and $\vec{v}$ to be the length of the difference between them, i.e. $|\vec{u}-\vec{v}|$. Define the \textbf{angle} between $\vec{u}$ and $\vec{v}$ to be $\arccos\left(\frac{\braket{u,v}}{|\vec{u}||\vec{v}|}\right)$ when neither $\vec{u}$ nor $\vec{v}$ are zero, and $0$ otherwise. Finally, define the \textbf{projection} of $\vec{u}$ onto $\vec{v}$, denoted $Proj_{\vec{v}}(\vec{u})$, by $Proj_{\vec{v}}(\vec{u}) = \frac{\braket{v,u}}{\braket{v,v}}\vec{v}$. 
+\end{definition}
+Many of the things in this definition are, at present, very iffy. We haven't stated any axioms for what makes a good notion of length in a vector space. Distance depends on that, and so whatever we define makes for a good length notion, it had better always follow that ensuing distance is a metric. It's not even clear at present that angle is well defined via our definition of it, since the domain of arccosine is $[-1,1]$. In order for angle to be well defined by this definition, we would need it to be the case that for all nonzero vectors $\vec{u},\vec{v}$ 
+	\[ |\braket{u,v}| \leq |\vec{u}||\vec{v}| \]
+This is precisely the Cauchy-Schwartz inequality, which we have yet to show, but we will. Some things are however clear immediately. It is plain to see from the definition that two vectors are orthogonal iff the angle between them is $\frac{\pi}{2}$, and also note that for any two vectors $\vec{u},\vec{v}$, the vector $\vec{u}-Proj_{\vec{v}}(\vec{u})$ is always orthogonal to $\vec{v}$. This is because
+\begin{align*} 
+\braket{\vec{v},\vec{u}-Proj_{\vec{v}}(\vec{u})} = \braket{\vec{v},\vec{u}}-\braket{\vec{v},\frac{\braket{\vec{v},\vec{u}}}{\braket{\vec{v},\vec{v}}}\vec{v}} 
+&= \braket{\vec{v},\vec{u}} - \frac{\braket{v,u}}{\braket{\vec{v},\vec{v}}}\braket{\vec{v},\vec{v}} \\
+&= \braket{\vec{v},\vec{u}} - \braket{\vec{u},\vec{v}} = 0 
+\end{align*}
+We also immediately have a very familiar friend:
+\begin{theorem}[Pythagorean Theorem]
+	Let $\vec{u},\vec{v} \in V$, an inner product space, with $\vec{v}$ orthogonal to $\vec{u}$. Then $|\vec{u}|^2+|\vec{v}|^2 = |\vec{u}+\vec{v}|^2$
+\end{theorem}
+\begin{proof}
+	\begin{align*}
+		|\vec{u}+\vec{v}|^2 &= \braket{u+v,u+v} = \braket{u+v,\vec{u}}+\braket{u+v,v} \\
+		&= \braket{u,u+v}^*+\braket{v,u+v}^* = \braket{u,u}^*+\braket{u,v}^*+\braket{v,u}^*+\braket{v,v}^* \\
+		&= |\vec{u}|^2+|\vec{v}|^2
+	\end{align*}
+\end{proof}
+We've been focusing on perpendicular vectors, but the dual notion should also be considered.
+\begin{definition}
+	We say that two vectors $\vec{u}$ and $\vec{v}$ are \textbf{parallel} if the angle between them is either $0$ or $\pi$. That is, $\arccos\left(\frac{\braket{u,v}}{|\vec{u}||\vec{v}|}\right) = 0$ (or $\pi$). Note that this is the case iff $|\braket{u,v}| = |\vec{u}||\vec{v}|$.
+\end{definition}
+\begin{fact}
+	$\vec{u}$ and $\vec{v}$ are parallel iff $\vec{u} = Proj_{\vec{v}}(\vec{u})$.
+\end{fact}
+\begin{proof}
+	If $\vec{u} = \frac{\braket{u,v}}{\braket{v,v}}\vec{v}$, then $|\vec{u}| = \frac{\braket{u,v}|}{|\vec{v}|} \implies |\braket{u,v}| = |\vec{u}||\vec{v}|$, and so $\vec{u}$ and $\vec{v}$ are parallel. Conversely, if $\vec{u}$ and $\vec{v}$ are parallel, then either $\braket{u,v} = |\vec{u}||\vec{v}|$ or $\braket{u,v} = -|\vec{u}||\vec{v}|$. In either case substitution into the projection formula gives that $|Proj_{\vec{v}}(\vec{u})| = |\vec{u}|$. Now note that we can decompose $\vec{u}$ into two pieces:
+	\[\vec{u} = \vec{x}+\vec{y} \]
+	Where $\vec{x} = Proj_{\vec{v}}(\vec{u})$, and $\vec{y} = \vec{v}-\vec{x}$. We showed earlier how two vectors in this decomposition must be orthogonal. Thus, by the Pythagorean theorem, $|\vec{x}|^2+|\vec{y}|^2 = |\vec{x+y}|^2 = |\vec{u}|^2$. But since $\vec{x} = Proj_{\vec{v}}(\vec{u})$, we have that $|\vec{x}|^2 = |\vec{u}|^2$, and so it must be that $|\vec{y}|^2 = 0$, i.e. $\vec{y} = \vec{0}$. Thus, $\vec{u} = \vec{x} + \vec{0} = Proj_{\vec{v}}(\vec{u})$.
+\end{proof}
+By the decomposition used in proving the above fact and another use of the Pythagorean theorem, one can note that if $\vec{u}$ and $\vec{v}$ are \textit{not} parallel, then $|Proj_{\vec{v}}(\vec{u})| < |\vec{u}|$. This is the last observation we need to prove Cauchy-Schwartz, and affirm that our notion of angle is well defined.
+\begin{theorem}[Cauchy-Schwartz Inequality]
+	For any $\vec{u},\vec{v}\in V$, an inner prouct space, we have that $|\braket{u,v}| \leq |\vec{u}||\vec{v}|$, with equality iff $\vec{u}$ and $\vec{v}$ are parallel.
+\end{theorem}
+\begin{proof}
+	If either $\vec{v}$ or $\vec{u}$ are the zero vector, then the inequality is clearly satisfied. Thus we assume both are nonzero. We make use of our projection functions, as well as the Pythagorean theorem.  Thus by the Pythagorean theorem,
+	\begin{align*} |\vec{u}|^2 &= |\vec{x}|^2+|\vec{y}|^2 = |\frac{\braket{u,v}}{\braket{v,v}}\vec{v}|^2+|\vec{y}|^2 \\
+	&= |\frac{\braket{u,v}}{\braket{v,v}}|^2|\braket{v,v}| + |\vec{y}|^2 \\
+	&= \frac{|\braket{u,v}|^2}{|\vec{v}|^2}+|\vec{y}|^2 \geq \frac{|\braket{u,v}|^2}{|\vec{v}|^2}
+	\end{align*}
+	Thus multiplying both sides of this result by $|\vec{v}|^2$ and taking the square root of both sides yields the inequality. It is also plain to see that equality holds iff $|\vec{y}|^2 = 0$, which we know from the above discussion is true iff $\vec{u}$ and $\vec{v}$ are parallel.
+\end{proof}
+Now, let's finally give a definition of what a good notion of length looks like in a vector space:
+\begin{definition}
+		A \textbf{norm} on a vector space $V$ is a function $||\cdot||:V \to \mathbb{R}$, such that
+		\begin{itemize}
+		\item[(Triangle Inequality)] $||\vec{x}+\vec{y}|| \leq ||\vec{x}||+||\vec{y}||$ for all $x,y \in V$
+		\item[(Homogeneity)] $||a\vec{x}|| = |a|||\vec{x}||$ for all vectors $\vec{x}$, scalars $a$
+		\item[(Positive Definite)] $||\vec{x}|| \geq 0$, with $||\vec{x}|| = 0$ iff $\vec{x} = \vec{0}$. 
+		\end{itemize}
+	A vector space with a defined norm is called a \textbf{normed space}.
+\end{definition}
+With the Cauchy-Schwartz inequality in hand, we can finally prove the all important triangle inequality required to show that our length function is indeed a norm.
+\begin{theorem}
+	The function $|\cdot|: V \to \mathbb{R}$ defined by $|\vec{v}| = \sqrt{\braket{v,v}}$ is a norm on $V$.  
+\end{theorem}
+\begin{proof}
+	To show the triangle inequality, note that 
+	\begin{align*}
+		|\vec{u}+\vec{v}|^2 = \braket{u,u}^*+\braket{u,v}^*+\braket{v,u}^*+\braket{v,v}^* \\
+		&= |\vec{u}|^2 +|\braket{u,v}^*|+|\braket{v,u}^*|+|\vec{v}|^2 \\
+		&\leq \vec{u}|^2+2|\vec{u}||\vec{v}|+|\vec{v}|^2 \\
+		&= (|\vec{u}|+|\vec{v}|)^2
+	\end{align*}
+	Thus taking the square root of both sides now yields the triangle inequality. To show homogeneity, note that for any scalar $c$, $|c\vec{v}|^2 = \braket{cv,cv}^2 = (c^*c\braket{v,v})^2 = |c|^2|\vec{v}|^2$, so again taking the square root of both sides gives us what we are after. Positive definiteness follows immediately by our third inner product axiom and the definition of $|\vec{v}|$. 
+\end{proof}
+Finally, we need to show that the distance function defined in terms of our norm is a metric.
+\begin{theorem}
+	Let $|\cdot|$ be a norm on a vector space $V$ (not necessarily an innner product space even!) Then the function $d(\vec{u},\vec{v}) := |\vec{u} - \vec{v}|$ is a metric on $V$. 
+\end{theorem}
+\begin{proof}
+	That $d(\vec{x},\vec{y}) = |\vec{x} - \vec{y}| \geq 0$ is clear from positive definiteness. Similarly, $d(\vec{u},\vec{v}) = 0$ iff $\vec{u}-\vec{v}=\vec{0}$ iff $\vec{u} = \vec{v}$, so that also checks out. To show symmetry, note that $d(\vec{u},\vec{v}) = |\vec{u}-\vec{v}| = |(-1)(\vec{v}-\vec{u})| = |-1||\vec{v} - \vec{u}| = d(\vec{v},\vec{u})$. Finally, for the actual triangle inequality, for any three vectors $\vec{u},\vec{v},\vec{w}$, we have 
+	\[ d(u,w) = |(\vec{u}-\vec{v})+(\vec{v}-\vec{w})| \leq |\vec{u}-\vec{v}|+|\vec{v}-\vec{w}| = d(\vec{u},\vec{v})+d(\vec{v},\vec{w}) \]
+Thus we're done
+\end{proof}
+Thus we have that every inner product space is a topological space, namely a metric space, and in addition to even that has notions of length and angle. We can speak now of open balls, convergent sequenced, closures, continuous functions, and any other topological notion. Note that not every normed vector space needs to be an inner product space. In fact, not every topology on a vector space needs to have a norm! 
+Let us make that clearer. We'll start at the base level:
+\begin{definition}
+	A \textbf{topological vector space} is a vector space $V$ together with a topology $\tau$ on $V$, such that the addition and scalar multiplication operations are continuous with respect to $\tau$. I.e. $+:V \times V \to V$ is a continuous function on the product topology of $V$ with itself, and for each scalar $c$, $S:F \times V \to V$ defined by $S(c,\vec{v}) = c\vec{v}$ is continuous as well. Usually, we require that the topology $\tau$ be at least $T_1$, i.e. we usually assume singleton sets are closed.
+\end{definition}
+Let $A,B \subseteq V, \vec{x} \in V$, and $c \in F$, the scalar field of $V$, where $V$ is a vector space, we can use the operators on $V$ to define set operations:
+\[ A+B = \{\vec{a}+\vec{b}: \vec{a} \in A, \vec{b} \in B \} \]
+\[ \vec{x}+A = \{ \vec{x}+\vec{a}: \vec{a} \in A \} \]
+\[ \vec{x}-A = \{ \vec{x}-\vec{a}: \vec{a} \in A \}  \]
+\[ cA = \{c\vec{a}: \vec{a} \in A\} \]
+This notation is convenient in many ways. For instance, note that for any set $A$, $-A$ is the set of all inverses of elements of $A$. 
+If $V_1$ and $V_2$ are subspaces of $V$, then it can clearly be seen that the resulting set is itself a subspace of $V$, known as the \textbf{direct sum} of $V_1$ and $V_2$. The direct sum is a very useful tool in it's own right, but the sum itself gives a very nice way to express continuity in a vector space. Suppose that $(V,\tau)$ is a topological vector space, and that $W$ is a neighborhood of $\vec{v}_1+\vec{v}_2$. Then continuity is equivalent to saying that exists neighborhoods $V_1$ and $V_2$ of $\vec{v}_1$, $\vec{v}_2$, such that $V_1+V_2 \subseteq W$. Note that since the scalar field $F$ is always assumed to be either $\mathbb{R}$ or $\mathbb{C}$, we can always assume that it is a metric space, allowing us to focus the context of continuity of scalar multiplication in vector spaces similarly to how we just did addition. 
+Let $B = \{\vec{b}_i\}_{i \in I}$ be a basis for a space $V$, and suppose that $M$ is a linear transformation such that. Note that if $B = \{\vec{b}_i\}_{i \in I}$ is a basis for $V_1$ and $T:V_1 \to V_2$ is a linear transformation such that $T(\vec{b}_i) = \vec{a}_i$ for each $i\in I$, then for any $\vec{v} = \sum_{i \in I} v_i\vec{b}_i$, $T(\vec{v}) = \sum_{i \in I} v_iT(\vec{b}_i) = \sum_{i \in I} v_i \vec{a}_i$, i.e. defining a linear transformation on just the basis vectors completely defines it for all vectors in the domain. Of special note is that if the space $dim(V_1) = n$ and $dim(V_2) = m$ for some $n,m < \infty$, then 
+\begin{align}
+	T(\vec{v}) = T\begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix} = \sum_{i=1}^n \vec{a}_i v_i = \begin{pmatrix} \vec{a}_1, \vec{a}_2, \ldots, \vec{a}_n \end{pmatrix} \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix} = A\vec{v}
+\end{align}
+Where $A$ is the $m$ by $n$ matrix of complex coefficients whose columns are the vectors $\vec{a}_i$. Thus when considering mappings from finite dimensional spaces to finite dimensional spaces, being a linear transformation amounts to being a function of the form $T(\vec{v}) = A\vec{v}$ for some matrix $A$. 
+\par This observation becomes more interesting when considering the special case of linear functional. In this case, instead of basis elements mapping to vectors, we are mapping to scalars $a_i$. This means that our 'matrix' $A$ is really just a row vector, and so where before we had that an arbitrary linear transformation was just multiplication by a fixed matrix, we now have that an arbitrary linear functional is just taking the dot product with a fixed vector. 
+\par This would interesting, if we had ever actually defined the dot product for arbitrary vector spaces. Instead, we define the more general inner product, a little later.
+
+	Note that the definition of a norm requires a notion of addition and scalar multiplication, so this is strictly a linear algebra concept. 
+	\begin{fact}
+		If $||\cdot||$ is a norm on a vector space $V$, then the function $d(\vec{x},\vec{y}) := ||\vec{x}-\vec{y}||$ is a metric on $V$
+	\end{fact}
+	\begin{proof}
+		We clearly have symmetry since $||\vec{x}-\vec{y}|| = ||(-1)(\vec{y}-\vec{x})|| = |-1|||\vec{y}-\vec{x}|| = ||\vec{y}-\vec{x}$. Next, note that		
+		$||\vec{x}-\vec{y}|| = ||(\vec{x}-\vec{z})+(\vec{z}-\vec{y})|| \leq ||\vec{x}-\vec{z}|| + ||\vec{z}-\vec{y}|| = ||\vec{x}-\vec{z}||+||\vec{y}-\vec{z}||$ for any $\vec{z}$, so we have the triangle inequality. That $||\vec{x}-\vec{y}|| \geq 0$ is obvious, and finally $||\vec{x} - \vec{y}|| = 0$ iff $||\vec{x}-\vec{y}=\vec{0}$ iff $\vec{y} = \vec{x}$. 
+	\end{proof}
+
+	It will become clear soon that for some vector spaces, an inner product simply cannot exist. Thus we refer to spaces which have a defined inner product as \textbf{inner product spaces}. Of course, if the scalar field is $\mathbb{R}$, the first axiom simply becomes commutativity, and we get linearity in both arguments. If the scalar field is $\mathbb{C}$, then we get a sort of antilinearity:
+
+	Occasionally in the interest of clarity, we will employable the cruder notation $(\vec{v},\vec{w})$ instead of the 'bracket' notation used above.The field in question unless otherwise noted will always be assumed to be $\mathbb{C}$ in these notes. We refer to collections of symbols of the form $\vec{v}$ as 'kets' and collections of the form $\vec{w}^{\dagger}$ as 'bras'. But together side by side to create an inner product $\braket{w|v}$, i.e. a 'bra-ket'. 
+	\begin{fact}
+		The inner product always defines a norm:
+	\[ ||v|| := \sqrt{\braket{v|v}} \]
+	\end{fact}
+	\begin{proof}
+	\end{proof}	
+	Thus, any inner product space is also a topological space, in fact a metric space. Two vectors $\vec{u},\vec{v}$ are said to be \textbf{orthogonal}, \textbf{normal}, or \textbf{perpendicular}, if $\braket{u|v} = 0$, and a vector $\vec{v}$ with the property $||v||=1$ said to be a \textbf{unit vector}. Note that due to this induced metric, any inner product space is also a metric space, and therefore has well defined topological notions of open balls, continuous functions, sequence convergence, and so forth. An inner product space which is also \textbf{complete} with respect to the induced metric (that is, Cauchy sequences converge) is called a \textbf{Hilbert space}. 
+	\par Having a natural topology on our space allows us to define infinite sums of vectors. Just as in calculus, we can consider a sequence of scaled vectors $\{a_1\vec{v}_1,a_2\vec{v}_2,...\}$, and define the $n^{th}$ partial sum to be
+	\[S_n = \sum_{i=1}^n a_i\vec{v}_i \]
+Then we can define
+	\[\sum_{i=1}^{\infty} a_i\vec{v}_i = \lim_{n\to \infty} S_n \]
+Where of course, to claim that the limit exists is to claim that there is a vector $\vec{v}$ such that $||S_n - \vec{v}|| \underset{n}{\to} 0$. We're getting ahead of ourselves though. 
+Thus, for any inner product spaces we are interested in, we will fix once and for all a \textbf{standard basis} to express coordinates in, which we will assume is orthonormal. Most of the time, the basis will be obvious. Sometimes we will define it explicitly.
+	\begin{align}
+		\braket{v|w} &= \left(\sum_{i \in I} v_i\vec{b}_i,\sum_{i \in I} w_i\vec{b}_i \right) \\
+		&= \sum_{j \in I} w_j \left(\sum_{i \in I} v_i\vec{b}_i,\vec{b}_j \right) \\
+		&= \sum_{j \in I} w_j \overline{\left( \vec{b}_j, \sum_{i \in I} v_i\vec{b}_i \right)} \\
+		&= \sum_{j \in I} w_j \overline{ \sum_{i \in I}v_i ( \vec{b}_j, \vec{b}_i )} \\
+		&= \sum_{i,j \in I} v_i^*w_j \braket{b_j|b_i}
+	\end{align}
+	Now, this is as far as we can go unless we make an assumption about the inner products $\braket{b_j|b_i}$. However, we already have an assumption in mind. If we assume that the basis $B$ is orthonormal, then $\braket{b_j|b_i} = \delta_{ij}=1$ if $i=j$, and $0$ otherwise. (This notation is called the Kroenecker delta I think.) If this is true about the basis we're working in then the double sum above collapses to a single sum over $I$, along the diagonal. In finite dimensions, we then have that if
+	\[ \vec{u} := \begin{pmatrix} u_1 \\ u_2 \\ \vdots \\ u_n \end{pmatrix} \hspace{2cm} \vec{v} := \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix} \]
+	are arbitrary vectors, then
+	\begin{align}
+		\braket{u|v} = \begin{pmatrix} u_1^*, u_2^*,...,u_n^* \end{pmatrix} \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix}
+	\end{align}
+	If all of the linear algebra that you've seen has been over the real numbers, then you'll note that the above result looks \textit{almost} like the dot product, in the sense that it is \textit{almost} the transpose of the vector $\vec{u}$. It is a little more than this, however - it is also conjugated. To this end we define the \textbf{adjoint} operation - the transpose conjugate of a matrix, which we denote with a dagger $\dagger$. That is,	\[ \vec{u}^{\dagger} = \begin{pmatrix} u_1 \\ u_2 \\ \vdots \\ u_n \end{pmatrix}^{\dagger} := \begin{pmatrix} u_1^*, u_2^*, \ldots, u_n^* \end{pmatrix}  \]
+	As mentioned before, we refer to $\vec{u}^{\dagger}$ as a 'bra', and note that in the context of finite dimensional spaces, where vectors can be viewed in the conventional sense as lists of numbers, it can now be seen that the inner product is simply a matrix product. It is important to note however that we can now see the $\vec{u}^{\dagger}$ as it's own mathematical object - we now know that any linear functional has an associated bra. Thus where 'kets' represent objects in the original vector space, 'bras' represent simultaneously as an anti-symmetric copy of the space itself, but also as linear functionals on the space.
+	\begin{theorem}
+		Let $B = \{\vec{b}_i\}_{i=1}^n$ be an orthonormal basis for a finite dimensional vector space $V$, and let 
+	\end{theorem}
+	\par A particular vector space which will be the space $\ell^2(\mathbb{C})$. This is the space of all sequences of complex numbers $\{z_n\}_{n \in \omega}$ such that $\sum_{n \in \omega} |z_n|^2 < \infty$. We view these 'sequences' really as infinite dimensional vectors, i.e. infinite lists of numbers. This can easily be seen to be a vector space, with addition defined componentwise, and scalar multiplication simply hitting every component as one would expect. This space has the defined inner product:
+	\[ \braket{z_n,w_n} = \sum_{n \in \omega} \bar{z_n}w_n \]
+And is a complete metric space under the induced metric, making this a Hilbert space.  
+\begin{definition}
+	Let $V_1,V_2$ be inner product spaces. A linear transformation $T$ is called \textbf{unitary} if it preserves norm. That is, for all $\vec{v} \in V_1$,
+	\[ ||Uv|| = U||v||  \]
+\end{definition} 
+An extremely simple but important example of a unitary transformation will be a \textbf{permutation}. If $B$ is an orthonormal basis for a space $V$, and $\sigma$ is a permutation of $B$ (that is, a rearrangement, or relabelling of the basis vectors, or more formally a bijection $\sigma: B \to B$), then $U_{\sigma}$ defined by 
+
+\end{document}
