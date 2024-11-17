@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}Preliminary/Ancillary Definitions}{2}{}%
+\contentsline {subsection}{\numberline {1.1}Boolean Logic}{2}{}%
+\contentsline {section}{\numberline {2}Models of Computation}{5}{}%
+\contentsline {subsection}{\numberline {2.1}Turing Machines - The Initial "Natural" Model}{5}{}%
+\contentsline {subsection}{\numberline {2.2}Semicomputability, and Beyond}{20}{}%
+\contentsline {subsection}{\numberline {2.3}Transcending Models - The Recursive Functions}{24}{}%
+\contentsline {section}{\numberline {3}The Ackerman Function and the Arithmetic Hierarchy}{38}{}%
+\contentsline {section}{\numberline {4}Logic, and Godel's Theorems}{43}{}%
+\contentsline {subsection}{\numberline {4.1}First Order Logic}{43}{}%
+\contentsline {subsection}{\numberline {4.2}A Complete Framework for Proof}{48}{}%
+\contentsline {subsection}{\numberline {4.3}Arithmetic - The Language of Computation}{55}{}%
+\contentsline {section}{\numberline {5}Complexity Theory - The Basics}{61}{}%
+\contentsline {subsection}{\numberline {5.1}Measures of Complexity}{61}{}%
+\contentsline {subsection}{\numberline {5.2}Time, Space, and Nondeterminism: The Power of Guess and Check}{69}{}%
+\contentsline {subsection}{\numberline {5.3}Function Problems}{77}{}%
+\contentsline {subsection}{\numberline {5.4}Completeness, Reductions, and Complements}{78}{}%
+\contentsline {subsection}{\numberline {5.5}The Structure of Complexity Classes}{83}{}%
+\contentsline {subsection}{\numberline {5.6}The Polynomial Hierarchy}{88}{}%
+\contentsline {subsection}{\numberline {5.7}The Space Classes Revisited}{95}{}%
+\contentsline {subsection}{\numberline {5.8}Oracles}{101}{}%
+\contentsline {section}{\numberline {6}Quantum Computing}{102}{}%
+\contentsline {subsection}{\numberline {6.1}Reversibility}{102}{}%
+\contentsline {section}{\numberline {7}Descriptive Complexity}{104}{}%
+\contentsline {subsection}{\numberline {7.1}Query Complexity}{104}{}%

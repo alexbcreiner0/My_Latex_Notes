@@ -1,0 +1,416 @@
+\section{Turing Machines}
+In the notes that follow, some symbols should always be taken to refer to specific things unless otherwise noted:
+
+$\Sigma$ will denote an \textbf{alphabet}. That is, a finite set of symbols. 
+$\Sigma^*$ will denote the set of finite \textbf{strings} of characters in the alphabet $\Sigma$. Formally, a string is a function $x: \{1,2,3,\ldots,n\}\to \Sigma$ for some $n \leq \omega$. ($\omega$ is how I represent the cardinality of the natural numbers, i.e. $|\mathbb{N}| = \omega$. I'm too lazy to write aleph all of the time.)
+
+\begin{definition}
+A \textbf{decision problem} (otherwise known as a \textbf{language}) is a subset $L \subseteq \Sigma^*$.
+\end{definition}
+
+Informally, a decision problem is a problem where the answer is yes or no, depending on some input. In the interest of viewing problems as mathematical objects to be studied and categorized, we view these as sets, in particular the set of inputs for which the answer is yes. As an example, consider the following problem:
+
+\begin{problem}
+FACTORING: Given an integer $n \in \mathbb{Z}$, does n have a nontrivial factor?
+\end{problem}
+
+We will usually define problems informally, like this. Implicitly though, the alphabet is $\Sigma = \{0,1,2,3,4,5,6,7,8,9\}$, and
+
+\[FACTORING = \{n\in\mathbb{Z}: \textrm{n has a nontrivial prime factor}\} \]
+
+A convenient consequence of this formalism is that we can regard all decision problems as questions of set membership. If we are given a set and told that this set is a language, then we can always assume that the decision problem is simply answering the question 'Is $x\in L$?'
+
+\begin{definition}
+A \textbf{Turing Machine} is a triple $M=(\Sigma,Q,\delta)$. $\Sigma$ is as above, but in addition to having a blank symbol, we assume that we have an additional \textbf{start} symbol, denoted $\triangleright$. Q is another finite set, called the \textbf{states} of the machine. Q will always be assumed to have three special states - a \textbf{starting state} $q_s$, an \textbf{accepting state} $q_y$, and a \textbf{rejecting state} $q_n$. The states $q_y$ and $q_n$ will be known as \textbf{halting states}. Finally, $\delta: \Sigma \times Q \to \Sigma \times Q \times \{-1,0,1\}$ is known as the \textbf{transition function} of the machine. 
+\end{definition}
+The transition function explains how the machines behavior. We will explain the semantics more formally shortly, but intuitively, picture a single infinite row of a piece of graph paper (typically referred to as \textit{tape}). At any moment in time, we are 'pointed' at a single cell of the tape, which will have a single symbol $\sigma$ printed on it, and we are in some state, q. 
+\vspace{1cm}
+\begin{center}
+\begin{tikzpicture}
+\tikzstyle{every path}=[very thick]
+\edef\sizetape{0.7cm}
+\tikzstyle{tmtape}=[draw,minimum size=\sizetape]
+\tikzstyle{tmhead}=[arrow box,draw,minimum size=.5cm,arrow box
+arrows={north: .25cm}]
+\begin{scope}[start chain=1 going right,node distance=-0.15mm]
+ \node [on chain=1,tmtape,draw=none] {$\ldots$};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] (input) {$\sigma$};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape,draw=none] {$\ldots$};
+ \node [tmhead,yshift=-.6cm] at (input.south) (head) {$q$};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+The transition function $\delta$ describes what the machine should do in this moment. If 
+\[\delta(\sigma,q)=(\lambda,r,d)\]
+Then the interpretation is that the machine erases $\sigma$, prints $\lambda$ in it's place, changes to state $r$, and moves the cursor either one cell to the right, one cell to the left, or stays still, depending on whether $d$ is 1,0, or -1 respectively. If $d=1$, then the intuitive picture in the next 'moment' would look like this:
+\vspace{1cm}
+\begin{center}
+\begin{tikzpicture}
+\tikzstyle{every path}=[very thick]
+\edef\sizetape{0.7cm}
+\tikzstyle{tmtape}=[draw,minimum size=\sizetape]
+\tikzstyle{tmhead}=[arrow box,draw,minimum size=.5cm,arrow box
+arrows={north: .25cm}]
+\begin{scope}[start chain=1 going right,node distance=-0.15mm]
+ \node [on chain=1,tmtape,draw=none] {$\ldots$};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] (input) {$\lambda$};
+ \node [on chain=1,tmtape] (input) {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape] {};
+ \node [on chain=1,tmtape,draw=none] {$\ldots$};
+ \node [tmhead,yshift=-.6cm] at (input.south) (head) {$r$};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+We now formalize the semantics of a Turing Machine. The key to this is the notion of a configuration.
+\begin{definition}
+A \textbf{configuration} of a Turing Machine M is a triplet $c=(T,q,z)$ where $T\in\Sigma^*$, $q\in Q$, and $z\in\mathbb{Z}$.  
+\end{definition}
+Intuitively, a configuration is a complete description of the state of a Turing Machine at any moment in `time'. The element T is called a \textbf{tape configuration}, and it documents what is printed on the tape, and where. It's important to note that the tape configuration is finite. To understand this, know that a bit further down we will have an initial tape configuration which is always finite, and the machine will always be at some finite number of steps from it's initial state. Thus there will always be a finite string such that everything to the right and to the left is nothing but 'blanks'. This region may shrink or expand, but it is always finite, and we can regard it as the portion of the tape which is 'in use'. This finite used region of tape is the tape configuration $T$. The state is self explanatory, and the natural number $z$ represents the current position of the cursor. There is an implicit assumption in declaring $z$ a natural number, as opposed to an integer. Since $z$ is nonnegative, this means that the tape only extends infinitely in \textit{one direction}. We will show later that this is nothing more than convention - allowing the tape of a Turing machine to be two-way adds nothing profound in the way of what is computationally possible or efficient. For any $n\in\mathbb{N}$, we let $T[n]$ denote the contents of the tape at position n.
+\begin{definition}
+Let $M=(\Sigma,Q,\delta)$ be a Turing Machine, and $c_1=(T_1,q_1,z_1)$, $c_2=(T_2,q_2,z_2)$ be configurations of M. We say that \textbf{$c_1$ yields $c_2$ in one step} and write $c_1 \overset{M}{\to} c_2$, if $\delta(T_1[z_1],q_1)=(T_2[z+d],q_2,d)$ and $z_2=z_1+d$. Inductively we can extend this definition in the obvious way to define what it means for $c_1$ to yield $c_2$ in k steps for any $k\in\mathbb{N}$, and we use $c_1 \overset{M^k}{\to} c_2$ to denote this.
+\end{definition}
+Thus we have a formal framework for describing 'steps' of a computation. Towards beginning the machine on some input, let $x\in(\Sigma-\{\sqcup\})^*$. We will call strings like this (that is, finite strings without any blanks), \textbf{inputs}, and we'll allow denote the \textbf{empty string} $\epsilon$ to also be an input. (Often we will refer to inputs as members of $\Sigma^*$, but this is an abuse of notation.) By $|x|$, we mean the \textbf{length} of x (that is, the number of characters in x). By $T_x$, we mean the tape configuration consisting of a single $\triangleright$, followed by $x$. Formally, $T_x[0]=\triangleright$, and $T_x[n]=x_{n-1}$ for $1\leq n \leq |x|+1$. 
+\begin{definition}
+We say that a Turing Machine M \textbf{halts in k steps} on an input $x\in\Sigma^*$, if for some tape configuration T, some cursor position z, and one of the two halting states $q_h \in \{q_y,q_n\}$, we have that $(T_x,q_0,0) \overset{M^k}{\to} (T,q_h,z)$. If the halting state is $q_y$, then we say that M \textbf{accepts} the input x, and if the halting state is $q_n$, then we say that M \textbf{rejects} the input x. We call the final tape congiguration the \textbf{output} of M, and write $M(x)=T$. If the machine never halts for any number of steps, then we write $M(x)=\nearrow$. 
+\end{definition}
+Before proceeding further we should come out and be upfront about some incoming hypocrisy regarding the so-called start symbol $\triangleright$. For a two sided infinite Turing machine, which is what we've defined as our standard, the $\triangleright$ only exists for our convenience. The more primal and fundamental form of the model we've described should be understood to make do without it, by having initial configurations begin with the first character of the input string rather than with a $\triangleright$. I have it in my definition because I found it helpful when I was being introduced to theory, and indeed it is sometimes very useful to have a symbol like this.
+
+On the other hand, the blank symbol $\sqcup$ is absolutely fundamentally necessary, and in fact, it should be noted that this symbol has a very special role in the operation of any Turing machine, as it is the \textit{only} symbol which is ever allowed to occur infinitely often on the tape.
+
+Now that we have a formal notion of what it machine to accept or reject an input, we can define what it means for a machine to truly solve a problem for us.
+\begin{definition}
+Let L be a language, and M be a Turing Machine. We say that M \textbf{decides} L if for all inputs $x\in\Sigma^\#$,
+\[x\in L \Rightarrow \textrm{M accepts x in k steps for some k} \]
+\[x \notin L \Rightarrow \textrm{M rejects x in k steps for some k}\]
+\end{definition}
+Note that we can't get away with simply writing the first condition with an $\iff$ and have an equivalent definition, since the machine may \textit{neither} accept \textit{nor} reject an input. The machine may simply trail on forever, never reaching a conclusion.
+\begin{definition}
+    If a language/decision problem $L$ is decidable by a Turing machine, we say that the language is \textbf{recursive}. Alternatively, we say that it is \textbf{decidable}, or \textbf{computable}. We call the set of all recursive languages \textbf{R}.
+\end{definition}
+Before moving on, we extend our definition of Turing machines to machines which are allowed multiple tape 'strings'. This extension is equivalent to the original model in it's capabilities, and takes the idea of a Turing machine from something abstract and foreign to one which will, with a bit of practice, quickly feel startlingly natural.
+\begin{definition}
+A \textbf{k-string Turing machine} is a triple $M=(\Sigma,Q,\delta)$, with $\Sigma$ and Q just as before. The only thing that is different is the transition function. Now, $\delta: \Sigma^k \times Q \to \Sigma^k \times Q \times \{-1,0,1\}^k$.
+\end{definition}
+The interpretation is that we now have multiple strings of tape, and multiple cursors positions to keep track of. At any single step, we are reading k symbols, and we are allowed to alter all of them in a single step before moving the k cursors left or right independently of each other. Configurations are just as before, except not we need k integers to keep track of cursor positions, and k strings of tape. Thus, the configurations of a k-string Turing machine are (2k+1)-tuples
+\[c=(T_1,T_2,T_3,...,T_k,q,z_1,z_2,z_3,...,z_k) \]
+
+We would still like for our inputs and outputs to be single strings, rather than vectors, so we take as the output only the contents of the last string of the machine, and record inputs on the first. Thus, for an input string $x\in \Sigma^\#$, our initial configuration would look like
+\[c_x=(T_x,\epsilon, \epsilon,...,\epsilon,q_0,0,0,0,...,0) \]
+Where $\epsilon$ denotes the tape configuration consisting of a $\triangleright$ followed by nothing but blanks. It should be obvious that adding multiple strings would provide a noticable boost in efficiency over single string machines. We will show shortly that this boost is not particularly significant. Before that we need to discuss in a bit more detail the philosophy of what we're actually trying to do here. 
+
+What we are interested in is, in general, analyzing the \textit{difficulty} of computational problem. What \textit{is} difficulty? 
+
+We should first note that in some sense, we talk about difficulty as a quantity. We talk about \textit{how difficult} something is. We say that this problem is \textit{more difficult} than some other problem. This is our initial assumption - difficulty is a quantity.
+
+As a quantity, difficulty is still more complicated than most others. While we haven't proven that they exist yet, it can certainly be said that any problem which isn't computable is more difficult in a sense than any problem which \textit{is} computable. So in some sense, the problems which aren't computable are going to be \textit{infinitely} difficult. And yet, we will see that we are still able to measure and categorize tiers of difficulty nonetheless. It stands to assume then that difficulty as a quantity is more deeply connected to the generalization of the natural numbers known as the ordinal numbers - numbers which proceed past infinity. This ordinal property of difficulty can in some sense be traced to it's fundamental subjectivity. What is difficult in one sense might be easy in another sense. If a problem is impossible for normal computers, it may nonetheless be possible for a computer which has been equipped a certain special additional property. 
+
+We will get to this, but primarily we will be interested in the difficulty of problems which \textit{are} computable, and in this sense we can think of difficulty as a distinct finite number. Even here, difficulty is a \textit{fuzzy concept}. It's presence was known before we even realized that it was a quantity, making it fundamentally different to the quantities that mathematicians and physicists are typically used to dealing with; who's definitions are baked into their method of measurement. For inspiration then, we turn to the social scientists, who are more used to dealing with this sort of thing. 
+
+A psychologist wishes to analyze quantities like difficulty all of the time. They have words like isolation, alienation, greed, dominance - character traits which are clearly quantities and clearly philosophically valid ideas, but which nonetheless exist with no clear 'ruler' for measuring them. Nonetheless, the psychologist or sociologist wants to do controlled experiments just like any other scientist. They want to test hypotheses such as ``The social isolation of individuals increases proportionally to the length of the working day.''
+
+I believe that the social scientists accomplish this by forming an \textit{operational} definition of alienation. What they do is define some material, measurable behaviors which can reasonably be \textit{associated} with social isolation. For example, suppose they decide to track the lives of 30 individuals, 15 of which work 12 hour days, and 15 of which work 8 hour days. For each person in the experiment, the scientist decides to measure, say, the amount of time spent conversing with friends and family outside of work. While this is not a concrete measure of isolation by any means, it can reasonably be argued that the results say something meaningful about isolation in general, and more importantly, \textit{very few would argue that} time spent talking with friends would decrease with isolation. As other social scientists create their own operational definitions for social isolation and conduct similar experiments, the aggregate can prove results through an exhaustive inability to falsify, arguable just as well as a physicist can prove results about their more 'concrete' quantities such as charge and mass. We will define several types of resources for which large amounts could reasonably be seen as signs of high difficulty. 
+
+How can we form an operational definition for the difficulty of a computational problem? The gateway lies in the computational model. Suppose we have a Turing machine which decides a problem for us. Implicit to this model are certain resources which can be monitored. Number of steps, for instance, or amount of 'scratch paper' used. There are many more. Just as 'amount of time spent talking to friends and family' can be used in the negative for 'measuring' social alienation, the \textbf{runtime} of a Turing machine - number of steps which the machine takes to complete it's computation, can be used in the positive to 'measure' the difficulty of a problem. There is here still a complication though. 
+
+Tracking the resource use of a specific computation isn't good enough to measure the difficulty of an entire problem. Problems, as we've defined them, involve infinitely many computations - one for any problem for which the answer is yes or no. 
+
+Since any problem contains an infinite number of possible instances, in order to analyze the feasibility of a problem, we need to look at how resource requirements go up relative to how complicated the instance of the problem is. There is probably no objection to assuming that, as a rule of thumb, the larger the \textit{length} of an input is, the more demanding an instance of the problem becomes. If an input is long, we should expect that deciding if $x\in L$ will be more resource intensive than if the input was short, \textit{regardless} of what resource is being considered.
+
+Thus, to measure the feasibility or difficulty of a problem, we need to define a resource of interest within a particular model of computation (for our purposes, the Turing model), and then track how quickly the use of that resource gets out of hand, as the input length increases. One of the primary advantages of the Turing model is that two resources which feel very natural to think about as scaling with difficulty feel just as natural to track within the model - time and space. We'll begin with time.
+
+\begin{definition}
+Let M be a Turing machine which, for some input x, halts after t steps. Then we say that the \textbf{time required by M on input x is t}. We say that \textbf{M operates in time $f(n)$}. if, for any string x, the time required by M on x is at most $f(|x|)$. 
+\end{definition}
+
+Note that our definition here implicitly is concerned with `worst-case' performance, in that the function $f$ is characterizes the machine $M$ as an upper bound. If we had replaced the words `at most' with 'at least' we would instead be concerned with `best-case' performance. Best-case, worst-case, and even average-case performance are all worthy of consideration. However, worst-case is the place to begin, and in many senses the most important of the three.
+
+Suppose that $L_1$ and $L_2$ are problems which are computed by Turing machines operating in time $f(n)$, $g(n)$ respectively, and that these are the best known Turing machines which solve the problem. To compare the difficulty of these problems is to compare the \textit{growth rates of these two functions $f$ and $g$}. But now there is some question of how to compare these two functions. For instance, suppose that $g(n) = f(n)+1$. Then it is true that $g(n)$ is always bigger, but is $L_2$ really a more difficult problem than $L_2$? Certainly not. One extra step per computation is meaningless in the grand scheme of things. We would wish in this case to view the problems as $L_2$ and $L_1$ to be in the same general difficulty class. 
+
+The same decision will be made in the case of $g(n) = cf(n)$ for some positive constant $c$. The decision to view problems like this as 'the same' difficulty is more questionable, but in the end just as well justified by the fact that by utilizing a larger alphabet, we can improve the performance of any Turing machine for \textit{arbitrary} amounts of linear speedup. We won't prove it in these notes, but we will state it for the record, and prove what is in some sense the inverse result shortly. (A full proof can be found in Papadimitriou)
+
+\begin{theorem}[The Linear Speedup Theorem]
+	Suppose that $L$ is decidable by a Turing machine $M$ which operates in time $f(n)$. Then for any $\epsilon > 0$, there exists a Turing machine $M'$ with a larger alphabet than $M$ which operates in time $\epsilon f(n)+n+2$.
+\end{theorem}
+Practically any nontrivial problem is going to take more than $n$ steps to solve, since it always takes \textit{at least} $n$ steps to just scan the input. Any machine which operates in time less than $n$ would have to be populated by questions which can be answered without even looking at the input, hence the triviality.
+
+Recall from calculus that two functions $f(n)$ and $g(n)$ are \textbf{comparable} if  the $f(n) = cg(n)$ for some constant $c$ - that is to say, $\lim_{n \to \infty} \frac{f(n)}{g(n)} = c$. It follows from the linear speedup theorem that we should view problems which are solvable by Turing machines operating in comparable amounts of time should be seen as 'the same' difficulty.
+
+Thus, in complexity theory, we are concerned exclusively with \textit{general classes} of growth rates, rather than specifics. To help us talk about things more simply, we define what is known as big $O$ notation, as well as some other things for later.
+\begin{definition}[Big O]
+Let $f,g:\mathbb{N} \to \mathbb{R}$. We say that \textbf{$f(n) \in O(g(n))$} if there exists a $c \in \mathbb{R}$ such that for all $n \in \mathbb{N}$, we have $f(n) \leq cg(n)$. 
+\end{definition}
+It's impossible to tell a difference, but that O is supposed to actually be the Greek letter capital omicron.
+\begin{definition}[Little o]
+	Let $f,g:\mathbb{N} \to \mathbb{R}$. We say that $f(n) \in o(g(n))$ if 
+	\[\lim_{n \to \infty}\frac{f(n)}{g(n)} = 0 \]
+\end{definition}
+
+Usually we only care about $O$ and $o$ for functions which are positive and nondecreasing, and we will assume this is always the case unless otherwise noted. To point out some differences between these two things, first note that any $g(n)$ is \textit{always} in $O(g(n))$, but \textit{never} in $o(g(n))$. Also note that $o(g(n)) \subseteq O(g(n))$ Think of the difference between $O$ and $o$ as being akin to the difference between $\leq$ and $<$, but for growth rates. If $a < b$, then $a \leq b$, but obviously not the other way around. For big-O, functions in $O(g(n))$ grow \textit{incomparably slow or comparably fast} to $g(n)$. For little-o, functions in $o(g(n))$ grow \textit{incomparably slow}, nothing in $o(g(n))$ is allowed to match $g(n)$ in terms of growth rates.
+
+\begin{definition}[Big $\Omega$]
+	Let $f,g: \mathbb{N} \to \mathbb{R}$. We say that $f(n) \in \Omega(g(n))$ if there exists a positive $c \in \mathbb{R}$ such that $f(n) \geq cg(n)$.  
+\end{definition} 
+
+$\Omega(f)$ is $O(f)$'s sunny, optimistic, and often neglected sister. The idea is that $g(n) \in \Omega(f(n))$ grow \textit{comparably fast or incomparably faster} than $f$. So we take functions in $O(f)$ to be 'slower or similar' to $f$, and functions in $\Omega(f)$ to be 'faster or similar' to $f$. In this way, $\Omega$ will be useful to discuss \textit{best-case} performance, just as $O$ will be used to discuss worst-case. Discussion of best-case performance in complexity theory would amount to discussion of the \textit{optimality} of an algorithm - a proof that there is nothing better. Proofs of these kinds of claims are hard and rare, and so $\Omega$ tends to significantly less use than her brother. (For the record, the $O$ and $o$ in the notation are technically Greek capital and lowercase omicrom, but this looks identical to a regular o or O in the English alphabet.)
+
+A \textbf{complexity class} is any nonempty proper subset of \textbf{R}. This is \textit{not} going to be a completely rigorous definition. For now though, this will do. We will make this more precise later.
+\begin{definition}
+	 For any function $f:\mathbb{N} \to \mathbb{R}$, let \textbf{TIME($f(n)$)} denote the class of languages L such that there exists a Turing machine M which decides L, operates in time $g(n)$, for some $g \in O(f)$
+\end{definition}
+So \textbf{TIME}$(f(n))$ is the set of all decision problems which are decidable by an algorithm which operates in time \textit{less than or equal to} $cf(n)$ for some $c$. Note that $f(n)$ could be $2^n$, and our problem might be solvable by an algorithm which works in linear time, and this language would still be in \textbf{TIME}$(2^n)$. Again this hearkens to the fact that in complexity theory, we are interested primarily (but not exclusively) in \textit{worst-case complexity}. If it's better, that's great, but the concern of the theory revolves around being 'no worse than'. We summarize this formally with a simple fact:
+\begin{fact}
+	If $f(n) \in O(g(n))$, then \textbf{TIME}$(f(n)) \subseteq \textbf{TIME}(g(n))$ 
+\end{fact}
+Next we turn to an inspection of the second natural resource associated with the Turing model - space. to start, picture yourself sitting at a desk, performing some long computation. You have a sheet of paper with the input, and a specific sheet to record the output onto, and you are blindly following some set of instructions to produce an output. Two obvious 'resources' should come to mind. One of these resources is the amount of time the computation takes, which we have formally captured above. The other is the amount of \textit{scratch paper} you need. 
+
+Space is an interesting resource, because it has a fascinating inverse relationship with time. To illustrate this, let's consider the basic grade school algorithm we are taught to compute the sum of two numbers. Suppose we want to add the numbers 346 and 89. Our 'scratchwork' would look something like this:
+\begin{center}
+\begin{tabular}{c@{\,}c@{\,}c@{\,}c}
+  & 1 & 1 &   \\
+  & 3 & 4 & 6 \\
++ &   & 8 & 9 \\ 
+\hline
+  & 5 & 3 & 5 \\
+\end{tabular}
+\end{center}
+
+In considering space complexity, the + sign and the line separating summands from sum are completely unnecessary and shouldn't be considered. Nor should the two numbers we are adding or the final output. (Remember, we are only considering the amount of scratch paper we need, and the input/output is on a separate page). Without these, it would seem like the only extra space needed are for the two carry bits. If we're given two numbers, the bigger of which has length, say, n, then the input can be taken to be of length 2n, and the maximum number of carry bits that we might possibly need is n-1. It would seem like our basic grade school addition algorithm operates in linear space, O(n).
+
+But we don't really \textit{need} n-1 bits of space, do we? Once we use the carry bit and move leftward to the next digit, we won't need the old carry bit anymore. \textit{Provided we don't value our time, we could simply reuse that space}. We could leave the bit as a 1 if we need to carry another bit in the next step, or \textit{erase it} and replace it with a 0 if we don't. Again, \textit{provided we don't care about time constraints}, addition is actually uses only a \textit{single bit} of space!
+
+We will see many more examples of this dynamic at play. To summarize, space as a resource is fundamentally different than time in that it is \textit{reusable}, and therefore, \textit{at the cost of time}, we can \textit{usually} save space. How much space can we save in general? It seems like the answer to this questions should vary wildly depending on the algorithm, so perhaps we should reword the question: What is the \textit{maximum} amount of space that we could \textit{possibly} save? The answer to this question seems to be exponential.  
+
+In order to properly exclude the input and output in considerations of space, we make use of multiple strings. We will append extra strings to be reserved as input and output. We want to make damn sure that nothing worth considering ever happens on these two strings, so we take measures in the next definition to make sure that the input string is \textit{read only}, and the output string is \textit{write only}.
+\begin{definition}
+A \textbf{k-string Turing machine with input/output} is a k+2-string Turing machine with the condition that if $\delta(\sigma_1,\sigma_2,...,\sigma_{k+2},q)=(\rho_1,\rho_2,...,\rho_{k+2},r,...,d_1,d_2,...,d_k)$, then $\sigma_1 = \rho_1$ and $i_k \neq -1$
+\end{definition}
+
+This condition ensures that no symbols of the input string can be overwritten, and that the cursor of the output string can only move forward. 
+The definitions for time complexity easily apply to k-string machines with no alterations. We are ready to define the space used in a computation for these types of machines. After doing so we can state a theorem which confirms that there is no loss of generality in viewing any ordinary Turing machine as a Turing machine with input/output, assuring that this definition can be applied generally.
+\begin{definition}
+Let M be a single string Turing machine with input/output, and suppose that M halts on input $x \in \Sigma^\#-\{\sqcup\}$ after t steps. For $l=0,...,t$, let $c_l = (T_1,...,T_{k+2},q,z_1,...,z_{k+2})$ denote the configuration of M, initially in configuration $c_x$, after l steps. Then the \textbf{space required by M on input x} is the number
+\[\max_{l\leq t}\{\sum_{i=2}^{k+1}|T_i|\} \] 
+Note that for a Turing machine with only one work string, this amounts to simply the maximum length of that string at any step, i.e. $\max_{l \leq t}(|T_2|)$. For a function $f:\mathbb{N}\to \mathbb{R}$, we say that \textbf{M operates in space $f(n)$} if for any input $x \in \Sigma^*-\{\sqcup\}$, the space required by M on x is at most $f(|x|)$. 
+We also define the class $\bm{SPACE}(f(n))$ to be the collection languages L which are decidable by some Turing machine M operating in space $g(n)$, for some $g \in O(f(n))$. Just as we noted above, it is obvious that for any $g(n) \in O(f(n))$, $\bm{SPACE}(g(n)) \subseteq \bm{SPACE}(f(n))$.
+\end{definition}
+Now is as good a time as any to make an extremely simple but nonetheless important observation, one which would appear deep for computer scientists used to more complicated models of computation, but for Turing machines is clear as day:
+\begin{fact}
+For any function $f:\mathbb{N} \to \mathbb{R}$, 
+\[\textrm{\textbf{TIME}}(f(n)) \subseteq \textrm{\textbf{SPACE}}(f(n)) \]
+\end{fact}
+\begin{proof}
+If L is decided by a k-string Turing machine in $f(n)$ steps, then there is certainly no way to move more than $kf(n) \in O(f(n))$ tape cells in either direction!
+\end{proof}
+This is as far as we're going to go for now with respect to complexity theory. Before we can talk in detail about this topic, we need to note some basic things about Turing machines. We went to the trouble early on of defining these things because it will be important to analyze resource use as we go through the first wave of basic results, which we turn to now.
+
+Consider the Turing machine $M = (\{\triangleright,\sqcup,0,1\},\{s,h,q,q_0,q_1\},\delta)$, with $s$ the starting state and $h$ a halting state, and $\delta$ defined as follows:
+\begin{center}
+\begin{tabular}{ |c c|c| } 
+ \hline
+ State & Symbol & Output of $\delta$ \\ 
+ \hline
+ $s$ & $0$ & $(s,0,1)$ \\ 
+ $s$ & $1$ & $(s,1,1)$ \\ 
+ $s$ & $\sqcup$ & $(q,\sqcup,-1)$ \\
+ $s$ & $\triangleright$ & $(s,\triangleright,1)$ \\
+ $q$ & $0$ & $(q_0,\sqcup,1)$ \\
+ $q$ & $1$ & $(q_1,\sqcup,1)$ \\
+ $q$ & $\sqcup$ & $(q,\sqcup,0)$ \\
+ $q$ & $\triangleright$ & $(h,\triangleright,1)$ \\
+ $q_0$ & $0$ & $(s,0,-1)$ \\
+ $q_0$ & $1$ & $(s,0,-1)$ \\
+ $q_0$ & $\sqcup$ & $(s,0,-1)$ \\
+ $q_0$ & $\triangleright$ & $(h,\triangleright,1)$ \\
+ $q_1$ & $0$ & $(s,1,-1)$ \\
+ $q_1$ & $1$ & $(s,1,-1)$ \\
+ $q_1$ & $\sqcup$ & $(s,1,-1)$ \\
+ $q_1$ & $\triangleright$ & $(h,\triangleright,1)$ \\
+ \hline
+\end{tabular}
+\end{center}
+The reader should show to themselves with a simple example that this machine simple creates a single blank space in between the starting $\triangleright$ and the input $x$, and then halts. That is to say, $M(x) = \sqcup x$. This is a useless program on it's own, but it serves a smaller 'building' block in the sense that it would be nice if we could use this within the context of building something bigger. Perhaps we are designing a Turing machine which at some point needs to create a space somewhere on it's work string. We would detect the need for this of course via finding a particular symbol-state pair, call them $\sigma$ and $v$ respectively. What we could do is define $5$ new states for the machine we are building, corresponding to the $5$ in this machine above and one more, call it $v$, as well as the new 'special' symbol, $\underline{\sigma}$, where $\sigma$ is the symbol for which you want everything to the right of it moved over. For simplicity, we will assume that none of the letters used in the $Q$ above have been used yet. First, we have the command $\delta(\sigma,v) = (\underline{\sigma},s,0)$. From here, everything is defined \textit{exactly} as above. The 'starting state' $s$ now takes the form of an initialization of a subroutine, and the 'halting state' $h$ would take the form of a completion of that subroutine. 
+
+We will need this subroutine shortly for a specific proof, but more generally it points to a principle which we will can make extensive use of going forward:
+\begin{center}
+	In principle, given we have defined previously a machine which produces a specific function, we can without any extra justification use this machine as a subroutine in the creation of larger programs. 
+\end{center}
+	By this same principle we also but we also have the following important lemma:
+\begin{lemma}
+    Let $M_1,M_2$ be Turing machines. Then there exists a Turing machine $M$ such that for all $x$, $M(x) = M_2(M_1(x))$, where $M(x)$ is defined as $\nearrow$ whenever $M_1(x) = \nearrow$ as well as whenever $M_2(M_1(x)) = \nearrow$. 
+\end{lemma}
+\begin{proof}
+    Let $Q_1$ and $Q_2$ represent the states of $M_1$ and $M_2$, and let $\delta_1$ and $\delta_2$ the transition functions, and WLOG suppose that $Q_1$ and $Q_2$ are disjoint. 
+    Also WLOG assume that the $M_1$ leaves the initial $\triangleright$ symbol alone, so the output can always be expected to lead with it. For the machine $M$, we let the $Q=Q_1 \cup Q_2$, and define $\delta = \delta_1$ for any state/symbol pair with a state belonging to $Q_1$, \textit{with the exception of $Q_1$'s halting state}, call it $q_h^1$. 
+    On this state, define $\delta({q_h}^1,b) = ({q_h}^1,b,-1)$ for any symbol $b \neq \triangleright$, and $\delta(q_h^1,\triangleright)=(q_{s_2},\triangleright,0)$, where $q_{s_2}$ is the starting state for $M_2$. We then define $\delta = \delta_2$ for all state-symbol pairs with states in $Q_2$, and have the halting state for $M_2$, $q_h^2$, act as the halting state for $M$. It should be clear that $M$ performs as desired. 
+\end{proof}
+\begin{exercise}
+	Modify the Turing machine we described earlier that creates spaces in the following way: Define a two-string Turing machine which, when initialized with a binary coding of an integer $n$ in the top tape-string, and a string $x$ in the bottom string, creates $n$ spaces between the $\triangleright$ and the $x$, and then halts. That is to say, we are modifying the space-creating program to move the string $x$ to the right by a specified distance. Describe a second Turing machine which moves the string $x$ a desired number of spaces to the left (without regard to the $\triangleright$). These machines as subroutines will be useful in constructing a universal Turing machine, which will be our next objective. 
+\end{exercise}
+We now take some time to develop our model, proving various facts which when taken together demonstrate a certain peculiar robustness which the model possesses. To this end we begin by defining what it means for two machines to be functionally the same.
+\begin{definition}
+	We say that two Turing machines $M_1,M_2$ are \textbf{equivalent} if for all strings $x$, $M_1(x) = M_2(x)$, and that $M_1$ accepts/rejects an input $x$ iff $M_2$ accepts/rejects $x$. 
+\end{definition} 
+\begin{lemma}[Staying still is unnecessary]
+	For any Turing machine $M$, there exists an equivalent Turing machine $M'$ with transition function $\delta'$ such that the third coordinate of $\delta(\sigma,q)$ is strictly nonzero. That is to say, the cursor of the machine will never stay still.
+\end{lemma}
+\begin{proof}
+	This is easy. Let $M = (\Sigma,Q = \{q_1,q_2,...,q_n\},\delta)$. The machine $M'$ will have the same alphabet, and $n$ extra states $s_1,...,s_n$ which weren't already in $Q$. Suppose that $\delta(\sigma,q_i) = (\sigma',q_j,0)$. For this, let $\delta'(\sigma,q_i) = (\sigma',s_j,1)$, and $\delta(\sigma,s_j) = (\sigma,q_j,-1)$. If $\delta(\sigma,q) = (\sigma',q',d)$ with $d \neq 0$, then we simply let $\delta'(\sigma,q) = \delta(\sigma,q)$. Clearly $M'$ performs identically to $M$, except that wherever $M$'s cursor would stay still, $M$ will take an extra step to have it's cursor move one cell forward followed by one step backward, and then continue onward as normal. Obviously this uses no extra space at all. In considering time, the worst case would be the situation in which the cursor perpetually stays still in the original machine's computation. In this instance, we would be adding two extra steps per step of the original machine, making the computation take $3$ times as long. Thus if the original machine operates in time $O(n)$, the new machine will operate in time $O(3n) = O(n)$ as well. 
+\end{proof}
+\begin{corollary}
+	$\bm{R}$ is the same class regardless of whether or not our Turing machine model has the ability to 'stay still', as is the class $\bm{TIME}(f(n))$ and $\bm{SPACE}(f(n))$ for any function $f$. 
+\end{corollary}
+When we defined the class \textbf{R}, as well as $\bm{TIME}(f(n))$ and $\bm{SPACE}(f(n))$, we were a bit aloof about representation. Suppose that $\Sigma = \{0,1,2,3,4,5,6,7,8,9\}$ and we have a language over this which is computable. Then it stands to reason that the same language with numbers represented in binary rather than decimal, that is to say over the alphabet $\{0,1\}$, would also be computable. Are there to be two of 'the same language' in \textbf{R} then? To avoid this kind of confusion, we would like to fix a specific alphabet and a particular encoding of problems in other alphabets so that they have concrete representations over this one.
+
+For any alphabet $\Sigma$, define the \textbf{standard unary coding} of $\Sigma$ to be the unary coding of symbols in $\Sigma$ with a single arbitrary symbol (label it $1$, though in the following proof it will be a $\triangleright$) padded with enough of some other arbitrary symbol (label it $0$, though for our purposes it will be a $\sqcup$ to make all code words the same length. For example, if $\Sigma = \{a,b,c\}$, then the standard unary coding would be $\{001,011,111\}$. For reasons that will become clear shortly, whenever the language being coded includes a machine blank $\sqcup$, we will assume that this is encoded as the string of all zeros $00\ldots 0$. Under the standard unary encoding, any language over $\Sigma$ has a one to one correspondence with one over the alphabet $\{0,1\}$, and each string length will be exactly $|\Sigma|$ times longer than those strings in $\Sigma$. 
+\begin{theorem}[More than two symbols is unnecessary]
+	For any Turing machine $M$ over the alphabet $\Sigma$, there exists a Turing machine $M'$ over the alphabet $\{0,1\}$ which is equivalent to $M$ \textit{up to} the standard unary encoding of inputs and outputs. $0$ will be regarded as $M$'s blank symbol, in the sense that it will be the unique symbol of $M$'s alphabet which is allowed to occur infinitely often on the tape. 
+\end{theorem}
+\begin{proof}
+	By the last lemma, we may WLOG assume that the machine $M$ never has it's cursor stay still. Let $\delta$ be the transition function for $M$, and $Q = \{1,2,...,l\}$ be the set of states of $M$. The idea is to represent tape cells in $M$'s computation via multiple 'actual' tape cells. 
+	The machine $M$ will begin with the input $x$ encoded in the way described above, with the cursor pointed at the first symbol of the first encoded symbol of $x$. A single cell of the origitnal machine will be represented by a block of $s$ cells, where $|\Sigma| = s$. The idea will be to simulate a step of the machine $M$ in the following way: The machine will always begin a simulated step with the cursor pointed at the leftmost symbol of an encoding. First, it moves to the end of the block, \textit{reading} through the block's contents in order to determine the symbol being looked at. Then, it will back up again, \textit{writing} in the code for the new symbol which is supposed to replace it. Finally, it \textit{moves} either to the previous cell or the next cell depending on what direction the cursor of the simulated machine is suppose to go. The reader is encouraged to try and write the details of this themselves before looking through my construction. 
+
+	For the read phase, we will define the states $r_{0,0,1},r_{0,0,2},...,r_{s,s,l}$. The final subindex of $r$ holds the current state of the simulated machine. The first subindex counts how far through the block we've moved, while the second subindex counts the number of $1$'s specifically, so as to determine the code number for the symbol being stored there. To this end, for any state $q$, and any $i,j <s$,  we define $\delta'(0,r_{i,j,q}) = (0,r_{i+1,j,q},1)$, and $\delta'(1,r_{i,j,q}) = (1,r_{i+1,j+1,q},1)$. The effect of these definitions will be to eventually land the cursor of our machine one cell to the right of the final cell of the block, with the middle index holding the number representing the symbol being looked at. 
+
+	For the write phase, we define the states $w_{0,0,1,-1},w_{0,0,1,1},w_{0,0,2,-1},...,w_{s,s,l,-1},w_{s,s,l,1}$. Suppose $\delta(\sigma,q) = (\lambda,p,d)$, with $a$ is the number of $1$'s encoding a $\sigma$, and $b$ the number of $1$'s encoding a $\lambda$. Then the transition from read to write for this particular $a$ and $q$ will be defined by $\delta'(0,r_{s,a,q}) = (0,w_{s,b,p,d},-1)$, and $\delta'(1,r_{s,a,q}) = (1,w_{s,b,p,d},-1)$. From here, we begin moving left, disregarding the contents of the block we are moving through, recording $1$'s while decrementing the second index $b$ until it reaches $0$ while also decrementing the first, and recording $0$'s until the end of the block is reached after the second index reaches $0$. To this end, for $\gamma \in \{0,1\}$, and for $i,j>0$, define $\delta'(\gamma,w_{i,j,p,d}) = (1,w_{i-1,j-1,p,d},-1)$, and for $i>0,j=0$ define $\delta'(\gamma,w_{i,j,p,d}) = (0,w_{i-1,0,p,d},-1)$. This will leave us in the state $w_{0,0,p,d}$, with our cursor pointing at the final symbol of the block left of the one we have been working on. At this point, the machine $M'$ can inspect $p$ and determine if it's a halting state. If it is, then this is where we halt, in the corresponding halting state for $M'$. 
+
+	Otherwise, we need to move to an adjacent cell, and so we need to enter and describe a move phase. In the case $d=1$ we need to move forward $s+1$ cells to reach the beginning of the block right of the one we were just working on, and if $d=-1$ then we need to move backward $s-1$ cells to reach the beginning of the block we are currently inhabiting. For the job we define the forward movement states $f_{1,1},f_{1,2},...,f_{s,l}$, and the backward movement states $b_{1,1},...,b_{s-2,l}$. For the transition from write to move, have $\delta'(0,w_{0,0,p,1}) = (0,f_{1,p},1),\delta'(1,w_{0,0,p,1}) = (1,f_{1,p},1), \delta'(0,w_{0,0,p,-1}) = (0,b_{1,p},-1)$, and $\delta'(1,w_{0,0,p,-1}) = (1,b_{1,p},-1)$ for any $p = 1,...,l$. Then, for the forward case, with $i=1,...,s-1$, have $\delta'(0,f_{i,p}) = (0,f_{i+1,p},1),\delta'(1,f_{i,p}) = (1,f_{i+1,p},1)$, which will have the effect of moving the cursor to the final cell of the block we were operating on before, from which we transition to a new read phase by $\delta'(0,f_{s,p}) = (0,r_{0,0,p},1),\delta'(0,f_{s,p}) = (0,r_{0,0,p},1)$. For the backward case, for $i=1,...,s-3$, have $\delta'(0,b_{i,p}) = (0,b_{i+1,p},-1),\delta'(1,b_{i,p}) = (1,b_{i+1,p},-1)$, and then finally $\delta(0,b_{s-2,p}) = (0,r_{0,0,p},-1)$. This completes the description of simulating a step of $M$, as well as completely defines the transition function $\delta'$ on all pairs of interest, and thus the construction of $M'$.
+
+	It remains to investigate the complexity of what we just described. Suppose that the machine $M$ operates in time $f(n)$ and spaces $g(n)$. Then it should be clear that our new machine operates in time approximately $3sf(n)$ and space $g(n)$, and thus both machines operate in time $O(f(n))$ and $O(g(n))$. At least as far as the rate of difficulty which scales with the size of the input, there is no meaningful loss of efficiency. 
+\end{proof}
+\begin{corollary}
+	The classes $\bm{R},\bm{TIME}(f(n))$, and $\bm{SPACE}(f(n))$ are always the same collection set up to a standardized one-to-one correspondence. That is to say, if we define, say $\bm{TIME}(f(n))$ to be the class of languages computable by a Turing machine operating over the alphabet $\{a,b,c,d,e\}$, then there is a one-to-one correspondence between computable languages over this alphabet and computable languages over $\{0,1\}$, and the restriction of that mapping to any of the above classes remains a bijection between the smaller classes for any $f(n)$. 
+\end{corollary} 
+The end result of our discussion of alphabets is that we can without loss of generality for rest of these notes assume that all of the languages that we discuss are the same objects - simply collections of finite binary strings. Furthermore, we may prove results about this now concrete class of objects by using \textit{whatever alphabet we want} when building Turing machines, knowing that any construction can be converted into a construction for the fixed binary alphabet. Keep in mind that this means that our convention of including a $\triangleright$ in every Turing machine is completely harmless and inconsequential.
+
+Our next result concerns the need for how our tape extends infinitely. Currently our definition entails a machine whose 'tape' extends infinitely both left and right. We can define a machine whose tape only extends infinitely in one direction as a restriction of our current model, in the following way:
+\begin{definition}
+	A \textbf{unidirectional} Turing machine is a Turing machine $M = (\Sigma,Q,\delta)$ such that if $\delta(\triangleright,q) = (\sigma,p,d)$, then $\sigma = \triangleright$, and $d \neq -1$. Thus, the $\triangleright$ symbol takes on special meaning in that it can't be passed over on the left, nor can it be overwritten. Under our given input convention, this means that the cursor can never retreat left of the starting position.
+\end{definition}
+As unidirectional Turing machines are a special case of regular Turing machines, it is trivially the case that any language decided by a unidirectional Turing machine can be decided by a Turing machine at no loss of resource efficiency. The following result shows the converse of this.
+\begin{lemma}[Only need infinite tape in one direction]
+	For any Turing machine $M$, there is an equivalent Turing machine $M'$ which is unidirectional and operates at the same big-O efficiency for space and time.
+\end{lemma}
+\begin{proof}
+	The obvious way to accomplish the construction would be to design a Turing machine which implements our space-making subroutine every time it reaches a $\triangleright$ in a state which the original machine $M$ would want to move left from. However one can quickly see that a method like this would result in a machine which operates in time $O(nf(n))$, where $f(n)$ is the operating time of the original machine. In order to not lose any time a more sophisticated algorithm is necessary. 
+
+	The idea is going to be to, in a similar manner to the standard bijection from the integers to the natural numbers, \textit{fold} the two sided tape in half, and interleave the positive and negative entries. Let $Q = \{q_1,q_2,...,q_l\}$ and assume that $q_l$ is the (without loss of generality only) halting state. be the set of states for the original machine. Instead of these states, we will include in $M'$ the states $q_1^+,q_1^-,q_2^+,q_2^-,...q_{l-1}^+,q_{l-1}^-$. We will also include what we will call the 'hop states' $i_{1,1}^+,i_{1,-1}^+,i_{2,1}^+,i_{2,-1}^-,...,i_{l-1,1}^+,i_{l-1,-1}^-$. The halting state $q_l$ will be the same for both machines. The idea is to have the machine $M'$ be in a $+$ mode or a $-$ mode, depending on whether the simulated machine $M$ is on right right or left 'half' of the tape. Past the starting $\triangleright$, we will interpret all odd cells as cells on the positive half of the tape, and all even cells as cells on the negative half. While in either the $+$ mode or the $-$ mode, the machine will mimic the behavior of $M$ except that it will 'hop' over a cell every time it moves, so as to stay on the correct tape cells (the intermediary hop phases are there to facilitate this jump). Whenever it detects a $\triangleright$, which we will assume is the only one, (we can do this by adding a second $\bar{triangleright}$ symbol to $M$ which is uses everywhere it would use an actual $\triangleright$ would be used normally, except for the input configuration, and appealing to the above fact about equivalence between alphabets) the machine $M'$ may or may not switch from one 'polarity' to the other, depending on the direction it's supposed to go. 
+
+	We flesh this idea out now, beginning with the transition from a positive mode to a negative mode. Note that since positive cells are odd, we will only ever detect a $\triangleright$ during our intermediary hop states (the exact opposite will be true for the transition from negative to positive polarity). For the non-$\triangleright$ hops, define for $\sigma \neq \triangleright, d = 1,-1,j =1,...,l-1$, define $\delta'(\sigma,i_{j,d}^+) = (\sigma,q_j^+,d)$. For the polarity switch, define $\delta'(\triangleright,i_{j,-1}^+) = (\triangleright,i_{j,1}^-,1)$ (note that a $\triangleright$ can only be encountered during a positive hop state if $d=-1$). This transition puts the machine in a position where it thinks it is in the negative mode and needs to hop right, which will safely land it in the first negative cell and continue as usual. 
+
+	The negative mode is a bit more complicated since we will only land on a $\triangleright$ when \textit{after} a hop. To deal with this we will lazily add in some more intermediary check states $c_1,c_2,...,c_{l-1}$. These will be defined by $\delta'(\sigma,c_j) = (\sigma,q_j^-,0)$ if $\sigma \neq \triangleright$, and $\delta'(\triangleright,c_j) = (\triangleright,q_j^+,1)$ otherwise. As for regular negative moves, if $\delta(\sigma,q) = (\lambda,q,1)$, then have $\delta'(\sigma,q_i^-) = (\lambda,i_{j,-1}^-,-1)$ and if $\delta'(\sigma,q_i) = (\lambda,q_j,-1)$ then have $\delta'(\sigma,q_i^-) = (\lambda,i_{j,1}^-,1)$. Note the directional flip - moving forward on the two sided tape while on the negative side amounts to moving \textit{closer} to the middle, and thus we need to move \textit{backward} on the simulating machine as if to approach closer to the $\triangleright$. Similarly moving backwards will amount to moving further forwards. As for the hops, define $\delta'(\sigma,i_{j,d}^-) = (\sigma,c_j,-d)$ (again noting the directional reversal). The effect of these instructions is to have a machine which mimics changes the symbol and state as it should, hops two cells in the direction it needs to, checks if it is seeing a $\triangleright$, and reacts accordingly.
+
+	Finally, if $\delta(\sigma,q_i) = (\lambda,g_l,d)$ for some $\lambda,d$, then we don't need to worry about moving because we only need to replace the symbol and halt. For this reason define $\delta'(\sigma,g_i^+) = (\lambda,q_l,0)$, and $\delta'(\sigma,g_i^-) = (\lambda,q_l,0)$. This completes the construction of $\delta'$ for all relevant inputs, and thus \textit{almost} the construction of $M'$. 
+(We need to talk about the initial configuration, but we will do this outside of the proof shortly.) Note that a single simulated step of $M$ is at most three steps for $M'$, and so at worst this machine $M'$ operates in time $3f(n) \in O(f(n))$ where $f(n)$ is the operating time of $M$, and with identical space efficiency.	
+\end{proof}
+There is a very slight complication of the above proof. Our convention is to have the machine start with the string $x$ written out as an input with the cursor on the starting $\triangleright$. That is to say, \textit{on the positive side of the tape}. If $x_1 x_2 \ldots x_n$ is the input string for the machine, then our above description only works on the condition that it begins with the initial tape configuration $\triangleright x_1 \sqcup x_2 \sqcup \ldots \sqcup x_n$. The same issue will apply to the output. Thus unless our Turing machine convention is to always be using a Turing machine with input/output, we will need to perform an initial subroutine which rewrites $x$ in the appropriate form, and then rewrites the output in the appropriate form following the computation's completion. This task can be accomplished in time $O(n^2)$ by making repeated use of our space creation subroutine, but that's a big time efficiency loss. The way I will deal with this is by simply copping out, and assuming that with all discussion of time/space efficiency classes, we will assume the model to be always fixed as single string Turing machines with input/output. (As we will see shortly, multiple string worktapes can be collapsed into a single one rather easily.)
+\begin{corollary}
+	For any $f(n)$, $\bm{TIME}(f(n))$, $\bm{SPACE}(f(n))$ are the same are the same regardless of whether the classes our Turing machines are one-sided or two-sided, as is $\bm{R}$. 
+\end{corollary}
+\begin{theorem}[More than $1$ string is unnecessary]
+Given a k-string Turing machine M operating in time $f(n)$, there exists a single string Turing machine M' such that $M(x)=M'(x)$ for all $x\in \Sigma^*$ (and operating in time $O(f(n)^2)$, but we won't define time complexity until later.)
+\end{theorem}
+\begin{proof}
+	By the previous lemma, we will assume that our $k-string$ Turing machine is 1-sided. In principle, a 1-sided Turing machine is just a two sided Turing machine with the special constraint that the transition function never moves left past any $\triangleright$ symbols (thus blocking the path). Thus we will make that assumption for the machine $M$. (TODO) Seeing the truth of the claim is simple in principle - we just need to cram all k-strings onto one string, which will involve adding new symbols as markers to divide them up. We will need subroutines to reconfigure the work string and to add space when more of a particular string needs to be used than has already been used, and we will make use of additional symbols - a copy of each of the symbols of the original machine - to keep track of where each cursor is. (By the lemma's we have so far, we can use as many more symbols as we want with the simulating machine.) We will proceed to formalize this idea. Let $M = (\Sigma,Q,\delta)$. The alphabet for our new machine will be $\Sigma' = \Sigma \cup \underline{\Sigma} \cup \{\triangleright',\triangleleft, \underline{\triangleright}',\underline{\triangleleft}\}$, where $\underline{\Sigma} = \{ \underline{\sigma}: \sigma \in \Sigma \}$.
+
+	Note that single string Turing machines are initiated in exactly the same way as multi-string Turing machines - with the entire input in the top string, which in the case of a single string machine is the only string. Thus there is no need to discuss how to re-code inputs. What we will need to do is set up a single string workspace which is prepped to simulate the multiple strings. We will do this by first moving the entire input string one cell to the right, preceding it with a $\underline{\triangleright'}$, and then following up the input with the string $\triangleleft(\underline{\triangleright'},\triangleleft)^{k-1}\triangleleft$. The reader is invited to write out the details and show themselves that this can be done with $2k+2$ states additional to the original set $Q$.
+
+	Once this setup phase is complete, the machine $M'$ can simulate a step of the original machine $M$ by scanning twice from left to right, and then back, gathering information in a similar manner to how we scanned many cells in order to simulate a single cell in our proof of the 2 character alphabet lemma. In the first scan, $M'$ gathers information on the $k$ symbols which would currently be 'looked at' by the original machine. Just like the many states we added in the alphabet lemma, we can have multiple 'subscript' states for each symbol of each string. It does this, and then backtracks to the beginning of the string by encountering the 'real' $\triangleright$. $M'$ can now make a second pass over the string, with the knowledge of what to replace the underlined characters with. Note that it is going to have to replace each underlined character with another underlined character (in the event that the cursor stays still) and otherwise with a non-underlined character. In the latter case, a second change will need to occur - the character to the left or the right of the underlined character will need to be replaced with it's underlined equivalent. Suppose that the newly underlined character is a $\triangleleft$. This would correspond to a yet-unused portion of one of the individual tape strings in the original computation, a 'new' $\sqcup$. In this case we must pause, and make room for this. Thus we must execute a 'subroutine' in which the entire string is moved right by one cell, up to and including the $\underline{\triangleleft}$, and a $\underline{\sqcup}$ is printed in it's former place. The Turing machine we explicitly defined above can do exactly this for us. Upon completing this second pass, we return back to the beginning of the string, and repeat the process. Thus a single step of the original $k$-string machine is simulated on the $k$ string machine.
+	
+    To analyze the complexity of the above, suppose that our original $k$-string machine $M$ halts in time $f(|x|)$. Note that in this time, none of the $k$-strings of $M$ will ever have more than $f(|x|)$ many non-blank cells. Thus the total length of the single string of the machine $M'$ is never longer than $k(f(|x|)+1)+1$. (The $1$ inside of the parenthesis is for each of the $\triangleleft$ symbols, while the final $1$ is for the single extra $\triangleleft$ at the end.) Thus up to constant multiples there is no space efficiency loss at all. Furthermore, in the worst case, simulating a single step of $M$ will involve two separate traversals from left to right and then back, taking $4k(f(|x|)+1)+4 = O(kf(|x|))$ steps, plus it will have to execute the space creating subroutine $k$ times. A bit of thought shows that this subroutine operates in linear time, and so this constitutes an additional $O(kf(|x|))$ many steps for each simulated step. Thus the total number of steps per simulated step is $O(kf(|x|))$, and since we have to execute $f(|x|)$ total steps, we have a simulation which works in time $O(k^2f(|x|)^2)$, or since $k$ is fixed, $O(f(|x|)^2)$. It can be shown by using a more complicated alphabet that in fact the $k^2$ term can be reduced to just a $k$ term. (See \cite{papadimitriouComputationalComplexity1994} exercise 2.8.6)
+\end{proof}
+\begin{corollary}
+	As before, when we defined $\bm{TIME}(f(n))$, we ignored the number of strings that the machine had, and when we defined $\bm{SPACE}(f(n))$, we assumed a 3 string machine with a single work tape. Now apply more detail - define $\bm{TIME}_k(f(n))$ to be the class of problems decidable by a $k$-string Turing machine in time $O(f(n))$. Then for any $k$, $\bm{TIME}_k(f(n)) \subseteq \bm{TIME}_1(f(n)^2)$. It should also be obvious that $\bm{SPACE}_k(f(n)) = \bm{SPACE}_1(f(n))$ for any $k$, where $\bm{SPACE}_k(f(n))$ is defined to be the class of problems decidable in space $O(f(n))$ with $k+2$ strings, in which the first is a read-only input tape, the last is a write-only output tape, and the machine has $k$ work strings. And finally, of course, $\bm{R}$ is the same class for any number of tapes as well.
+\end{corollary}
+So while $k$-tape machines can't solve any problems that single tape machines can't, it still seems like they can potentially offer quadratic speedup. We can see an example of this speedup with the palindrome problem:
+\begin{problem}
+	The palindrome problem
+	\begin{center}
+		$PAL$: Given a string $x$, is it a palindrome? That is, is the sequence read backwards the same as if read forwards?
+	\end{center}
+\end{problem}
+\begin{fact}
+	$PAL \in \bm{TIME}_2(f(n))$, and $PAL \in \bm{TIME}_1((f(n))^2$
+\end{fact}
+\begin{proof}
+	todo
+\end{proof}
+Amazingly, we also have the following:
+\begin{theorem}
+	\textit{Any} single string Turing machine which computes $PAL$ must operate in time $\Omega(n^2)$. 
+\end{theorem}
+\begin{proof}
+	todo
+\end{proof}
+\begin{corollary}
+	$PAL \notin \bm{TIME}_1(f(n))$. Thus, $\bm{TIME}_1(f(n)) \subset \bm{TIME}_2(f(n))$ - the containment is proper.
+\end{corollary}
+Thus through an exploration of this one simple problem, we've proven something very deep in general - parallel computing \textit{can} speedup (albeit to very limited degree) the computation of at least some problems, to a degree greater than anything that a single string machine can accomplish. It is unknown, at least to me, whether or not \textit{all} problems can be sped up in this way, however. (Research: Try speeding up a complete problem.) It is also unknown to me whether $\bm{TIME}_k(f(n))$ is proper in $\bm{TIME}_{k+1}(f(n))$ for \textit{any} k. 
+
+Despite this result, it won't effect our discussion much. The classes we are centrally interested in are aggregates of many different time classes. Notably, $\bm{P}$ will be our general class which we will later see as the class of problems which are 'efficiently computable', and this class will include $\bm{TIME}(n^k)$ for any $k$, meaning smearing away the smaller differences. $\bm{P}$ itself will remain the same regardless of number of strings. 
+
+Knowing that we can have as many 'rows' of tape as we want is what, at least to me, solidifies the Turing machine as the 'natural model'. Think of each row as a row on a sheet of graph paper. When imagining a program Turing machine, you need only imagine how you yourself would perform a computation on a sheet of graph paper, with a pencil. It is the one which is based not on some kind of metal contraption running on electricity, but instead is based on the idea of a person, sitting at a desk, doing arithmetic with a pencil. 
+
+The results we've shown so far reveal the Turing model as one which is quite robust, but there is still one crucial aspect of them which may make them appear weaker than actual computers. The Turing machine's we've been describing are specially designed to solve specific problems. A modern computer, in contrast, when appropriately programmed, can solve any computable problem. We would like to produce a Turing machine with this same capability, one which we will call a \textbf{universal Turing machine}. 
+
+Our universal Turing machine will be denoted $U$, and will be a machine which takes two inputs (separated by a blank). The first input will be a string which describes \textit{some other} Turing machine, $M$, and the second will be the desired input which we would like to have $M$ evaluate. That is, we would like $U(M,x) = M(x)$. 
+
+The very idea of this requires the ability to \textit{encode} the description of a Turing machine with a finite string. Can this be done? Certainly, and the reason for this is that Turing machine's are fundamentally finite in their descriptions. The number of symbols and states are both finite, and thus so is the number of inputs and outputs which need to be defined by the transition function. Let's first discuss the details of this encoding. We will have more sophisticated encoding schemes for Turing machines later on but the following will do for now. 
+
+First, we will assume our UTM to be over the standard alphabet but with some additions for convenience: $\{0,1,\triangleright, \sqcup,;,(,),,\}$. (The final comma is not a typo, our alphabet has a comma in it.) Of course, other Turing machines need have any number of symbols, and we need to be able to run all of them. To standardize, we will need to assume that \textit{all symbols for all other Turing machines are integers, and so are all states}.  So if $M = (\Sigma,Q,\delta)$ is some arbitrary Turing machine, we will assume for now that $\Sigma = \{1,2,3,...,|\Sigma|\}$, and in fact that $Q = \{|\Sigma|+1,|\Sigma|+2,...,|\Sigma|+|Q|\}$. We will assume that $|\Sigma|+1$ is always the initial state, and that the final three states are the halting states, $q_h,q_y$, and $q_n$, in that order. Finally the numbers $|\Sigma|+|Q|+1$ through $|\Sigma|+|Q|+3|$ denote the only other special symbols which are involved in the description of any Turing machine - namely the three directions (left, right, and stay still, in that order). We can encode all of these integers in binary using $\ceil{\log(|Q|+|\Sigma|+3)}$ bits, and that each sequence has enough $0$'s to make them all of equal length. Our description of the Turing machine $M = (\Sigma,Q,\delta)$ will be first the numbers $|\Sigma|$ and $|Q|$ in binary, with a ',' in between them, followed by a second ','. (By our assumption this is enough to determine the alphabet and the states.) Following that will be a description of $\delta$, which is coded as a sequence of pairs of the form: $((\sigma,q),(\lambda,p,d))$, where the symbols, states and directions are all in the form of their binary representations as we described above. The first tuple in the pair is of course the input, and the second is the output of $\delta$ for that input. To summarize, the coding of a machine $M$ has the form 
+\[ |\Sigma|,|Q|,((1,1),\delta(1,1))((1,2),\delta(1,2))\ldots ((|\Sigma|,|Q|),\delta(|\Sigma|,|Q|)) \]
+After this we will insert a ';' symbol, followed by the input string $x$. What we've provided here is an illustration of something which obviously exists, but is important to observe carefully - a complete description of a Turing machine with a \textit{finite} string of characters. Since the set of finite strings over a finite alphabet is countable, we have demonstrated that the following fact:
+\begin{fact}
+	The set of all Turing machines is countably infinite. Thus, the set of all computable functions is countably infinite.
+\end{fact}
+Let's compare this to the set of all \textit{languages} over a finite alphabet. The set of all strings over a finite alphabet is countably infinite. Languages are subsets of this countably infinite set. Thus the collection of all languages is the power set of this: $\bm{ALL} = \mathcal{P}(\Sigma^*)$. ($\bm{ALL}$ is of course how we denote the class of \textit{all} languages.) This has the same cardinality as $\mathbb{R}$ - it is an uncountable set. Thus the set of computable problems is countable, but the set of all decision problems is uncountable. Thus we have the following:
+\begin{fact}
+	Not all decision problems are computable. There must exist a problem which \textit{undecidable}. In fact, \textit{almost all} problems are undecidable. 
+\end{fact}
+(We mean almost all in the measure theory sense - with respect to the standard Lebesgue measure on the space of binary strings, the set of computable problems is a measure $0$ set.) We will demonstrate an example soon of one such problems, and see many more as we continue to develop the theory. For now though, it is worth noting how obviously glaring this deficiency is. By sheer numbers, it can't possibly be the case that all problems are computable. 
+
+Returning to the task at hand, we now describe how, given an input $M;x$, our universal Turing machine $U$ operates. $U$ will be a two-string Turing machine. Intuitively, the second string will at any moment contain an encoding of the machine $M$'s configuration. Configurations will be encoded in the form $(w,q,u)$, where $q$ is the state, and $w$ and $u$ are strings which, when concatenated together, gives the entire tape configuration $T$. The splitting of $T$ into these two smaller strings implicitly specifies the cursor position, by the interpretation that the final character of $w$ is the cursor's current position. When $U(M;x)$ is first started, it will write the initial configuration $(\triangleright,q_i,x)$ on the second tape-string (where the parentheses and commas are explicit, but in place of the characters and states will be the binary strings of a fixed length which represent them). It then simulates the steps of $M(x)$ in the following way: First, it scans on it's second string until finding the binary description of a state. Once it finds this, it begins to scan through the description of $M$ on the first string, in search of an instruction corresponding to that state. If it finds one, then it scans left on the second string in order to read the symbol directly adjacent (which by our convention is the symbol which $M$'s cursor is pointing at), and then checks to see if the symbol in the instruction matches. If it does, then it proceeds to edit the configuration according to the instruction. Otherwise, it restarts the process just described. To edit the configuration, the machine just needs to replace the binary strings for the symbol and state with the ones in the instruction, and then 'move the cursor'. If the cursor doesn't move, then we've successfully simulated a step. If the cursor is to move left, then the machine swaps the binary string for the state with the binary string for the first symbol of $u$, and if the cursor is to move right, then the same is done but with the last symbol of $w$. All of these operations as subroutines should be easy to see as doable at this point, and we won't spell them out in detail. 
+
+Once the machine detects a halting state, it can either halt immediately in the corresponding decision state, or print it's output on a third tape string and halt after that. Whatever is needed. The only thing left to address is what happens if the input string doesn't encode a valid Turing machine. There are many ways to detect this, and we can assume that the machine quickly makes a scan and checks before doing anything we described. If the input isn't valid, it doesn't really matter what happens. Let's just say that if moves the top cursor right forever and never halts in this case. 
+
+Note that by our results regarding making single string machines out of multi-string machines, and making 'standard' alphabet machines out of non-standard alphabet machines, this description implies the existence of a single string universal Turing machine operating over the standard alphabet $\{0,1,\triangleright,\sqcup\}$ (or really, any other alphabet that is at least two symbols). We summarize this essential result:
+\begin{theorem}
+	Fix any alphabet $\Sigma$ with at least two symbols. Then there exists a scheme of encoding Turing machines in that alphabet along with a universal Turing machine $U$. Given a machine $M$, and given that $m$ is the string describing $M$, the machine $U(m,x) = M(x)$ for all strings $x$. 
+\end{theorem}
+What we're going to see later is that this property of \textit{universality} - the existence of a machine within a machine within a model of computation which can simulate other machines in the same model, is an essential component of what is known as being 'Turing compete' - perhaps the defining feature of such a model. 
+
+Before we move on, let's take a moment to consider time and space complexity. Suppose that the machine $M$ operates in time $O(f(n))$. While it's true that the UTM $U$ we've described has to continually scan through the description of $M$, this number of steps is \textit{constant} with respect to the input $x$, as is the steps required to edit the configuration. (This is provided we are a little careful. If one thinks through the details of this description, they'll realize that unless the machine $M$ is venturing into 'new territory' with the cursor, that the configuration can be altered only by changing out neighboring symbols. It's only if the machine cursor ventures farther left or right on the tape than had previously been ventured that new 'space' must be made in the configuration, in which case we can avoid doing anything dependent on the input length as long as we always make that space on the 'short' side.) Thus the machine $U$ \textit{also} operates in time $O(f(n))$ - with the understanding that we are \textit{NOT} referring to the length of $M;x$, but rather solely that of $x$. However...
+
+We've been a little sloppy. We've implicitly been assuming that the machine $M$ is always a \textit{single string} Turing machine, whereas the universal machine being simulated uses \textit{multiple strings}! Thus to translate this multi-tape machine to a single tape machine requires a quadratic efficiency loss. As a single string machine, our UTM simulates the computation of $M$ in time $O((f(n))^2)$. However, there does exist a more sophisticated construction of a universal single string machine which will simulate and machine $M$ in time $O(f(n)\log(n))$, where $f(n)$ is the operating time of $M$. This is the best known simulation time to date. I would personally like to know if it is optimal. 
+
+There is an extremely important takeaway from this theorem, which is the following:
+\begin{center}
+    We may always, without loss of generality, speak of one Turing machine simulating another Turing machine, for any number of steps, at any point, and use this to define new Turing machines. Effectively, any Turing machine that we define can be later used arbitrarily, entirely or partially, as a subroutine in the definition of a new Turing machine.
+\end{center}
+
+%This chunk is a discussion of the palindrome problem, which should be completed and put somewhere for the sake of showing that multi-string Turing machines produce a provable efficiency boost over single string machines.
+\begin{comment}
+ reason has to do with the palindrome problem, PAL.
+
+What does this silly little problem have to do with Universal Turing machines? Well, what we've shown here is that our single string Turing machine is \textit{optimal} - it is the best possible algorithm to solve the problem. Thus, what it tells us isn't so much something about universal Turing machines, so much as something about the difference between multi-tape Turing machines and single-tape Turing machines.
+\begin{corollary}
+	The class of problems computable by single tape Turing machines in time $O(n)$ is \textit{properly} contained in as the class of problems computable by $k$-tape Turing machines in time $O(n)$. Multi-tape Turing machines offer definite improvements to efficiency, though it is limited to quadratic speedup, and even this is not guaranteed 
+\end{corollary}
+Thus, suppose there existed a single tape universal Turing machine which could simulate any other Turing machine in time $O(f(n))$, where $f(n)$ is the operating time of the simulated machine. 
+\end{comment}
+What allows us to focus almost entirely on Turing machines, and yet from these results assume to be achieving results about the nature of computation, in general? In a strictly rigorous sense, nothing. However, over the decades many people have devised their own models of computation, and yet, each time someone does, it always turns out to be \textit{equivalent} to a Turing machine in the sense that any problem decidable by a machine in the other model is also decidable by a Turing machine. This has led to the philosophical assertion which is widely believed, yet too broad in nature to have a concrete proof:
+\begin{thesis}
+    Any sufficiently detailed model of computation is equivalent to a Turing machine. That is to say, Turing machines are as powerful as any model of computation can be. Because of this, if one can describe an algorithm for solving a problem in such a way as to be reasonably rigorous under \textit{some} model of computation, then there exists a Turing machine which accomplishes the same task. If a model of computation is computationally equivalent to the Turing machine model, then we say that the model is \textbf{Turing complete}.
+\end{thesis}
+The reader is not meant to be completely convinced yet by the validity of this statement. The next section on the recursive functions should help in that matter. However, the two essential takeaways from the Church Turing Thesis can't be overstated, so we will reiterate: 1: Under the assumption that all models of computation are equivalent to a Turing machine, we can focus on this one rigorous model and from it derive results which apply directly to the broader philosophical considerations of what is computable. And 2: We can, and will, (sparingly) describe an algorithm in pseudocode for solving a problem, and simply assume the existence of a Turing machine which carries out the steps of the algorithm, without worrying about the finer details.
+

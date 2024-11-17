@@ -1,0 +1,10 @@
+\contentsline {section}{\numberline {1}Turing Machines}{2}{section.1}%
+\contentsline {section}{\numberline {2}Semicomputability, and Beyond}{17}{section.2}%
+\contentsline {section}{\numberline {3}Transcending Models - The Recursive Functions}{21}{section.3}%
+\contentsline {section}{\numberline {4}The Ackerman Function and the Arithmetic Hierarchy}{35}{section.4}%
+\contentsline {section}{\numberline {5}The Ackerman Function and the Arithmetic Hierarchy}{36}{section.5}%
+\contentsline {section}{\numberline {6}Logic, and Godel's Theorems}{40}{section.6}%
+\contentsline {subsection}{\numberline {6.1}First Order Logic}{40}{subsection.6.1}%
+\contentsline {section}{\numberline {7}First-Order Logic}{45}{section.7}%
+\contentsline {section}{\numberline {8}Arithmetic - The Language of Computation}{53}{section.8}%
+\contentsline {section}{\numberline {A}Boolean Logic}{60}{appendix.A}%

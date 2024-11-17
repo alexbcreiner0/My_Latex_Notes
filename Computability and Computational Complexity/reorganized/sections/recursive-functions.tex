@@ -1,0 +1,489 @@
+\section{Transcending Models - The Recursive Functions}
+\par If the Church Turing Thesis is true, then there should be a way to define the set of computable functions \textit{without reference to any specific model of computation}. That is precisely our next task. To accomplish this would be invaluable to proving general facts about computation in general.  
+\begin{definition}
+    We define the set of \textbf{primitive recursive functions} $f:\mathbb{N}^k \to \mathbb{N}$, which we denote PRIM, as follows:
+    \begin{enumerate}
+        \item The \textbf{zero function} $z(n):=0$ is PRIM.
+        \item The \textbf{successor function} $s(n):=n+1$ is PRIM
+        \item All of the \textbf{projection functions} $U_i^k(\vec{m}) := m_i$ are PRIM. ($\vec{m} = (m_1,m_2,...m_k)$.)
+    \end{enumerate}
+    If any function satisfies the following two rules, then they are PRIM:
+    \begin{enumerate}
+        \item \textbf{Substitution}: There exist PRIM functions $g,h_0,h_1,...,h_l$ such that 
+            \[f(\vec{m})=g(h_0(\vec{m}),h_1(\vec{m}),...,h_l(\vec{m})) \]
+        \item \textbf{Primitive recursion}: There exist PRIM functions $g,h$ such that
+            \[f(\vec{m},0)=g(\vec{m})\]
+            \[f(\vec{m},n)=h(\vec{m},n-1,f(\vec{m},n-1)) \]
+    \end{enumerate}
+    From PRIM, we define the set of \textbf{partial recursive functions}. First, all PRIM functions are also partial recursive. Second, if $g(\vec{n},m)$ is partial recursive, then so is $f$ given by
+    \begin{align}
+        f(\vec{n}) = \mu m[g(\vec{n},m)=0]
+    \end{align}
+    Where $\mu m[g(\vec{n},m)=0]$ is the least $m_0$ such that $g(\vec{n},m)=0$ and for all $m < m_0$, $g(\vec{n},m)$ is both defined and nonzero. We call $\mu$ the \textbf{minimalization operator}. If for some number, $f(n)$ is not defined, we write $f(n) = \nearrow$. If for all $n \in \mathbb{N}$, $f(n) \neq \nearrow$, then we say $f$ is \textbf{total}. Else, we say it is \textbf{partial}. If a function $f$ is partial recursive, and total, then we say that $f$ is \textbf{recursive}.  
+\end{definition}
+Note that PRIM functions are always defined for all natural numbers, but partial recursive functions are not, and this is strictly due to the ability to 'search' for a particular (already recursive) quantity.
+\par What we will do now is build. Little by little, we will build up a repertoire of primitive recursive functions, learning more and more about them along the way. The overall goal is to find a primitive recursive function which \textit{codes} finite strings of integers by mapping them to a single integer, in a way which can be \textit{decoded}. This means that we need a coding function which is primitive recursive, and also one to one, and also has the property that the decoding function is primitive recursive. This will take some effort, but payoff will be immense.
+\begin{lemma}
+    For any $k \in \mathbb{N}$, the constant function $c_k(n):=k$ is PRIM.
+\end{lemma}
+\begin{proof}
+    We go by induction. Clearly the zero function is the constant function for $k=0$. Suppose that the constant function is PRIM for some $k$. Then $c_{k+1}(x)=s(c_{k+1}(x))$, so $c_{k+1}$ is also PRIM, completing the induction.
+\end{proof}
+\begin{lemma}
+    Addition, multiplication, and exponentiation (as binary functions) are all PRIM. 
+\end{lemma}
+\begin{proof}
+    Let $+,\times$, and $\uparrow$ denote the three functions above. There are several ways to define $+$ as a PRIM function. Probably the most productive way is to use the constant function above as a base case, and using our primitive recursive rule: 
+    \[+(m,0) := c_m(0) = m\]
+    \[+(m,n) := s(+(m,n-1))=m+(n-1)+1=m+n\]
+    (Technically, we must write $s(U_3^3(m,n-1,+(m,n-1))$ instead of $s(+(m,n-1))$, to be completely rigorous). That $\times$ is prim, we do the same thing again, using the previous result in place of the constant function, and with a dash of the zero function for taste:
+    \[\times(m,0) := z(0) = 0 \]
+    \[\times(m,n) := +(\times(m,n-1),m) = m(n-1)+m = m(n-1+1) = mn \]
+    Finally, $\uparrow$ is PRIM:
+    \[ \uparrow(m,0) := c_1(0) = 1 \]
+    \[ \uparrow(m,n) := \times(\uparrow (m,n-1),m) = m^{n-1}m = m^n \]
+\end{proof}
+Define the \textbf{predecessor function} by 
+\[
+    \delta(m) = \begin{cases}
+                    m-1 & \textrm{if $m>0$} \\
+                    0 & \textrm{else}
+                \end{cases}
+\]
+And the \textbf{recursive difference} by 
+\[ m \prc n = \begin{cases}
+                            m-n & \textrm{if $m \geq n$} \\
+                            0   & \textrm{else}
+                        \end{cases}
+\]
+\begin{lemma}
+    $\delta$, $m \prc n$, and $|m-n|$ are all PRIM 
+\end{lemma}
+\begin{proof}
+    We'll be super formal about $\delta$. We'll define $\delta = \delta'(m,m)$, where
+    \[ \delta'(m,0) := z(0) = 0 \]
+    \[ \delta'(m,n) := U_2^3(m,n-1,\delta'(m,n-1)) \]
+    Then $\delta(0) = \delta'(0,0) = 0$, and for $m>0$, $\delta(m) = U_2^3(m,m-1,\delta'(m,m-1)) = m-1$. For the recursive difference, let 
+    \[ \prc(m,0) := m \]
+    \[ \prc(m,n) := \delta(\prc(m,n-1)) \]
+    Then if $m,n >0$, we'll have our first instance of the $\prc$ operation repeatedly calling itself, each time decrementing $n$, and subtracting 1 each time, until reaching the base case when it calls $\prc(m,0)=m$. So by nature of $\delta$, we'll stop subtracting once $n$ is used up. 
+    \par Finally, we have an opportunity to use the substitution rule, rather than the primitive recursion rule, and can define 
+    \begin{align}
+        |m-n| &= +(\prc(m,n),(\prc(n,m))\\
+              &= (m\prc n) + (n\prc m) \\
+              &= \begin{cases}
+                    m\prc n + 0 = m-n & \textrm{ if $m \geq n$} \\
+                    0+n\prc m = n-m &\textrm{ else}
+                \end{cases}
+    \end{align}
+\end{proof}
+This allows us to build two more handy PRIM functions:
+\begin{align}
+    sg(n) := \begin{cases}
+                0 & n=0 \\
+                1 & n \neq 0 
+              \end{cases} \\
+    \Bar{sg}(n) := \begin{cases}
+                        1 & n=0 \\
+                        0 & n \neq 0
+                    \end{cases}
+\end{align}
+These are both PRIM because we can just say that $sg(n) = sg'(n,n)$, and $\overline{sg}(n) = \overline{sg}'(n,n)$, where
+\[ sg'(m,0) = 0 \]
+\[ sg'(m,n) = c_1(U_1^3(m,n-1,sg'(n-1)) \]
+and $\Bar{sg}'(n,n)$ is identical except for the base case is set to 1 and the recursion case uses the zero function ($z=c_0$).
+\begin{lemma}
+    The \textbf{remainder function} is PRIM, that being: \[ rm(m,n) = \begin{cases} 
+                                                    \textrm{the remainder upon dividing n by m} & \textrm{if $m \neq 0$} \\
+                                                    n  & \textrm{ else}
+                                        \end{cases} \]
+\end{lemma}
+\begin{proof}
+    Again, using the primitive recursive scheme:
+        \[rm(m,0) = 0 \]
+        \[rm(m,n) = (rm(m,n-1)+1)\times sg(|(n-1)-rm(m,n-1)+1|) \]
+    It's a little confusing but it clearly works. 
+\end{proof}
+Next, consider the 'divides' relation $m|n \iff$ m divides n, and let $\chi_|(m,n)$ be the characteristic function of this relation. Then $\chi_|(m,n)$ is clearly PRIM, since $\chi_|(m,n) = \Bar{sg}(rm(m,n))$. We're inching closer and closer to what we need.
+\begin{lemma}
+    If $f(\vec{m},n)$ is PRIM, then $h(\vec{m},p) := \underset{n \leq p}{\sum}f(\vec{m},n)$ is PRIM, as is $h'(\vec{m},p):= \underset{n \leq p}{\prod}f(\vec{m},n)$
+\end{lemma}
+\begin{proof}
+    We can simply apply the primitive recursion scheme to our recursive addition and multiplication functions:
+    \[h(\vec{m},0) := f(\vec{m},0) \]
+    \[h(\vec{m},p) := +(h(\vec{m},p-1),f(\vec{m},p)) \]
+    The scheme for bounded products looks identical.
+\end{proof}
+This gives us that $D(m) = $ the number of divisors of $m$ is PRIM, since we can write 
+\[D(m) = \sum_{n \leq m}\chi_|(n,m) \]
+\begin{lemma}
+    Let $P$ denote the set of prime numbers. Then the characteristic function $\chi_P(n)$ is PRIM
+\end{lemma}
+\begin{proof}
+    Note that n is a prime number iff n has at most 2 divisors, and $n \neq 0,1$. We can model the 'anding' here by just multiplying two of our handy sg friends together:
+    \[\chi_P(n) = \Bar{sg}(D(n) \prc 2)\times sg(n \prc 1) \]
+    Note that the first term is 1 iff the number of divisors is at most 2, and the second is 1 iff $n > 1$. So we're done.  
+\end{proof}
+Note that the characteristic function of the $<$ relation, $\chi_<(m,n) = sg(m \prc n)$, is PRIM as well. A lot of what we're going to be doing for the rest of this part revolves around primes. In all of it, we will count the primes starting at 0, i.e. we will regard $2$ as \textit{the $0^{th}$ prime}, and count up from there.
+\begin{lemma}
+    Let $\pi'(n)$ be the function which sends $n$ to the smallest prime number greater than $n$, and $\pi(n)$ be the $n^{th}$ prime number. Then both $\pi'$ and $\pi$ are recursive.
+\end{lemma}
+\begin{proof}
+    This is the first time that we will have to make use of our $\mu$ operator. Simply observe that 
+    \[\pi'(m) = \mu n[\Bar{sg}(\chi_<(m,n) \times \chi_P(n))=0] \]
+    This allows us to define $\pi$ using our primitive recursion scheme and the help of $\pi'$:
+    \[\pi(0)=2 \]
+    \[\pi(n)=\pi'(\pi(n-1)) \]
+\end{proof}
+Thus $\pi$ and $\pi'$ are the first two functions we've found which are recursive, but not necessarily PRIM. Since we don't know enough about primes, we have to perform a search. However, with a little extra effort, it can be shown that these functions are in fact PRIM, and there will be some important takeaways from going to the trouble of this. We proceed as follows:
+\begin{definition}
+    We say that a relation $R$ is \textbf{recursive} if it's characteristic function is recursive. Note that sets can be viewed as unary relations, so this also defines what it means for sets to be recursive. 
+\end{definition}
+Many simple sets and relations are already recursive by the results we proved originally, such as $<, =, \leq, >, \geq$. Another useful one will be the following:
+\begin{lemma}
+    For any $m \in \mathbb{N}$, the function $\chi_{\geq m}$ is PRIM, where 
+    \begin{align}
+        \chi_{\geq m} = \begin{cases}
+                           1 & \textrm{ if $n \geq m$}  \\
+                           0 & \textrm{ else}
+                        \end{cases}
+    \end{align}
+    Similarly, $\chi_{leq m}$, $\chi_{< m}$, and $\chi_{> m}$ are all also PRIM. 
+\end{lemma}
+This fact is trivially true in the context of Turing machines, which we now know are equivalent to recursive functions. Another simple lemma:
+\begin{lemma}
+    Let $f: \omega^n \to \omega$ be a (total) function. Then $f$ is recursive iff it's \textbf{graph} $G_f = \{(\vec{a},b): f(\vec{a}) = b\}$ is partial recursive.
+\end{lemma}
+\begin{proof}
+    First we show a weaker claim: That a function is recursive iff it's graph is recursive.If $f$ is recursive, then $G_f$ is recursive since $\chi_{G_f}(\vec{a},b) = \chi_=(f(\vec{a}),b)$ is recursive, via function composition, the recursiveness of $f$, and the recursiveness of $=$. Conversely, if $G_f$ is recursive, then by defintion so is $\chi_{G_f}$, but then 
+    \[ f(\vec{a}) = \mu b[1 \prc \chi_{G_f}(\vec{a},b) = 0] \]
+    and so $f$ is recursive.
+    \par The observation that we can loosen things to partial recursiveness aren't required to show equivalence with Turing machines, so I am going to use a Church Turing thesis appeal to show that this weakening is still equivalent. If the graph is partial recursive, then we can decide whether $f(\vec{a}) \neq b$ by simply performing a dovetail search to eventually compute what $f(vec{a})$ actually is (using a Turing machine which accepts the graph), and then checking to see if $f(vec{a}) = b$. Thus assuming that the graph is partial recursive immediately implies that the graph is recursive, providing the other direction.
+\end{proof}
+Note that the $\mu$ operator seems necessary to use here due to the general nature of $G_f$. It should be noted because of this that the same fact is likely untrue for the PRIM functions, and indeed it is: If a function is PRIM, then it's graph is also PRIM, but the converse is not true in general. We turn to more obvious stuff:
+\begin{lemma}
+    If $R$ is a recursive unary relation and $f$ is a recursive function, then $R'(n) \iff R(f(n))$ is also a recursive relation.
+\end{lemma}
+This doesn't deserve a proof environment: just note that $\chi_{R'}(n) = \chi_R(f(n))$. The next lemma is obvious but also very useful, in that it shows that definitions by cases are recursive, so long as all of the functions in each case along with the relations determining which case to choose are all recursive:
+\begin{lemma}
+    If $R_1,...,R_k$ are recursive (or PRIM) unary relations (whose associated sets are disjoint), and $f_1,...,f_k$ are all unary recursive (or PRIM) functions, then the function
+    \begin{align}
+        f(n) = \begin{cases}
+                  f_1(n) & \textrm{ if $R_1(n)$}  \\
+                  f_2(n) & \textrm{ if $R_2(n)$} \\
+                  & \vdots \\
+                  f_k(n) & \textrm{ if $R_k(n)$} 
+               \end{cases}
+    \end{align}
+    is also recursive (or PRIM).
+\end{lemma}
+This is a nice result but also equally undeserving of a proof environment. Just note that $\chi_{f(n)} = f_1(n)\chi_{R_1}(n) + ... + f_k(n)\chi_{R_k}(n)$. (Actually this only gives the result for recursive functions and not PRIM functions. Need to eventually come back and deal with this.)
+\par Now, for what follows, we need to make a distinction. We need to acknowledge that quantifying a variable over a \textit{finite} set is not really quantifying. For example, and to define some notation, the expression 
+\[ \exists x \leq y \phi(x)  \]
+which is intending to make the claim that there exists an $x$ such that $\phi(x)$, \textit{with the property that} $x \leq y$, could easily be replaced with
+\[ \bigvee_{x = 1}^y \phi(x) \]
+which is quantifier free. On the other hand, there is no way in general to write down a finite expression which is equivalent to an expression which quantifies over an infinite set, which, if the condition $x \leq y$ wasn't mentioned, would have been what we were doing. Thus, \textbf{bounded quantification}, as we will call it, is \textit{only shorthand}, and not really quantification at all. With this, we state the next lemma.
+\begin{lemma}
+    The class of recursive relations is closed under finite unions, intersections, complements, and bounded number quantification.
+\end{lemma}
+\begin{proof}
+    If $R_1,R_2$ are PRIM, then $R_{\cap} = R_1 \cap R_2$ is PRIM by virtue of $\chi_{R_{\cap}}(\vec{a}) = \chi_{R_1}(\vec{a})\chi_{R_2}(\vec{a})$. Similarly $R_{\cup} = R_1 \cup R_2$ is PRIM since $\chi_{R_{\cup}}(\vec{a}) = \chi_{R_1}(\vec{a}) + \chi_{R_2}(\vec{a}) - \chi_{R_{\cap}}(\vec{a})$, and $R^c$ (pick your favorite) is PRIM since $\chi_{\neg}(\vec{a}) = \overline{sg}(\chi_R(\vec{a}))$. 
+    \par Turning towards bounded number quantification, suppose that $R$ is a relation defined by $R(\vec{a},n) \iff \exists n S(\vec{a},n,m)$ where $S$ is recursive (or PRIM). (Allowing $S$ to have the variables $n,m$ is more general than not doing so, and typically how it is rigorously defined.) Define $R'(\vec{a},n,k) \iff \exists m \leq k S(\vec{a},n,m)$. Then $\chi_{R'}(\vec{a},n,0) = \chi_S(\vec{a},n,0)$, and for any $k > 0$, $\chi_{R'}(\vec{a},n,k) = sg(\chi_{R'}(\vec{a},n,k-1)+\chi_S(\vec{a},n,k))$. Thus by the primitive recursive scheme, we have that $R'$ is PRIM. Since $\chi_R(\vec{a},n) = \chi_{R'}(\vec{a},n,n)$, we now have that $R$ itself is recursive. 
+\end{proof}
+The third paragraph of this simple proof has an important takeaway. In general, how would you, in your favorite programming language, write a program which answers the question $\exists x \leq y \phi(x)$, where $\phi(x)$ is something that you already have a program for? The answer is obvious - write a for loop. There is an obvious equivalence between bounded quantification and for loops, as we just mentioned, but less obvious is what we now know - that there is an equivalence between bounded quantification and the primitive recursive scheme. The important takeaway is as follows:
+\begin{center}
+    The class of functions which are PRIM is equivalent to the class of functions to which can be computed using only basic arithmetic operations and for loops. Thus the difference between primitive recursive and recursive is equivelently stated as the difference between for loops and while loops.
+\end{center}
+ We now know from the existence of fast growing functions like the Ackerman function that \textit{while loops are fundamentally more powerful than for loops}. However, as we will show definitively later on, once we have a notion of time complexity, \textit{nearly everything is PRIM anyway.} Thus, while loops are capable of more than for loops, but, at least strictly in the context of what is computable (i.e. throwing away any possible value that recursive enumerability might have), this difference is very slight.
+ \par Another important takeaway is that the closure properties makes it so that we can take the logical \textit{ands, ors, and nots} of relations that are already known to be PRIM, and now know that these new relations are PRIM without any further fuss. 
+ \par The next lemma says that we can make the bounds of our quantified expressions recursive as well, and stay recursive/primitive recursive.
+\begin{lemma}
+    If $S(n,m)$ is recursive (or PRIM) and $f:\omega \to \omega$ is recursive (or PRIM), then the relation $R$ defined by $n \in R \iff \exists m \leq f(n) S(n,m)$ is also recursive (or PRIM).
+\end{lemma}
+\begin{proof}
+    Define $R'(n,k) \iff \exists m \leq f(k) S(n,m)$, and then define $R''(n,k) \iff \exists m \leq k S(n,m)$. Note that $R''$ is recursive by the previous lemma, so $\chi_{R''}$ is recursive. Then $\chi_{R'}(n,k) = \chi_{R''}(n,f(k))$, so $\chi_{R'}$ is also recursive, and we can conclude that $R$ is now recursive by virtue of $R(n) \iff R'(n,n)$.
+\end{proof}
+We can show a similar lemma for functions. In the lemma that follows, we are slightly abusing the notation provided by our minimization operator, but it should be clear how what we are defining can be re-expressed as a legal use of the thing.
+\begin{lemma}
+    Let $S(\vec{a},n,m)$ be a recursive (or PRIM) relation. Let $g$ be a (total) recursive (or PRIM) function. Let $f$ be defined by
+    \begin{align}
+        f(\vec{a},n) = \begin{cases}
+                        \mu m \leq g(\vec{a},n) S(\vec{a},n,m) & \textrm{ if $\exists m \leq g(\vec{a},n)S(\vec{a},n,m)$} \\
+                        0 & \textrm{ else}
+        \end{cases}
+    \end{align}
+    Then $f$ is recursive (or PRIM).
+\end{lemma}
+\begin{proof}
+    The primitive recursive case is more important, so we will do that one. The general recursive case is the same argument but without any fussing about whether or not things are still PRIM. Let $f'(\vec{a},n,k)$ be defined by 
+    \begin{align}
+        f'(\vec{a},n,k) = \begin{cases}
+                              \mu m \leq k S(\vec{a},n,m) & \textrm{  if $\exists m \leq k S(\vec{a},n,m)$} \\
+                              k+1 & \textrm{ else}
+                          \end{cases}
+    \end{align}
+    Despite using the minimization operator, it is strictly for the sake of descriptive clarity: $f'$ is indeed PRIM. To realize this note that $f'(\vec{a},n,0) = 1 \prc \chi_S(\vec{a},n,0)$, clearly PRIM if $S$ is PRIM, and furthermore
+    \begin{align}
+        f'(\vec{a},n,k) = \chi_=(f'(\vec{a},n,k-1),k)[k\chi_S(\vec{a},n,k)+(1 \prc \chi_S(\vec{a},n,k))(k+1)]\\+(1 \prc\chi_=(f'(\vec{a},n,k-1),k)f'(\vec{a},n,k-1)
+    \end{align}
+    (To see that why this massive batch of nonsense if PRIM, note that it is the sum of two things, one of which is conditional on $f'(\vec{a},n,k-1) = k$, and the other conditional on this not being the case. The former case can only happen if case 1 of the definition of $f'(\vec{a},n,k-1)$ is not realized, in which case the only possible value which could possibly be returned for $f'(\vec{a},n,k)$ is $k$ itself, contingent on $S(\vec{a},n,k)$, and $k+1$ if this check fails. Turning to the second term in the sum, corresponding to case 1 applying to $f'(\vec{a},n,k-1)$, we know that the least $m$ has already occurred, so we simply call $f'(\vec{a},n,k-1)$.) Thus the $\mu$ operator in the definition of $f'$ can be replaced by an application of the primitive recursive scheme, and $f'$ is indeed PRIM. Finally, we can define $f$ in terms of $f'$ by invoking our lemma about case based definitions:
+    \begin{align}
+        f(\vec{a},n,k) = \begin{cases}
+                           f'(\vec{a},n,g(\vec{a},n)) & \textrm{ if $f'(\vec{a},n,g(\vec{a},n)) \leq g(\vec{a},n)$} \\
+                           0 & \textrm{ else}
+                        \end{cases}
+    \end{align}
+    Thus $f$ is PRIM. 
+\end{proof}
+We are now equipped to show that the prime function is indeed recursive. In fact, it is now easy, if we assume an important fact from number theory:
+\begin{lemma}[Bertrand's Postulate]
+    For any natural number $n$, there always exists a prime between $n$ and $2n$
+\end{lemma}
+\begin{theorem}
+    $\pi(n)$, the function which returns for an input $n$ the $n^{th}$ prime number, is PRIM.
+\end{theorem}
+\begin{proof}
+    Going off Bertrand's Postulate, we now know that the $n^{th}$ prime number, whatever it is, can't be bigger than $2^n$. (The first one is $2$, the second one is less than $2^2$, the third one is less than $2^3$, etcetera). Thus, we can write
+    \[ \pi(n) = \mu m \leq 2^n [\overline{sg}(\chi_{\leq}(m,\pi(n-1)))\chi_P(n) ] \]
+    By our wealth of lemmas, particularly last one involving functions which use the "bounded $\mu$" operator, we can now see that this is PRIM. 
+\end{proof}
+We now finally have everything that we need to define our coding and decoding functions, and show that they are PRIM:
+\begin{definition}
+    For a finite sequence $(x_0,x_2,x_3,...,x_k)$, let 
+    \[\langle x_1,x_2,...,x_k \rangle = 2^{x_0+1}3^{x_2+1}5^{x_3+1}...\pi(k)^{x_k+1} \] 
+    This is our coding function. (Let $\epsilon$ be the empty string. We will also define $\langle \epsilon \rangle = 1$.) Let $Seq = \{\langle \vec{a} \rangle: \vec{a} \in \omega^{<\omega}\}$, i.e. the set of all codings of finite sequences. Next, let
+    \[lh(n) = \begin{cases}
+                k+1\textrm{, the length of the sequence coded by $n$} & \textrm{ if $n \in Seq$} \\
+                0 & \textrm{ else}
+              \end{cases} \]
+    Finally, define the binary decoding function $(n)_i$ by
+    \[ (n)_i = \begin{cases}
+                  x_i & \textrm{ if $n = \langle x_0,x_1,...,x_k \rangle$ codes a sequence of length $> i$} \\
+                  0 & \textrm{ else}
+               \end{cases}\]
+\end{definition}
+Before we continue, we should note some clear intentions. The idea is obviously to exploit the fundamental theorem of arithmetic, by using uniqueness of prime factorizations to create a one to one function, which can be decoded primitive recursively based on the primitive recursiveness of the prime stuff that we went to so much trouble for. The adding of $1$ to every exponent is designed to make it easy to recover the length of a coded sequence. If not for this, since every number has a prime factorization, we would have that $Seq = \mathbb{N}$. This is not the case, but that is not of any importance. What is important is that the coding is one to one, and it surely is.
+\begin{theorem}
+    All of this junk is PRIM. More specifically, $Seq$ is primitive recursive set, the function $\langle x_1,...,x_k \rangle$ is primitive recursive for any integer $k$, the unary function $lh$ is primitive recursive, and the binary decoding function $(n)_i$ is primitive recursive. 
+\end{theorem}
+\begin{proof}
+    To show that $Seq$ is PRIM, note the only way for a number to not be in $Seq$ is for it's prime factorization to "skip" a prime. For example. $14$ is not the coding of any sequence, because $14 = 2^1*5^07^1$, and and $3$ character sequence would have coded to a power of $5$ which is at least $1$. More formally, 
+    \[ n \in Seq \iff \forall p \leq n \forall q \leq n [\textrm{If $p$ and $q$ are prime and $p < q$ and $q$ divides $n$, then $p$ divides $n$}] \]
+    This is then seen to be a primitive recursive relation, because the primeness relation is PRIM, as is the $<$ relation, as is the divides relation, and PRIM relations are closed under logical connectives, so the relation in brackets is PRIM, and finally both quantifiers are bounded, keeping things nice and PRIM. Thus $Seq$ is PRIM.
+    \par Next, the coding function is clearly PRIM for any fixed string length $k$: Since $k$ is fixed we don't even need the fact that the prime sequence is PRIM - the constant functions will do. From there, we just invoke lemma $1.5$, along with the closure of PRIM functions under function composition. 
+    \par Next we turn to $lh(n)$, which is actually the hardest part, despite our preparation. Towards the solution, we define a complicated but silly relation $s(n,l)$, which asserts that there exists a number $m$ of the form $m = 2^13^25^3...p^l$ where $p$ is the largest prime dividing $n$. Assuming that $n \in Seq$, the least $l$ such that $s(n,l)$ will be the proper value of $lh(n)$. It will be best to describe this relation in words before writing it down symbolically. 
+    \begin{itemize}
+        \item First, $m$ will surely be less than or equal to $n^{n^2}$: $n$ certainly has less $n$ unique prime factors, so $l \leq n$. Furthermore, if we replaced every one of these prime factors with $n$ itself, then multiplied them all, all taken to the $n^{th}$ power, then we have something certainly larger than $m$, and this number would be less than or equal to $n^{n^2}$. This is a dumb bound, but the important part is that it is finite, and that is all I care about. We will use a bounded $\mu$ operator using this bound to search for $m$.
+        \item Every prime $p$ divides $n$ iff it also divides $m$.
+        \item $2$ divides $m$. For any $k \leq n$ which is not prime, $k$ must not divide $m$.
+        \item If $p$ and $q$ are both prime with $p < q$, and there are no primes between $p$ and $q$, then $p^a$ divides $m$ iff $q^{a+1}$ divides $m$. 
+        \item There exists a prime $p$ smaller than $n$ such that $p^l$ divides $m$ but $p^{l+1}$ does not divide $m$, nor does any prime $q$ which is larger than $p$.
+    \end{itemize}
+    We claim that if there exists an $m$ within the conditions specified, then $s(n,l)$. To see this, requiring that $2$ divides $m$, then considering the next prime, $3$, the third item requires that $3^2$ be a factor of $m$. Similarly, $5^3$ is required, and so forth. The rest should be clear. Now, we state it more formally:
+    \begin{align*}
+         s(n,l) & \iff \exists m \leq n^{n^2} [(\forall p \leq n (\textrm{p is prime}) \Rightarrow (p|n \iff p|m)) \wedge 2|m \\ & \wedge \forall p \leq n (\textrm{p is not prime} \Rightarrow p \nmid m) \\ & \forall p,q \leq n \forall a \leq n ((\textrm{$p,q$ are prime} \wedge \neg \exists r ((p < r < q) \wedge \textrm{ r is prime}) \Rightarrow (p^a|m \iff p^{a+1}|m) \\ & \exists p \leq n (p^l|m \wedge p^{l+1}\nmid m \wedge \forall q \leq n (\textrm{q is prime}) \wedge q > p \Rightarrow q \nmid m)] 
+    \end{align*} 
+    So yeah, but it's at least very clear now that $s(n,l)$ is PRIM. Everything seen above uses only bounded quantification and logical combinations of relations which are already known PRIM. Furthermore, $lh(n)$ can now be defined as follows:
+    \begin{align}
+        lh(n) = \begin{cases}
+                   \mu l \leq n[(n \notin Seq) \vee (n \in Seq \wedge s(n,l))] & \textrm{ if $n > 1$} \\
+                   0 & \textrm{ else}
+                \end{cases}
+    \end{align}
+    The first implicant is just there to immediately return $l = 0$ if $n$ doesn't code a sequence. Finally, we have that this stupid thing is PRIM, and turn to the decoding function $(n)_i$. Armed with the rest of it, this one isn't too bad:
+    \begin{align}
+        (n)_i = \mu k \leq n [(n \notin Seq) \vee (n \in Seq \wedge i \geq lh(n)) \\ \vee (n \in Seq \wedge i < lh(n) \wedge \pi(i)^{k+1}|n \wedge \pi(i)^{k+2}\nmid n)]
+    \end{align}
+    The first two clauses require that $(n)_i$ return a $0$ if $n$ doesn't code a sequence or if $n$ does code a sequence but the index requested $i$ is too big. The third wedge should be self explanatory. Just as self explanatory is that this is all PRIM. 
+\end{proof}
+
+\par We finally have what we need to show something huge. Note that a Turing machine implicitly defines a function which maps finite strings to finite strings (in some fixed finite alphabet, which we can easily label with natural numbers). (Also it may not halt, so it may not be total, but don't worry about this for now.) What we will now show is that any function like this defined by a Turing machine is really a recursive function, in the sense that if $x$ is the input string, then the function $f(\langle x \rangle) := \langle M(x) \rangle$ is recursive!
+% Show that these simplifications are fine to do
+\par Before we begin, some standardization is in order. What follows are some lemmas to ensure that we can make several assumptions without loss of generality. These are nice facts to know in their own right, but the proofs are tedious, and the claims believable, so one can be forgiven for reading the statements and skipping the proofs. 
+
+The next very simple observation will prove later down the road to be important towards generalizing Turing machines to their quantum counterparts. We say that a Turing machine $M$ is \textbf{stationary} if it always halts with it's cursor at same tape cell that it started at. For a multi-tape Turing machine, all of it's cursors should be all the way left.
+\begin{lemma}[All Turing machines can be assumed to be stationary]
+	For any Turing machine $M$, there exists a Turing machine $M'$ which halts iff $M$ halts, with the exact same output, but is also stationary.
+\end{lemma}
+\begin{proof}
+	Let $M = (\Sigma,Q,\delta)$ be a Turing machine. By the previous lemma, without loss of generality assume that the cursor never moves left of the first nonblank tape cell. Let $\sigma$ be a symbol not already in the language of $M$, and define $M'$ whose alphabet is $\Sigma \cup \{\sigma\}$, and which behaves by first moving the entire input string to the right by one cell, and then at the original cell putting the symbol $\sigma$. It then moves it's cursor forward a single cell, and performs the exact computation of $M$. Then, when $M$ would normally enter a halting state, the machine $M'$ moves the cursor left until it finds the unique symbol $\sigma$, move right one cell, and halts. \par (This isn't a 100\% complete proof. Technically, this machine is only 'almost stationary'. To be complete, we must describe how the machine can translate it's entire output string to the left, overwriting the symbol $\sigma$, but this is very tedious to think about, because unlike the input string, the output string is likely to contain blanks, and in order to keep track of the output length, we would need to modify the entire machine to keep track of how far the right the cursor has moved as it works. The argument given is all that is necessary to give us what we need for the proof though. I leave it to the reader to determine the incredibly slight modification to the proof we're building towards which accounts for this one cell difference.)
+\end{proof}
+We are finally prepared for the main event. In the following proof, we will assume WLOG that our arbitrary Turing machines are stationary, defined over the minimal alphabet $\{0,1\}$, and use cursors which never stay still. We also assume that our machines only have a single halting state - the acceptance and rejection states were only there for convenience anyway, and could easily be substituted for having a machine print the symbol $0$ or $1$ and halting in the same halting state. We assume also that the collection of state symbols $Q$ are represented as an initial segment of integers, so that $Q = \{0,1....,n\}$ WLOG. State $0$ will be regarded as the initial state, and $n$ will be regarded as the halting state.
+\par With all of these assumptions combined we have "stripped down" our original definition of what a Turing machine is, down to only it's most essential features. Note that these simplifications together yield a significantly simpler way to describe the codomain of a transition function. Where before it was to be $\Sigma \times Q \times \{-1,0,1\}$, we may now regard it as $Q \times \{0,1,2,3\}$, where $0$ and $2$ correspond to the machine writing the symbols $0$ and $1$ respectively, and $1$ and $3$ correspond to the machine moving it's cursor left and right, respectively.
+\par Finally, note that if we are to regard Turing machines as functions, then there "arity" is somewhat subjective. For a Turing machine which takes, say, two inputs, the standard expected input will be of the form $\sqcup;x;\sqcup;y$, or rather, $0;x;0;y$, where $x,y \in \{1\}^{\#}$. It should be noted that the alphabet size is arguably the least important thing to assume a standard form of. In the proof that follows it is easy to see how things could be generalized to alphabets of arbitrary size, but regardless things are slightly simpler with only two symbols.
+ We are now ready to state and prove the theorem:
+\begin{theorem}
+    For any Turing machine $M$, the function $f:\mathbb{N} \to \mathbb{N}$ defined by
+    \begin{align}
+        f(n) = \begin{cases}
+                  \langle M(x) \rangle & \textrm{if $n \in Seq$ and $M(x) \neq \nearrow$ and $x$ is the unique input string such that $\langle x \rangle = n$} \\
+                  0 & \textrm{else}
+               \end{cases}
+    \end{align}
+    is partial recursive. Furthermore, $M(x) = \nearrow$ iff $f(n) = \nearrow$, i.e. the function $f$ is recursive (i.e. total) iff the machine $M$ eventually halts on every input string.
+\end{theorem}
+\begin{proof}
+    The plan of attack is as follows.
+    \begin{enumerate}
+        \item Represent the configurations of $M$ as finite strings, and then code those strings as numbers using our coding function. Note that since the state of any configuration is recoverable by a primitive recursive function, the "machine is in a halting state" unary relation will be primitive recursive. 
+        \item Do the same thing with \textit{the Turing machine itself}: That is, code the transition function $\delta$ in such a way that instructions can be decoded at will by our decoding function.
+        \item Show that the 'yields in one step' binary relation defined by $M$ is primitive recursive. We accomplish this by showing that if $c_1$, and $c_2$ are configurations, then the function which takes $\langle c_1 \rangle$ to $\langle c_2 \rangle$ is recursive. Immediately, we will then have that the 'yields in $k$ steps' relation is also primitive recursive, for any $k$.
+        \item Use (for the first time!) our unbounded minimization operator $\mu$, to define a partial recursive function which returns the number of steps $t$ necessary for $M(x)$ to enter into a halting state.
+        \item With this partial recursive function, it immediately follows that the coded output of the Turing machine can be primitive recursively recovered from the configuration yielded after the minimum number of steps needed for the machine to halt. 
+    \end{enumerate}
+    A reader might honestly be satisfied just having read the strategy. Carrying it out requires care, but it should be clear at this point that all of the above can be done. Nonetheless, there are a few things to notice along the way, and the majority of the legwork has already been done by the gauntlet of lemmas that were necessary to get our coding and decoding functions.
+    \par First, the configurations. Configurations are complete descriptions of the machine at a fixed point in "time" - that is, they somehow encode the nontrivial tape contents, the position of the cursor, and the state of the machine. We can capture the tape contents and cursor position with a triplet of binary strings $(l,r,s)$, where $l$ is tape contents from the beginning of the tape up to (and not including) the cursor cell, $s$ is the current contents of the tape cell that the cursor is on, and $r$ is the tape contents following the cursor cell, right up to and including the final occurrence of $1$ (the infinite trail of blanks in our proof is really an infinite trail of $0$'s.) Thus, configurations themselves can be regarded as quadruples of integers $(\langle l \rangle,\langle r \rangle,s,i)$, where $l,r,$ and $s$ are as before, and $i$ is the current state of the machine. $\langle \langle l \rangle,\langle r \rangle,s,i \rangle$ then codes the configuration itself as a single integer. Note that for any coded configuration $c$ (viewed as a number), the state of the machine can be recovered by $(c)_3$, a primitive recursive function. Thus, the relation $H$ defined by $H(c) \iff \textrm{c codes a halting state}$ is clearly PRIM: It's characteristic function can be defined easily: 
+    \[\chi_H(c) = \overline{sg}(n \prc (c)_3) \]
+    \par Next, we turn to the transition function $\delta$. As above, what we will do is standardize a string-based representation of $\delta$, and then code it in a way that the instructions are easily recoverable. Because of our simplified assumptions about our Turing machine model, we can regard the transition function $\delta$ as a collection of $4n+4$ numbers:
+    \[ \delta: a_{00},q_{00},a_{01},q_{01},a_{10},q_{10},a_{11},q_{111},...,a_{n0},q_{n0},a_{n1},q_{n1} \]
+    Where $a_{ij} \in \{0,1,2,3\}$ represents the \textit{action} that the machine takes given the machine is in state $i$ an pointed at symbol $j$, and $q_{ij} \in Q$ represents the state which is transitioned to. Thus, we can regard $\delta$ as a finite sequence of $2n+2$ integers, which we code with our coding function will write as $m$. Define $a(m,s,i)$ to be the function which returns the action taken by the machine $M$ whose transition function is coded with the number $m$, given the cursor symbol $s$ and the current state $i$. Similarly, define $nQ(m,s,i)$ to be the corresponding function but which instead returns the state. We claim that these are primitive recursive $3$-ary functions. To see this, note that actions correspond to even indices, and state transitions correspond to odd indices, so that
+    \[ a(m,s,i) = (m)_{4i+ 2s} \]
+    \[ nQ(m,s,i) = (m)_{4i+1+2s} \]
+    Now, we turn to the function which maps configurations to configurations after one step. To do this, we begin by defining the intermediary functions $nL$, $nR$, and $nS$, which will correspond to the $l$, $r$, and $s$ strings of the new configuration, respectively. These are all binary functions, taking as inputs the "machine code" $m$, and the current configuration code $c$. Consider first the left-string $l$. We can break the changes to $l$ down to cases. If the action of the machine is going to be writing a symbol, then $l$ won't change at all. If the action is movement, then $l$ changes depending on the direction that the cursor moves. If the cursor is to move left, then $l$ will become itself but truncated to have one less symbol. We can write this action as a primitive recursive function of just the configuration $c$:
+    \[ lT(c) = \prod_{k=0}^{lh((c)_0))-1}\pi(k)^{((c)_0)_k}\]
+    What we're doing here is decoding and immediately recoding the symbols of $l$ (remember that the $k^{th}$ symbol of $l$ is going to be $((c)_0)_k$) up to one less the length of the original string $l$. Clearly this is PRIM. Next, if the cursor is to move right, then the new $l$ will be the original $l$, but concatenated with the previous cursor symbol $s$. This is much easier easier to define:
+    \[ lC(c) = (c)_0\pi(lh((c)_0)+1)^{s+1} \]
+    Finally, noting that the $a(m,s,i) = a$ relation is obviously recursive, we can but the function $nL$ together by cases:
+    %need to assume tape is 2-way infinite
+    \[ nL(m,c) = \begin{cases}
+               lT(c) & \textrm{ if $a(m,(c)_2,(c)_3) = 1$} \\
+               lC(c) & \textrm{ if $a(m,(c)_2,(c)_3) = 3$} \\
+               (c)_0 & \textrm{else}
+            \end{cases} \]
+    Since all of the relations and functions involved in this case based definition are PRIM, we have that $nL$ itself is PRIM. $nR$ can be defined in an extremely similar manner. Finally turning to $nS$, we can define it immediately:
+    \[ nS(m,c) = \begin{cases}
+                    0 & \textrm{ if $a(m,(c)_2,(c)_3) = 0$} \\
+                    ((c)_0)_{lh((c)_0)-1} & \textrm{ if $a(m,(c)_2,(c)_3) = 1$} \\
+                    1 & \textrm{ if $a(m,(c)_2,(c)_3) = 2$} \\
+                    ((c)_1)_0 & \textrm{ if $a(m,(c)_2,(c)_3) = 3$} \\
+                 \end{cases}\]
+    The first and third cases define setting $s$ equal to the last and first symbols of $l$ and $r$, respectively. Now that we have primitive recursive functions for the new left string, right string, cursor symbol, and state, we can define the coded configuration yielded by machine code $m$ in one step from coded configuration $c$ as
+    \[ y(m,c) = \langle nL(m,c),nR(m,c),nS(m,c),nQ(m,c) \rangle \]
+    Which is clearly PRIM. By composition, we now also have the "yields in $t$ steps" function: it is simply $y(m,c,k) := y^k(m,c) = y(y(...(y(m,c))...))$.
+    \par We're in the home stretch. We now claim that the relation $H(m,c,t) \iff $ machine coded by $m$ halts after $t$ steps after being in the configuration coded by $c$ is primitive recursive. To see this, we define it's characteristic function:
+    \[\chi_H(m,c,t) = \overline{sg}(n \prc (y^t(m,c))_3) \]
+    Clearly PRIM. Now, comes the pivotal moment. With our first ever \textit{necessary} use of the unbounded minimization operator, we have that the number of steps needed for the machine coded by $m$ to halt given initial configuration coded by $c$ is partial recursive. Call this function hSteps(m,c):
+    \[ hS(m,c) = \mu t [H(m,c,t)] \]
+    Now, we clear the dust, and put it all together. Our function $f$ will take a number $x$, which represents a coded input for the machine $M$. From this we need to define an initial configuration. The initial configuration from $x$ will have $l = \angle \epsilon \rangle = 1$ (the code for the empty string), $s = 0$, $r = x$, and $q = 0$. Thus the initial configuration as a primitive recursive function of $x$ will then be $c_x = \langle 1,0,x,0 \rangle$. If we know that we are in a halting state, then from the assumption that our machines are always stationary, we can make some easy assumptions about the final configuration. In particular, the code output string is simply the final configurations right side string $r$, so our coded output should be $\langle r \rangle = (c)_2$. Define the (partial!) recursive function $g$ by
+    \[ g(m,x) = (y(m,c_x,hS(m,c_x)))_2 \]
+    For a fixed machine $M$, the machine code $m$ is fixed, and we define $f(x) := g(m,x)$. We have constructed our function $f$, so the proof is complete.
+\end{proof}
+Note that the function $g(m,x)$ which $f$ was defined out of is very special - It's a recursive function which takes \textit{the encoding $m$ of a Turing machine M}, along with the input to that Turing machine, $x$, and returns the output $M(x)$. Effectively, $g$ is a recursive function which can \textit{simulate any arbitrary Turing machine}. Once we have shown the much easier direction, that Turing machines can compute arbitrary recursive functions, we will know that the collection of functions computable by Turing machines and the partial recursive functions coincide, and $g(m,x)$ will simultaneously be both a universal Turing machine, and equivalently but perhaps also more bizarrely, a universal partial recursive function. Also note that the Turing machines in this theorem were all assumed to be machines which take a single input string. We can easily redo this theorem under the interpretation that $M$ takes any number of arguments, in which case the "universal function" $g$ would be one which itself takes that many arguments plus one more.
+\iffalse
+\subsection{RAM Machines (Ignore all of this section)}
+We've shown that the recursion model of computation is as powerful as the Turing machine model. To show equivalence in the other direction, we will define another, intermediate model, which is interesting in it's own right, and most reminiscent of actual an actual computer: the \textbf{random access machine}, or the \textbf{RAM model}. Conceptually, a RAM machine has similarities to a Turing machine, in a few different ways. Like Turing machines, a RAM machine is characterized by a finite set of instructions (the program), dictating how the machine will operate on an implicit data structure. Recall that the central data structure being acted on in the Turing machine model, the 'tape', was nowhere to be seen in the formal definition. That is what we mean by implicit. It will be similar here, but in place of tape cells we have a countably infinite set of \textbf{registers}. The difference between tape cells and register cells is that where tape cells were restricted to holding one of a finite set of symbols in an alphabet, the registers of a RAM machine will be allowed to hold natural numbers of arbitrary size. For this reason, RAM machines are sometimes alternatively referred to as \textbf{unlimited register machines}, or URM machines. Since registers are to be treated as always containing numbers, we have no notion of a blank symbol. Any register which has not been acted on is assumed to contain $0$. As convention, we will use the letter $j$ to refer to register indices, and the letter $i$ to refer to which 'step' of the computation we are currently on. We now state formally both the syntax along with some of the semantics of a RAM program:
+\begin{definition}
+	A \textbf{RAM program} is a tuple of \textbf{instructions} $\Pi = (\pi_1,\pi_2,...,\pi_m)$. The instructions are one of several 'types', which themselves take arguments. The possible instructions are as follows. \textbf{Zero}, denoted $Z(n)$, corresponds setting the $n^{th}$ register $r_n$ equal to $0$. \textbf{Successor}, denoted $S(n)$, corresponds to incrementing the $n^{th}$ register, i.e. $r_n \mapsto r_n+1$. \textbf{transfer}, denoted $T(n,m)$, corresponds to setting the $n^{th}$ register equal to whatever number is stored in the $m^{th}$ register, i.e. $r_n \mapsto r_m$. Most importantly, \textbf{jump}, denoted $J(m,n,q)$, corresponds to 'jumping' to the $q^{th}$ instruction of $\Pi$, conditional on $r_m = r_n$, and moving to the next instruction otherwise. 
+	\par We have a \textbf{program counter}, denoted $\kappa$, which corresponds to the instruction being 'looked at' in $\Pi$. Initially, $\kappa = 1$, and for all instruction types other than the jump type, it is interpreted that $\kappa$ is simply incremented. The \textbf{input} of a RAM program is a finite sequence of integers $I = (i_1,...,i_n)$, where $i_j$ is interpreted to the number stored in register $j$ at the start of a computation. A \textbf{configuration} of a RAM program is a pair $C = (\kappa,R)$, where $\kappa$ is the program counter described above, and $R$ is the set of all nontrivial 'register-value' pairs $R = \{(j_1,r_1),(j_2,r_2),...,(j_k,r_k)\}$, where the interpretation is that at the current 'moment', register $r_i$ holds the integer $j_i$, and so forth. Any unmentioned register is assumed to hold a $0$. Given an input $I = (i_1,...,i_n)$, the \textbf{initial configuration of $\Pi$} is $C_i = (1,\{(i_1,1),...,(i_n,n)\}$. We say that configuration $C' = (\kappa',R')$ is \textbf{yielded by $\Pi$ in one step} by another configuration $C = (\kappa,\Pi)$, and write $C \overset{\Pi}{\to} C'$, if the following conditions hold for $\kappa,\kappa ',R,R'$: For $\kappa$, $\kappa ' = \kappa+1$ if the $k^{th}$ entry of $\Pi$ is not a jump instruction, or if it is a jump operation $J(m,n,q)$ but $j_m \neq j_n$ (where $j_m$ and $j_n$ are the neighbors to the pairs in $R$ whose register indices are $m,n$ respectively, and $0$ if those indices are not present in $R$), and $\kappa ' = q$ otherwise. For $R$, I could formalize the details like I did for $\kappa$ but hopefully the reader can just grok it. We extends the yields relation to arbitrary finite numbers of steps in the obvious way, and write $C \overset{\Pi^t}{\to} C'$ to denote this. 
+	\par We say that a RAM program $\Pi$ \textbf{halts} on input $I$ if there exists an integer $t$ so that $C_i \overset{\Pi^t}{\to} C$ for some configuration $C = (\kappa,R)$, where \textit{$\kappa$ is outside the bounds of the number of instructions of $\Pi$}. That is to say, if $\Pi = (\pi_1,...,\pi_m)$, then $\kappa > m$. I.e. a RAM machine halts once it runs out of instructions to read. Finally, if the RAM machine halts on input $I$, then we call $j$ the \textbf{output} of the machine, where $j$ is the left entry of the pair $(j,1) \in R$. (Again, if this pair isn't explicitly in $R$, then $j = 0$.) We denote this output $\Pi(I) = \Pi(i_1,...,i_n)$. If $\Pi$ does not halt on an input $I$, then we write $\Pi(I) = \nearrow$. 
+	\par Finally, let $f:\mathbb{N}^k \to \mathbb{N} \cup \{\nearrow\}$. We say that a RAM machine $\Pi$ \textbf{computes} $f$ if, for all $k$-tuples $(i_1,...,i_k)$, $\Pi(i_1,...,i_k) = f(i_1,...,i_k)$.
+\end{definition}
+\fi
+\begin{comment}
+\par Before continuing, let us formally define from the recursive functions as a 'model of computation'. Since our alphabets are assumed finite, we may always WLOG that the symbols are an initial segment of the natural numbers. Let's say that a function $f:\{0,1,...,n\}^{\#} \to \{0,1,...,n\}^{\#}$ is (recursively) computable if the function $f^*:\mathbb{N} \to \mathbb{N}$ defined by $f^*(n) = \langle f(x) \rangle$ is recursive, where $x$ is the string coded by $n$. What we then showed in theorem 2.3 is precisely that this model is at least as powerful as the Turing machine model. What we need now is the converse - we wish to show that any function from strings to strings which is computable in the recursive model is also recursive in the Turing machine model. However, the recursive model is currently at an advantage, because there is an explicit definition of what it means for a function from $\omega$ to $\omega$ to be computable. Let us define what it means for Turing machines. We say that a function $f:\omega \to \omega$ is Turing computable if there is a machine which computes the function in binary. That is, for any $x \in \mathbb{N}$, $M(x^b) = f(x)_b$, and we will say that the machine $M$ \textbf{implements} $f$. If we can show that all of the recursive functions can be implemented by Turing machines, then it will follow that in particular the coding/decoding functions are implementable, and while the details would be messy, it should be easy to see from that point that the process of decoding the output 'number' $f^*(n)$ and writing out the symbols of the actual function $f$ is extremely doable. Thus if we can show that all recursive functions are implementable by a Turing machine, then it will follow that the two models of computation are equivalent. That is to say, the set of functions which are computable in both models are in fact the same.
+\end{comment}
+\par For this and the rest of these notes, unless otherwise noted we will assume that our alphabet is $\{0,1,\sqcup,\triangleright\}$.
+\begin{lemma}
+    There is a Turing machine $M_0$ which implements the zero function.
+\end{lemma}
+\begin{proof}
+     Our Turing machine has starting state and halting state $q_0$ and $q_h$ respectively, and a single nontrivial state $q_1$. Define the transition function by $\delta(q_0,\triangleright) = (q_1,0,1)$, $\delta(q_1,0)=(q_1,1) = (q_1,0,1)$, and $\delta(q_1,\sqcup) = (q_h,0,1)$ Clearly this Turing machine just makes the first entry a 1, and replaces all other entries with a 0, as desired.
+\end{proof}
+\begin{lemma}
+    There is a Turing machine $M_s$ which implements the successor function. 
+\end{lemma}
+\begin{proof}
+    Define $Q=\{q_s,q_h,q_m,q_0,q_1\}$, where $q_s$ and $q_h$ represent our starting and halting states respectively. 
+    First, we move the cursor all the way right to the final bit. So define $(q_s,\triangleright) = (q_m,\triangleright,1)$, $\delta(q_m,0)=(q_m,0,1)$, $\delta(q_m,1)=(q_m,1,1)$, $\delta(q_m,\sqcup)=(q_1,\sqcup,-1)$. Now we need to add 1 and possibly carry, while moving left. The state $q_1$ represents that we have carried a bit and need to add, and we will move left while possibly carrying until returning to the $\triangleright$, signifying that we're done. To this end, $\delta(q_1,0)=(q_0,1,-1)$, $\delta(q_1,1)=(q_1,0,-1)$, $\delta(q_1,\triangleright)=(q_h,1,0)$, $\delta(q_0,0)=(q_0,0,-1)$, $\delta(q_0,1)=(q_0,1,-1)$, $\delta(q_0,\triangleright)=(q_h,0,0)$. The $\triangleright$ will have been replaced by a $0$ or a $1$, but in either case the output will be the binary representation of $x+1$. 
+\end{proof}
+\begin{lemma}
+    For any positive integers $n$, $1 \leq i\leq n$, There exists a Turing implementing the projection function $U_i^n$. Formally, in place of an $n-ary$ vector $(x_1^b,x_2^b...,x_n^b)$, we will expect a string of the form $x_1^b;\triangleright;x_2^b;\triangleright;...;\triangleright;x_n^b$, and our Turing machine $M_i^n$ will return the string $x_i^b$.
+\end{lemma}
+\begin{proof}
+    Remember that we are defining a separate Turing machine for each $i,n$. Thus it is perfectly legal to let $Q=\{q_0,q_1,q_2,...q_i,q_e,q_h\}$, where $q_0$ and $q_h$ are the starting and halting states respectively. For $b=0,1$, and $0 \leq j < i$, define $\delta(q_j,\triangleright)=(q_{j+1},0,1)$, and $\delta(q_j,b)=(q_j,0,1)$. Thus up until the '$i^{th}$ entry', we replace everything with 0, while counting based on how many $\triangleright$'s we see. Of course, we should leave the string alone once we arrive at $i$, so $\delta(q_i,b)=(q_i,b,1)$ for $b=0,1$. Once we finish scanning over the input we want to return, we enter an 'erasing state', called $q_e$, in which we replace everything with blanks. $\delta(q_i,\triangleright)=(q_e,\triangleright,1)$, and $\delta(q_e,b)=(q_e,\sqcup,1)$ for any $b=0,1,\triangleright$. Finally, once we encounter an actual blank, we halt: $\delta(q_e,\sqcup)=(q_h,\sqcup,0)$. The output will be the binary encoding of the desired entry. In fact, this Turing machine actually defines $U_i^n$ for \textit{every n} at once.
+\end{proof}
+We already know that any two Turing machines can be composed, and so certainly the composition of two functions that can each be computed via Turing machines is also computable by a Turing machine in this way.
+Note that all of the results we've shown apply to unary functions. To think about implementing arbitrary $k$-ary functions, we can in a restricted way allow blanks in the input, where the blanks represent breaks between entries. To show that Turing machines can implement the primitive recursive scheme, we need to show the following:
+\begin{lemma}
+    Let $f$ be a function such that there exists PRIM functions $g,h$ which satisfy the primitive recursive scheme for $f$, and such that there exist Turing machines $M_g,M_h$ implementing $g,h$ respectively. Then there exists a Turing machine $M$ implementing $f$.
+\end{lemma}
+\begin{proof}
+    With everything we have already, describing a machine to compute $f$ is not difficult. For simplicity, our machine will have $3$ strings. The first string will hold results, while the second and third will exist to process the subroutines of $M_g$ and $M_h$ respectively. We're going to assume for the sake of simplicity that the machine we have for $M_h$ has the special property that it never moves it's cursor left of the starting input (this is a safe assumption because we know everything can be done on tape which only extends one direction). \par
+    At the start of the computation, the machine immediately copies $\vec{m}$ onto the second string and computes $g(\vec{m})$ on this string as a subroutine. Once this is finished, it checks it's second input, $n$. If $n=0$, then it copies the contents of the second tape string onto the third. There is more to say of the $0$ case, but let's first address the case $n \neq 0$. In this case, $n$ is replaced with $n-1$ on the first string, and $\vec{m}$, as well as $n-1$, are copied onto the third tape string, with spaces in between just as if they were inputs. (The cursor moves over one before beginning the copying of $\vec{m}$, so that in the first case, we print inputs adjacent to the $\triangleright$, and in latter cases we leave a space.) The machine leaves it's second cursor on the blank to the right of the $n-1$, moves it's first cursor back to the initial $\triangleright$, and enters back into the initial state which the computation started in. \par
+     The effect that this produces is to continually decrement the value of $n$ in the first string, while counting down in the second string. By the time $n$ reaches $0$, the second string will look like 
+     \[ \triangleright \vec{m} \sqcup n-1 \sqcup \vec{m} \sqcup n-2 \sqcup \ldots \sqcup \vec{m} \sqcup 0 \sqcup g(\vec{m}) \sqcup \]
+    With the cursor guaranteed to pointing at the very last $\sqcup$. We now continue our description of the $n=0$ case, though one can guess what happens at this point. The second cursor moves back until encountering the appropriate number of inputs for a computation of $h$, and executes the $M_h$ subroutine. It continues to do this until reaching a $\triangleright$, at which point the machine enters it's final phase of operation - erasing whatever is currently present on the third string, copying in it's place whatever exists on the second string past the $\triangleright$, and halting.
+\end{proof}
+This leaves us with the corolemma:
+\begin{corollary}
+    All PRIM functions can be implemented by a Turing machine.
+\end{corollary}
+What remains is to show that Turing machines can implement the minimization operator. The reader may have noticed that we so far haven't used an essential fact about Turing machines - the existence of a universal one. It is with the minimization operator that we make use of this. \par 
+\begin{proof}
+Suppose that $M_1$ is a Turing machine, which may or may not halt on any input. Note that counting up in binary and counting up in the integers coincide, so we can think of binary strings as being ordered in the natural way. Suppose that there exists a least $y_0$ such that $M_1(x;y)$ is both defined and nonzero for each $y<y_0$, and such that $M_1(x;y)=0$. Define the Turing machine $M$, which on input $x$, simulates $M_1$ on the input $x;y$, until it halts, for each $y$, starting at $y=0$. If ever $M$ finds that $M_1(x;y)=0$, it halts and outputs that $y$. Else, it just keeps counting up. If $M_1(x;y)=\nearrow$ for some particular $y$, then $M(x)=\nearrow$ as well, but $M$ is still well defined, which precisely coincides with when a function is partial recursive as defined via the minimization operator. This finally completes the equivalence.
+\end{proof}
+We finally have the following:
+\begin{theorem}
+    \par The Turing machine model of computation is equivalent to the recursive function model. For any fixed alphabet, the set of recursive functions with their inputs and outputs decoded as numbers is precisely the set of Turing machine computable functions, and the set of all Turing machine computable functions when coded as numbers is precisely the set of recursive functions.
+\end{theorem}
+Since decision problems can be thought of as characteristic functions of a unary relation, the set of decision problems which are decidable by a Turing machines is precisely the set of decision problems whose characteristic function is recursive, justifying our wording in the next definition.
+Note that the set of recursive decision problems can alternatively be defined as the set of recursive relations. Also note that we now have an easy way to prove in general that a model of computation is "as powerful as any other model of computation", by the Church Turing Thesis. To show that any model of computation is equivalent to all other models of computation, we just need to show that it can compute the recursive functions. And when you stop to think about it, that's really quite simple. Let's say that you want to show that your favorite programming language is Turing complete. Then by the theorem we just proved, you only need the following:
+\begin{enumerate}
+    \item You need a function that outputs 0 all the time, a function which adds one, and a function which returns specific elements out of an array.
+    \item You need to be able to plug the outputs of your functions into other functions as inputs
+    \item You need to be able to implement primitive recursion. That is to say, you need to be able to have functions which call on themselves.
+    \item You need to be able to search indefinitely for stuff, and during the search be able to run subroutines which might themselves end up searching indefinitely for stuff.
+\end{enumerate}
+That's it. If you can do these things, then your model of computation is equivalent to that of a Turing machine, and by the Church Turing Thesis, equivalent to all other sufficiently complex models of computation.
+\par At this point we should summarize some of what what we've done. To each integer $m$, we can recursively decode a string which may or may not define a valid Turing machine. If it doesn't, let us use the convention that the $m^{th}$ Turing machine is just the 'empty machine' which halts immediately on every input. This defines an example of what is called an \textbf{admissible numbering} of all Turing machines. Since every Turing machine can be viewed as a unary recursive function, where the integer inputs are viewed as coded string inputs to the Turing machine, this is also an admissible numbering of all unary recursive functions. We can be sure that it is indeed \textit{all} of them, because every recursive function can be implemented by a Turing machine. We denote this numbering $\{\phi_m^{(1)}\}_{m=0}^{\infty}$ (where the $(1)$ reminds us that these are the unary partial recursive functions). Similarly, by simply viewing our Turing machines as $k$-ary functions by \textit{some} convention (it doesn't matter which, so long as we have agreed to fix one, which you can assume we have), we obtain what we will call an admissible numbering of $\{\phi_m^{(k)}\}_{m=0}^{\infty}$ of all $k$-ary partial computable functions. Note that we have a different enumeration of these functions for any number of arguments. This is reflective of repeating the proof that Turing machines are recursive, but with the Turing machine taking in multiple arguments, to arrive at new corresponding universal functions $g$. Note that these numberings of partial recursive functions, although surely listing them all out, aren't enumerations in the conventional sense, for several reasons. First, through padding of the same Turing machine with multiple "useless" states which don't actually matter, along with lots of other possible reasons, there will always be an infinite number of Turing machines to compute the same function, and thus \textit{every partial recursive function will thus appear infinitely often in the list.} We should now prove some obvious theorems about these numberings, and attach names to some of our observations:
+\begin{theorem}[The Enumeration Theorem]
+    $\phi_z(x)$ is a partial computable function of $z$ and $x$. (I.e. given a $z$ and $x$, it is a computable process to enumerate the partial computable functions.)
+\end{theorem}
+\begin{proof}
+    We've already described how to compute $\phi_z(x)$, but to summarize: First, decode $z$ to determing the Turing machine $M$ coded by it. Then, run $M(x)$. If it halts, the output of the Turing machine is the desired output.
+\end{proof}
+\begin{lemma}[The Padding Lemma]
+    If $f$ is a partial computable function, then there exist infinitely many indices $i$ such that $\phi_i = f$.
+\end{lemma}
+\begin{theorem}[The Universal Turing Machine Theorem]
+    There exists a universal Turing machine, that is, a number $U$, such that for all pairs $(e,x)$
+    \[ \phi_U^{(2)}(e,x) = \phi_e(x) \] 
+\end{theorem}
+\begin{proof}
+    We can prove this in two different ways, and have already! The first way would be to simply take the universal Turing machine that we explicitly defined earlier, and use the encoding of that machine as our index. The second way would be to simple note that the function $g$ which was defined in equation \ref{utm} \textit{is} a universal Turing machine, and note that because every recursive function can be implemented by a Turing machine, it has to be indexed somewhere.
+\end{proof}
+\begin{theorem}[The Kleene Normal Form Theorem]
+    Any arbitrary partial recursive function can be defined with no more than one single use of the minimization operator $\mu$. More specifically, if $f$ is partial recursive, then there exist primitive recursive functions $g$ and $h$ such that
+    \begin{align}
+        f(n) = h(\mu t [g(n,t) = 0])
+    \end{align}
+    This representation is known as the Kleene Normal form of $f$. 
+\end{theorem}
+\begin{proof}
+    Simply recall that our universal partial recursive function $g(m,x)$ from our proof that Turing machine computations are recursive is in this form already. Since cycling through all possible $m$ cycles through every partial recursive function, we must conclude that every partial recursive function has this form.
+\end{proof}
+I honestly don't understand the importance of this next very technical theorem. It is here for my own reference.
+\begin{theorem}[The s-m-n Theorem]
+    If $m,n \geq 1$, then there exists a computable function $S_n^m$ such that for all $x,y_1,...,y_m,z_1,...,z_n$
+    \[ \phi_{S_n^m(x,y_1,...,y_m)}^{(n)}(z_1,...,z_n) = \phi_x^{(n+m)}(y_1,...,y_m,z_1,...,z_n) \]
+    I guess what this theorem is actually saying is that given a computable $k$-ary computable function, we can always view it as a compositional process, in which we first perform one computation on some number of the inputs, and then from that getting the index of another function which we can evaluate on the rest of the inputs.
+\end{theorem}
+\begin{proof}
+ Todo
+\end{proof}
+\begin{theorem}[The Kleene Fixed Point Theorem (Sometimes called the Recursion Theorem)]
+    If $f$ is a computable function, then there exists a $k \in \mathbb{N}$ such that 
+    \[ \phi_{f(k)} = \phi_k \]
+\end{theorem}
+\begin{proof}
+    First, we define a Turing machine $M$ which, on input $x$, first seeks to compute $\phi_x(x)$, (that is to say, simulates the $x^{th}$ Turing machine on input $x$) and then goes on to compute $\phi_{\phi_x(x)}(x)$ if and when that simulation halts. Then clearly $M$ defines a partial recursive function, which has it's own index, call it $h(x)$. To summarize, for each $x$, we have a computable function $h(x)$ such that for all $y$,
+    \begin{align}
+        \phi_{h(x)}(y) = \phi_{\phi_x(x)}(y) \label{kfp}
+    \end{align}
+    Then $f \circ h$ is itself a computable function, with its own index $e$. i.e. $f(h(x)) = \phi_e(x)$. Finally, taking $y = e$ in the above equation (\ref{kfp}), we have 
+    \[ \phi_{f(h(e))} = \phi_{\phi_e(e)} = \phi_{h(e)} \]
+    Thus, our fixed point is $h(e)$.
+\end{proof}
+\par We will define as an \textbf{admissible numbering} any comprehensive indexing of the partial recursive function such that both the function which maps indices to the partial recursive functions, as well as the function which maps the partial recursive functions \textit{back} to the indices are both recursive. 
+\section{The Ackerman Function and the Arithmetic Hierarchy}
+

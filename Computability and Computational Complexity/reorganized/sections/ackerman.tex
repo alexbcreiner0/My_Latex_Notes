@@ -1,0 +1,297 @@
+\section{The Ackerman Function and the Arithmetic Hierarchy}
+\begin{definition} 
+    Let \textbf{PR} denote the class of problems which are decidable by a primitive recursive function. That is to say, the characteristic function for the language, where strings have been recursively coded as integers, is PRIM.
+\end{definition}
+Clearly \textbf{PR} $\subseteq$ \textbf{R}, but is it proper? Given what we've done so far it would seem like the answer is yes, but we don't have a confirmed case of this. To confront this, let's take a look back at the primitive recursive way that we defined addition, multiplication, and exponentiation. These were all defined with the same idea, in terms of the 'previous' operation:
+\[a+b = \begin{cases}
+			a & \textrm{if } b=0 \\ 
+			a+(b-1)+1 & \textrm{else }
+			\end{cases} \]
+\[ab = \begin{cases}
+			0 & \textrm{if } b=0 \\
+			a(b-1)+a & \textrm{else}
+			\end{cases} \]
+\[a^b = \begin{cases}
+			1 & \textrm{if } b=0 \\
+			a^{b-1}a & \textrm{else }
+			\end{cases} \]
+Let's generalize the notation here. Instead of writing $a+b$, we will write $a[1]b$. Instead of writing $ab$, we will write $a[2]b$. And so forth. Then we have
+\[a[1]b = \begin{cases}
+			a & \textrm{if } b=0 \\ 
+			a[0](a[1](b-1)) & \textrm{else }
+			\end{cases} \]
+\[a[2]b = \begin{cases}
+			0 & \textrm{if } b=0 \\
+			a[1](a[2](b-1)) & \textrm{else}
+			\end{cases} \]
+\[a[3]b = \begin{cases}
+			1 & \textrm{if } b=0 \\
+			a[2](a[3](b-1)) & \textrm{else }
+			\end{cases} \]
+Where $a[0]b$ is defined to be the $b+1$, i.e. we view the unary successor function as a binary function which ignores the first argument. The base cases seem different every time, but the convention is to make the base case $1$ from here onward. 
+\begin{definition}
+	The $k^{th}$ \textbf{hyper operation} is defined using the primitive recursive scheme via
+	\begin{align}
+		a[k]b := \begin{cases}
+								b+1 & \textrm{if } k=0 \\
+								a	& \textrm{if } k=1 \textrm{ and } b=0 \\
+								0	& \textrm{if } k=2 \textrm{ and } b=0 \\
+								1	& \textrm{if } k \geq 3 \textrm{ and } b=0 \\
+								a[k-1](a[k](b-1)) & \textrm{otherwise}
+				\end{cases}
+	\end{align}
+\end{definition}
+It should be immediately clear that $a[1]b = a+b$, $a[2]b = ab$, and so forth. This is clearly PRIM, and one should note that we can view all of the operations \textit{together} as a three variable function. Viewed this way we will use the notation $H_k(a,b)$. Observe the nontrivial case: $H_k(a,b) = H_{k-1}(a,H_k(a,b-1))$. We will look at a two variable variant of this function, known as the \textbf{Ackerman function}, and defined as follows:
+\begin{align}
+    A(m,n) = \begin{cases}
+                n+1 & \textrm{ if $m = $0} \\
+                A(m-1,1) & \textrm{ if $m>0$ and $n=0$} \\
+                A(m-1,A(m,n-1)) & \textrm{ if $m>0$ and $n>0$} \\
+             \end{cases}
+\end{align}
+This is definitely a very weird looking function at first sight. It is recommended that the reader compute $A(2,2)$ to get an idea of things. Despite being extraordinarily confusing to look at, it is plain to see that the function is defined only via recursive calls to addition. The effective algorithm for computing $A$ is clear, and you showed it to yourself when you computed $A(2,2)$. It is clearly also total - every recursive call to $A$ decrements \textit{something}. We give a formal proof below. Thus, $A$ is recursive. It might be tempting to think that this function is PRIM - the recursive definition certainly makes it look at first glance like this should not only be true but obvious. However, a moments reflection about why this thing looks so weird in the first place shows why it is not at all obviously PRIM. The recursion is \textit{nested}. \textit{Double recursion}. 
+\par We need a few basic facts about this function to begin making sense of it:
+\begin{lemma}
+    We have the following properties of $A$. Let $k,n,m$ be integers.
+    \begin{enumerate}
+        \item $A$ is total. 
+        \item $A(1,n) = n+2$
+        \item $A(2,n) = 2n+3$
+        \item $n < A(m,n)$
+        \item $A(m,n) < A(m,n+1)$ (So $A$ is increasing in the second argument.)
+        \item $A(m,n+1) \leq A(m+1,n)$
+        \item $A(m,n) < A(m+1,n)$ (So $A$ is increasing in the first argument.)
+        \item $A(k,A(m,n)) < A(k+m+2,n)$
+        \item There exists a $t_{km}$ such that $A(k,n)+A(m,n)<A(t_{km},n)$ (i.e. this $t$ is independent of $n$.)
+    \end{enumerate}
+\end{lemma}
+\begin{proof}
+    \begin{enumerate}
+        \item We show this by induction. For $m=0$, $A(0,n) = n+1$, so yeah. Assume that for some $m$, we have that $A(m,n) \neq \nearrow$ for all $n$. We need to show that $A(m+1,n) \neq \nearrow$ for all $n$, and this itself we do by induction. For $n=0$, $A(m+1,0) = A(m,1) \neq \nearrow$ by hypothesis. Now, for $n>0$, $A(m+1,n+1) = A(m,A(m+1,n)) \neq \nearrow$ by the hypothesis. This completes the induction.
+        \begin{align}
+        A(1,n) &= A(0,A(1,n-1)) = A(1,n-1)+1 = A(0,A(1,n-2))+1 \\
+               &= A(1,n-2)+1+1 = A(1,n-2)+2 = ... = A(1,0)+n \\
+               &= A(0,1) + n = 1+1+n = n+2
+        \end{align}
+        \item By induction on $n$. Note $A(2,0) = A(1,1) = A(0,A(1,0)) = A(1,0)+1 = A(0,1)+1 = 1+1+1 = 3 = 2(0)+3$. Thus, assume the statement holds for some $n$. Then $A(2,n+1) = A(1,A(2,n)) = A(1,2n+3) = 2n+3+2 = 2(n+1)+3$, completing the induction.
+        \item By induction on $m$, but we actually need two base cases. For $m=0$, $A(0,n)=n+1 \Rightarrow n < A(0,n)$. For $m=1$, $A(1,n) = n+2$ by item $1$, so of course $n < A(1,n)$. Now, assume that for all $j \leq m$ for some $m > 0$, we have that $n < A(j,n)$. Then $A(m+1,n+1) = A(m,A(m+1,n)) > A(m+1,n)$ by the hypothesis, giving us 
+        \[ A(m+1,n) < A(m+1,n+1) \]
+        But then
+        \[ n < A(m,n) \Rightarrow n+1 \leq A(m,n) < A(m-1,A(m,n)) = A(m,n+1) \]
+        (Note why we needed two base cases, we needed to assume that $m \geq 1$ so that $n < A(m-1,n)$ would be well defined.) Thus for all $n$, we have that $n+1 < A(m,n+1)$. It remains to show that $A$ is strictly positive, but assuming we get that at some point (since that would imply $0 < A(m,0)$), we're done.
+        \item By induction on $m$. For $m=0$, $A(0,n) = n+1 < n+2 = A(1,n)$, so the base case holds. Assume for some $m$, $A(m,n) < A(m,n+1)$ for all $n$. Then $A(m+1,n) < A(m,A(m+1,n)) = A(m+1,n+1)$ (where the second to last inequality is due to item $4$), completing the induction.
+        \item We induct on $n$. For $n=0$, $A(m,1) = A(m+1,0)$ by definition. Suppose for some $n$, we have that for all $m$, $A(m,n+1) \leq A(m+1,n)$. Then since $n+1 < A(m,n+1)$, $n+2 \leq A(m,n+1)$, so $A(m,n+2) \leq A(m,A(m,n+1)) \leq A(m,A(m+1,n))=A(m+1,n+1)$, completing the induction.
+        \item $A(0,n) = n+1$, while $A(1,n) = n+2$, so base case holds. Assume for some $m$, have that for all $n$, $A(m,n) < A(m+1,n)$. Then $A(m+1,n) < A(m,A(m+1,n)) < A(m+1,A(m+1,n)) \leq A(m+1,A(m+2,n-1) = A(m+2,n)$. This of course assumes that $n \geq 1$. If $n=0$, then $A(m+1,0) = A(m,1) < A(m+1,1) = A(m+2,0)$, completing the induction.
+        \item Putting all of these facts together: \[ A(k,A(m,n)) < A(k+m,A(m,n)) < A(k+m,A(k+m+1,n)) = A(k+m+1,n+1) \leq A(k+m+2,n) \]
+        \item First, $z = \max\{k,m\}$. Then $A(k,n)+A(m,n) \leq 2A(z,n)<2A(z,n)+3=A(2,A(z,n))<A(2+z+2,n)=A(4+z,y)$. The proof is then completed by setting $t_{km}:=4+z$
+    \end{enumerate}
+\end{proof}
+The next lemma states for the record the connection between the Ackerman function and hyperoperators.
+\begin{lemma}
+	For all $m > 1$, $A(m,n) = 2[m](n+3)-3$.
+\end{lemma}
+\begin{proof}
+	For the base case $m=2$, note that by (3) of the previous lemma we have  \[ A(2,n) = 2n+3 = 2(n+3)-3 = 2[2](n+3)-3 \].
+	Now for the inductive case, let $n=0$. (todo)
+\end{proof}
+\begin{fact}
+    The Ackerman function is not primitive recursive.
+\end{fact}
+\begin{proof}
+    Define the set $\mathcal{A}$ as follows:
+    \[ \mathcal{A} = \{f: \exists t \forall x_1,x_2,...,x_n f(x_1,...,x_n) < A(t,max\{x_i\})\} \]
+    Where $f$ is a function which takes some number $n$ of natural number inputs to some natural number output. Note that this is essentially a way to define what it means for a function to grow slower than another function independent of "arity". We will show that the set of all primitive recursive functions is a subset of $\mathcal{A}$. It will follow that $A$ cannot be PRIM, because if it were, then it would be that $A \in \mathcal{A}$, and so there would be a $t$ such that for all pairs $x_1,x_2$, $A(x_1,x_2) < A(t,\max\{x_1,x_1\})$, but this is impossible since, taking $x_1=x_2=t$, we would be saying that $A(t,t)<A(t,t)$.
+    \par To show this, we will show that the zero, successor, and projection functions are in $\mathcal{A}$, and then show that $\mathcal{A}$ is closed under function composition and the primitive recursion scheme. For the zero function, note that if we pick $t=0$, $z(n) = 0 < n+1 = A(0,n)$, so $z \in \mathcal{A}$. For the successor function, pick $t=1$. Then we see that $s(n) = n+1 < n+2 = A(1,n)$ for all $n$, so $s \in \mathcal{A}$. For the arbitrary projection function $U_m^k$, let $x := \max\{x_1,...,x_k\}$, and picking $t=0$ again we note that $U_m^k(x_1,...,x_k) = x_m \leq x < x+1 = A(0,x)$ for all $k$-tuples  $(x_1,...,x_k)$. So $U_m^k \in \mathcal{A}$.
+    \par Towards closure under function composition, let $g_1,...,g_m$ be $k$-ary, $h$ be $m$-ary, and $g_1,...,g_m,h \in \mathcal{A}$. This means there exist $t_1,...,t_m,s$ such that for all $k$-tuples, $\vec{x}$, $g_i(\vec{x}) < A(t_i,\max\{\vec{x}\})$, and for all $m$-tuples $\vec{x}$, $h(\vec{x}) < A(s,\max\{\vec{x}\})$. We wish to show that the $k$-ary function $f = h(g_1,...,g_m) \in \mathcal{A}$. Let $g_j(\vec{x}) = \max\{g_i(\vec{x})\}$. Then
+    \begin{align}
+        f(\vec{x}) = h(g_1(\vec{x}),...,g_m(\vec{x}) < A(s,g_j(\vec{x})) < A(s,A(t_i,\max\{x_i\}) < A(s+t_j+2,\max\{x_i\})
+    \end{align}
+    Thus, picking $t = s+\max\{t_1,...,t_n\}+2$ produces the desired result.
+    \par Finally we turn to the primitive recursion scheme. Suppose that $g$ is $k$-ary, $h$ is $(k+2)$-ary, and $g,h \in \mathcal{A}$. That is to say, there exists $r,s$ so that $g(\vec{x}) < A(r,\max\{\vec{x}\})$ and $h(\vec{y}) < A(s,\max\{\vec{y}\})$ for all $\vec{x} \in \mathbb{N}^k,\vec{y} \in \mathbb{N}^{k+2}$. What we need to show is the function defined by 
+    \begin{align}
+        f(\vec{x},n) = \begin{cases}
+                            g(\vec{x}) & \textrm{ if n=0} \\
+                            h(\vec{x},n-1,f(\vec{x},n-1) & \textrm{ otherwise}
+                       \end{cases}
+    \end{align}
+    is in $\mathcal{A}$. We go about this by proving the subclaim that there exists a $t$ such that
+    \[ f(\vec{x},n) < A(t,n+\max\{\vec{x}\}) \]
+    For any $\vec{x},n$. It will follow that $f \in \mathcal{A}$: Pick $t = \max\{\max\{\vec{x}\},n\}$. Then the subclaim shows that $f(\vec{x},n) < A(t,n+\max\{\vec{x}\}) \leq A(t,2z) < A(t,2z+3)=A(t,A(2,z))=A(t+4,z)$, i.e. this is the $t$ we are looking for. To prove the subclaim, let $t = \max\{r,s\}+1$. We claim this works, and show this by induction on $n$. For $n=0$, $f(\vec{x},0) = g(\vec{x}) < A(r,\max\{\vec{x}\}) < A(t,n+\max\{\vec{x}\})$. Next suppose that for some $n$, we have that $f(\vec{x},n) < A(t,n+\max\{\vec{x}\})$ for all $\vec{x}$. Then $f(\vec{x},n+1) = h(\vec{x},n,f(\vec{x},n)) < A(s,z)$, where $z = \max\{\max\{\vec{x}\},n,f(\vec{x},n))\}$. Note that $\max\{\max\{\vec{x}\},n\}\leq n+\max\{\vec{x}\} < A(t,n+\max\{\vec{x}\})$. But then when combined with the inductive hypothesis this gives us that $z < A(t,n+\max\{\vec{x}\})$. Thus $f(\vec{x},n+1) < A(s,z) < A(s,A(t,n+\max\{\vec{x}\})) \leq A(t-1,A(t,n+\max\{\vec{x}\}))= A(t,n+\max\{\vec{x}\})$, completing the induction, and subsequently the claim that $\mathcal{A}$ is closed under primitive recursion.
+    \par Thus, we have that the set of all primitive recursive functions is contained in $\mathcal{A}$, completing the proof.
+\end{proof}
+\begin{corollary}
+	If a function $f(n)$ is primitive recursive, then there exists a hyperoperator degree $k$ such that $f(n) < 2[k]n$ for all $n$.
+\end{corollary}
+\begin{proof}
+	Suppose this weren't the case. I.e. for all $k$, there existed an $m$ such that $f(m) \geq 2[k]n$.  But then, setting $n = m-3$, we have 
+	\[ f(n+3) = f(m) \geq 2[k]m = 2[k](n+3) > 2[k](n+3)-3 = A(k,n+3) \] Thus, $f(n) \notin \mathcal{A}$, and hence cannot be PRIM. 
+\end{proof}
+Of course, it should follow from this that \textbf{PR} is proper in \textbf{R}, but it will be convenient to defer the proof of this to a bit later, when we have defined a complexity measure.
+Before moving on, let's try to connect the idea of the Ackerman function to the idea of the natural 'repeating the last thing' elementary math operations. 
+\par Turning back to \textbf{RE}, we next note an equivalent definition of the class, in terms of quantifiers. We say that a $k$-ary relation R is computable if the set $\{x_1;x_2;...;x_k: (x_1,x_2,...,x_k) \in R\}$ is decidable. Equivalently, a relation R is computable if it's characteristic function is recursive.
+\begin{theorem}
+    A language $L \in \textbf{RE}$ iff there exists a computable binary relation R such that 
+    \[ x \in L \iff \exists y R(x,y) \]
+\end{theorem}
+\begin{proof}
+    First, suppose that there is a relation $R$ with the properties described. Let $M$ be the Turing machine which decides $R$. Then we could construct a machine $N$ which accepts $L$ by having $N$ lexicographically runs through the set of possible all possible inputs $y$, interlacing steps of the computation $M(x,y)$ in a dovetail search. This machine $N$ clearly accepts $L$, so $L \in \textbf{RE}$.
+    \par Conversely, suppose $L \in \textbf{RE}$. Let $M$ be a Turing machine which accepts $L$. Define the relation $R$ by $(x,y) \in R$ iff $M$ accepts $x$ in less than $y$ steps. Clearly this relation is recursive: For any $y$ we can just simulate $M(x)$ while counting the steps, halting in rejection when the number of steps reaches $y$, and accepting otherwise. $M$ accepts $x$ iff the machine eventually halts after a finite number of steps, so clearly $x \in L$ iff $\exists y R(x,y)$.
+\end{proof}
+\begin{corollary}
+    A language $L \in \textbf{coRE}$ iff there exists a computable binary relation R such that \[ x \in L \iff \forall y R(x,y) \].
+\end{corollary}
+\begin{proof}
+    A language $L$ is in \textbf{coRE} iff it's complement $L^c \in \textbf{RE}$. By the above theorem this is of course true iff there is a computable binary relation $R$ such that $x \in L^c$ iff $\exists y R(x,y)$, but then negating both sides of this gives that $x \in L \iff \forall y \neg R(x,y)$. Of course, since \textbf{R} is self dual, $\neg R(x,y)$ is itself a computable relation, so we're done.
+\end{proof}
+Thus, we can view the \textbf{RE} languages as those which are "one existential quantifier away" from being recursive, and the \textbf{coRE} languages as those which are "one universal quantifier away" from being recursive. Of course, if there was a $3$-ary computable relation $R$ such that $x \in L \iff \exists y \exists z R(x,y,z)$, this language would still be in \textbf{RE}, just by viewing the $y$ and $z$ as one object. By \textit{alternating} the quantifiers, however, we seem to get higher and higher \textit{degrees} of uncomputability. We formalize this in the following definition
+\begin{definition}
+    The \textbf{arithmetic hierarchy} is defined as follows: First,
+    \begin{align}
+        \Sigma_0^0 = \Pi_0^0 = \Delta_0^0 = \textbf{R}
+    \end{align}
+    \par Next, for all integers $n \geq 0$, we say that a language $L \in \Sigma_{n+1}^0$ iff there exists a binary relation $R \in \Pi_n^0$ such that $x \in L \iff \exists y R(x,y)$. Finally, we define $\Pi_{n+1}^0 = \textbf{co}\Sigma_{n+1}^0$, and $\Delta_{n+1}^0 = \Sigma_{n+1}^0 \cap \Pi_{n+1}^0$.
+\end{definition}
+So from the above definition, $\Sigma_1^0 = \textbf{RE}$, $\Pi_1^0 = \textbf{coRE}$, and $\Delta_1^0 = \textbf{R}$. Note that the definition can be "unpacked" to yield characterizations of each class in terms of recursive relations which are in analogy with those of \textbf{RE} and \textbf{coRE}: For instance, a language $L \in \Sigma_2^0$ iff there exists a binary relation $S \in Pi_1^0 = \textbf{coRE}$ such that $x \in L \iff \exists y_1 R_1(x,y_1)$, but $R_1 \in \textbf{coRE}$ means there exists a recursive relation $R_2$ such that $x;y_1 \in R_1 \iff \forall y_2 R_2(x;y_1,y_2)$. Thus, if we define the $3$-ary relation $R$ by $(x,y_1,y_2) \in R$ iff $(x;y_1,y_2) \in R_2$, then $R$ is clearly recursive (by more or less the exact same machine such that decides $R_2$), and  
+\[ x \in L \iff \exists y_1 \forall y_2 R(x,y_1,y_2) \] 
+\begin{corollary}
+    Let $L$ be a language, $n \geq 1$. Then $L \in \Sigma_n^0$ iff there exists a polynomially balanced $(n+1)$-ary recursive relation $R$ such that
+    \begin{align}
+        x \in L \iff \exists y_1 \forall y_2 \exists y_3 ... Q y_n(x,y_1,y_2,y_3,...,y_n) \in R
+    \end{align}
+    Where the $n^{th}$ quantifier is $\forall$ if $n$ is even, and $\exists$ if $n$ is odd. \\
+    Similarly, $L \in \Pi_n^0$ iff there exists a polynomially balanced $(n+1)$-ary computable relation $R$ such that
+    \begin{align}
+         x \in L \iff \forall y_1 \exists y_2 \forall y_3 ... Q y_n(x,y_1,y_2,y_3,...,y_n) \in R
+    \end{align}
+    Where the $n^{th}$ quantifier is $\exists$ if $n$ is even, and $\forall$ if $n$ is odd.
+\end{corollary}
+\section{Logic, and Godel's Theorems}
+\subsection{First Order Logic}
+\begin{definition}
+    A \textbf{first order vocabulary} or just a \textbf{vocabulary} (more typically referred to as a language but we've unfortunately misused that word already for something else) is a triple $\Sigma = (\Phi,\Pi,r)$. $\Phi$ and $\Pi$ are disjoint, countable sets of symbols, with elements of $\Phi$ being called \textbf{function symbols}, and elements of $\Pi$ being called \textbf{relation symbols}. $r: \Phi \cup \Pi \to \mathbb{N}$ is called the \textbf{arity function}. If $f$ is a function/relation symbol with $r(f)=k$, then we call $f$ a \textbf{k-ary function/relation}. A $0$-ary function is otherwise known as a \textbf{constant}. $\Pi$ will always be assumed to contain a special binary relation symbol $=$, (i.e. $r(=)=2$), called the \textbf{equality} relation. Across all vocabularies we will assume that we have a countable set of \textbf{variables} $V = \{x,y,z,...\}$, as well as all of the logical symbols which were present for Boolean logic. 
+\end{definition} 
+A vocabulary is exactly what it sounds like: a vehicle for writing in a language. We designate which strings of symbols in the language are to be seen as actual words: 
+\begin{definition}
+    We define the \textbf{terms} of a vocabulary $\Sigma$ as follows: First, any variable is a term. Then, if $f \in \Phi$ is a $k$-ary function symbol, and $t_1,...,t_k$ are terms, then $f(t_1,...,t_k)$ is also a term. (This means that every constant symbol is a term as well.) We next define the \textbf{expressions} over $\Sigma$ inductively as follows. First, if $R \in \Pi$ is a $k$-ary relation symbol, and $t_1,...,t_k$ are terms, then $R(t_1,...,t_k)$ is an expression, which we call an \textbf{atomic expression}. Just as in Boolean logic, if $\phi$ and $\psi$ are expressions, then $(\neg \phi)$, $(\phi \vee \psi)$, and $(\phi \wedge \psi)$ are all also expressions, with $(\phi \Rightarrow \psi)$ and $(\phi \iff \psi)$ as shorthand for what they represented in Boolean logic. Finally, if $\phi$ is an expression, and $x$ is any variable, then $(\forall x \phi)$ is an expression. We also use $(\exists x \phi)$ as shorthand for the expression $(\neg \forall \neg \phi)$. These 'valid' expressions are otherwise known as \textbf{well formed formulas}, or \textit{wffs} for short.
+\end{definition}
+There are three examples of vocabularies which are of the utmost importance:
+\begin{example}
+    The vocabulary of \textbf{graph theory} $\Sigma_G$ is one with no function symbols (i.e. $\Phi_G = \varnothing$), and one binary relation symbol besides $=$, labelled $G$. Intuitively, $G(x,y)$ says "There is an edge between $x$ and $y$."
+\end{example}
+\begin{example}
+    The vocabulary of \textbf{number theory} $\Sigma_N$ has 5 function symbols: $\Phi_N = \{0,s,+,\times,\uparrow\}$, and one binary relation symbol besides $=$, labelled $<$. Of the function symbols $0$ is a constant called \textbf{zero}, (so $0$-ary), $s$, called the \textbf{successor} function, is unary, and the rest are binary.
+\end{example}
+\begin{example}
+    The vocabulary of \textbf{set theory} is in a sense identical to that of graph theory, having no function symbols, and one binary relation besides $=$, labelled $\in$. 
+\end{example}
+An important consideration in first order logic is going to be whether or not a variable appearing in a \textit{wff} is 'quantified'. For instance, in the expression $\forall x (x=y)$, where $x$ and $y$ are variables, despite both being variables $x$ and $y$ serve very different purposes. In a sense, $y$ is like the Boolean variables we knew of before: a placeholder, whose meaning is to be 'attached' later via a truth assignment. On the other hand, the meaning of $x$ is already there - bounded by the quantifier. Variables like $y$ - that is to say, those not appearing within the scope of a quantifier $\exists$ or $\forall$, are called \textbf{bounded}. Otherwise, it is called \textbf{free}. A \textit{wff} in which none of the variables are free is called a \textbf{sentence}. Basically everything that one proves in math is a sentence, but free variables are still going incredibly important to studying the structure of \textit{wffs} in general. 
+\par We have a language to speak in, but what are we talking about? In Boolean logic, all we had were logical expressions, which we could apply semantics to through truth assignments. In mathematics, however, we centrally seek to study theoretical 'objects'. These objects take the place of truth assignments, and we call them models.
+\begin{definition}
+    Fix a vocabulary $\Sigma$. A \textbf{structure appropriate to $\Sigma$} (sometimes alternatively called a \textbf{model}) is a pair $M=(U,\mu)$. $U$ is a non-empty set, called the \textbf{universe of M}, and $\mu$ is a function which maps every variable, function symbol, and relation symbol to objects surrounding $U$. Specifically, it maps variables $x$ to actually elements $x^M \in U$, it maps $k$-ary function symbols $f$ to actual $k$-ary functions $f^M:U^k \to U$, and it maps $k$-ary relation symbols $R$ to actual relations $R^M \subseteq U^k$. For the equality symbol $=$, we always require that $\mu$ maps this to the specific relation $\{(u,u): u \in U\}$. 
+    \par Suppose that $\phi$ is an expression over $\Sigma$, and $M$ is a structure appropriate to $\phi$. We pursue defining next what it means for the model $M$ to \textbf{satisfy} $\phi$ (sometimes the word \textbf{models} is also used), written $M \models \phi$. Before we do this, we will agree to call any variable assignment $x^M$ the \textbf{meaning of $x$ under $M$}, and inductively extend this definition to all terms of a vocabulary in the natural way: If $f$ is a $k$-ary function, then the assigned function evaluated at all of the assigned terms $f^M(t_1^M,t_2^M,...,t_k^M)$ is the meaning of $f$ under $M$. We are now ready to define $M \models \phi$. First, if $\phi$ is an atomic expression $\phi = R(t_1,...,t_k)$, where $t_1,...,t_k$ are terms, then $M \models \phi$ iff $(t_1^M,...,t_k^M) \in R^M$. For general expressions we proceed inductively. If $\phi = \neg \psi$, we say that $M \models \phi$ iff $M$ fails to structure $\psi$, written $M \nvDash \psi$. If $\phi = \psi_1 \vee \psi_2$, then $M \models \phi$ iff $M \models \psi_1$ or $M \models \psi_2$. If $\phi = \psi_1 \wedge \psi_2$, then $M \models \phi$ iff $M \models \psi_1$ and $M \models \psi_2$. Finally, we turn to $\phi = \forall x \psi$. To this end, for any $u \in U$, the universe of $M$, let $M_{x=u}$ be the structure which is identical to $M$ in every way, \textit{except} that $x^{M_{x=u}} = u$. Then $M \models \psi$ iff for all $u \in U$, we have that $M_{x=u} \models \psi$. 
+    \par If there exists a structure $M$ such that $M \models \phi$, then we call $\phi$ \textbf{satisfiable}.
+\end{definition}
+One thing to note about this definition is that we include in the structure a mapping of the variables, which are not technically part of the vocabulary (supposedly we have one fixed set of variables which we are using universally). Because of this, some texts do not include this in the definition, speaking separately of functions $s: V \to U$. The discussion of the \textbf{interpretation} of terms would then be deferred to this function $s$, which is effectively what assigns the meaning. Doing things this way probably admittedly makes the definition of $M \models (\forall x \psi)$ a bit less confusing, since presumable $x$ had previously been assigned a specific element of $U$. Pausing to realize this at any point effectively destroys any semblance of the variables actually being variables. We will redefine things a bit in terms of $s$ here: First, satisfaction in this light now requires \textbf{both} a structure $M$ as well as a function $s$, and thus we write $M \models \phi[s]$ instead of simply $M \models \phi$. Everything except for the quantifier case follows in the obvious way. For the case of $M \models (\forall x \psi[s])$, we require that for every $u \in U$ we have $M \models (\forall x \phi[s_{x=u}]$, where
+\begin{align}
+    s_{x=u}(y) = \begin{cases}
+                 s(y) & \textrm{ if $y \neq x$}\\
+                 u & \textrm{ if y = x}
+              \end{cases}
+\end{align}
+It's plain to see that this is identical to the original definition, just slightly more technically correct. We will stick to the original definition, and anyone reading this can know that it is an extremely slight abuse of notation. The reason we can get away with this is that most of the time we only really care about sentences, and for sentences, this discussion doesn't matter at all, as the next fact shows:
+\begin{fact}
+    Let $\phi$ be an expression over a vocabulary $\Sigma$, and $M$ and $M'$ be models (by the original definition) which are appropriate to $\Sigma$ and which agree on all of the free variables appearing $\phi$. (So they are allowed to disagree on variables which are bound by quantifiers.) Then $M \models \phi$ iff $M' \models \phi$.  
+\end{fact}
+\begin{proof}
+    Suppose first that $\phi$ is atomic. Then all of the variables in $\phi$ are free, so trivially $M \models \phi \iff M' \models \phi$. Next suppose that $\phi = \neg \psi$. Then the free variables of $\phi$ are precisely the free variables appearing in $\psi$. Then by definition and the inductive hypothesis we have $M \models \phi \iff M \nvDash \psi \iff M' \nvDash \psi \iff M' \models \phi$. If $\phi = \psi_1 \wedge \psi_2$, then the set of free variables appearing in $\phi$ is the union of those appearing in $\psi_1$ and $\psi_2$. If $M$ and $M'$ agree on all of the free variables in $\phi$, then they do the same on $\psi_1$ and $\psi_2$, so by induction $M \models \psi_i \iff M' \models \psi_i$, $i=1,2$. Thus $M \models \phi \iff M \models \psi_1$ and $M \models \psi_2 \iff M' \models \psi_1$ and $M' \models \psi_2 \iff M' \models \phi$. The case of $\phi = \psi_1 \vee \psi_2$ is identical.
+    \par Finally, assume that $\phi = \forall x \psi$. The free variables appearing in $\phi$ are then all of those appearing in $\phi$, along with $x$. (As a subexpression, $x$ may or may not appear free in $\psi$). Now $M \models \phi \iff M_{x=u} \models \psi$ for all $u \in U$. Consider the structure $(M_{x=u})'$. This is a structure which agrees with $M_{x=u}$ on all of the free variables appearing in $\psi$, except possibly $x$, but also at $x$, since we are substituting $u$ for $x$ in both models. So they agree on all free variables appearing in $\psi$, and thus by the inductive hypothesis, we have that for all $u \in U$, $M_{x=u} \models \psi \iff (M_{x=u})' \models \psi$, which is equivalent(?*) to saying that $M \models \phi \iff M' \models \phi$. 
+\end{proof}
+A word of warning to any potential readers: When I wrote these notes, I preferred the word structure over model. Now I've flipped, and very much prefer the word structure. I've gone back and changed some, but I use the two words fairly interchangeably in these notes.
+\begin{example}
+    Consider the vocabulary of graph theory $\Sigma_G$. What would a structure for this look like? Well, we would have a universe of objects, call it $V$, and a binary relation $G^M \subseteq V^2$. Effectively then, a structure in graph theory is (up to isomorphism) a specific graph $(V,G)$, where $G$ is the set of edges. \textit{Every graph is it's own model of graph theory}. 
+\end{example}
+\begin{example}
+    On the other hand, consider the vocabulary of number theory. Models here are much more complicated, but the flavor of what models for graph theory turned out to be should give one an idea of what a model of number theory should represent: the natural numbers, as we are used to them behaving. Mathematicians work with many different models of graph theory on the fly, but number theory seeks to understand only one \textit{specific} object/model: The natural numbers, as we've come to understand them since we started learning math. As we've been assuming it our entire lives without a second thought, we can only continue to assume that a \textit{true} model of number theory exists, and we will elect to denote it $\mathbb{N}$. Effectively, everything we are about to do with first order logic will be in the pursuit of 'pinning this object down', in a sense.
+\end{example}
+\begin{definition}
+    Suppose $\phi$ be a first order expression over some vocabulary $\Sigma$, such that for any model $M$ appropriate to  $\Sigma$, we have $M \models \phi$. Then $\phi$ is called \textbf{valid} (or alternatively, a \textbf{tautology}), and write $\models \phi$ with no model on the left side. We say that two expressions $\phi_1$ and $\phi_2$ are \textbf{equivalent}, and write $\phi_1 \equiv \phi_2$ if for any appropriate model $M$, $M \models \phi_1 \iff M \models \phi_2$. 
+\end{definition}
+The following fact is immediate but bears mentioning:
+\begin{fact}
+    An expression $\phi$ is unsatisfiable iff it's negation $\neg \phi$ is valid.
+\end{fact}
+\begin{definition}
+    Let $\phi$ be an expression. We define inductively the \textbf{principal subexpressions} of $\phi$: First, any atomic expression has only a single principal subexpression - itself. The same is true if $\phi = \forall x \psi$. If $\phi = \neg \psi$, then the principal subexpressions of $\phi$ are precisely those of $\psi$. Finally, if $\phi = \psi_1 \vee \psi_2$ or $\phi = \psi_1 \wedge \psi_2$, then the set of principal subexpressions of $\phi$ are precisely those of $\phi_1$ along with $\psi_2$. Suppose for an expression $\phi$ which has subexpressions $\psi_1, \psi_2,... \psi_n$, we assigned a unique Boolean variable $x_1,x_2,...,x_n$, and then replaced in $\phi$ each principal subexpression $\psi_i$ with the associated $x_i$. The resulting expression would be a Boolean expression, called the \textbf{Boolean form} of $\psi$.
+\end{definition}
+So as an example, consider in graph theory the expression $\phi = \forall x G(x,y) \wedge \exists x G(x,y) \wedge (G(z,x) \vee \forall x G(x,y))$. $\phi$ has three principal subexpressions: $\forall x G(x,y)$, $\forall x \neg G(x,y)$, and $G(x,z)$. Assigning $x_1,x_2$ and $x_3$ to these yields the Boolean form 
+\[ x_1 \wedge \neg x_2 \wedge (x_3 \vee x_z) \]
+The following fact gives one of the three possible ways in which a first order expression can be valid:
+\begin{fact}
+    If the Boolean form of an expression $\phi$ is valid, then $\phi$ itself is valid.
+\end{fact}
+\begin{proof}
+    Suppose that the Boolean form of $\phi$ is valid - that is, true under all possible truth assignments. Let $M$ be an arbitrary model appropriate for $\phi$. Under this model, all of the subexpressions are fixed either true or false, and this defines a truth assignment to the Boolean form of $\phi$, under which $\phi$ itself is either true or false. But the Boolean form of $\phi$ is true under any truth assignment, the model doesn't matter at all. So for all models $M$, $M \models \phi$, i.e. $\phi$ is valid.
+\end{proof}
+This is a simple fact but has an important consequence. From the definition of satisfiability, it follows immediately that if two expression are valid, then their conjunction is also valid. Thus, if $\psi$ is valid, and $\psi \Rightarrow \phi$ is valid, then $\psi \wedge (\psi \Rightarrow \phi)$ is valid, but inspecting the Boolean form of this conjunction reveals that $x_1 \wedge (x_1 \Rightarrow x_2) \equiv x_2$. Thus, we have the first order logic analog of the most important rule in mathematics:
+\begin{fact}[Modus Ponens]
+    If $\psi$ and $\psi \Rightarrow \phi$ are both valid, then $\phi$ is valid.
+\end{fact}
+Another (and definitely the most boring) reason that an expression might be valid is due to the definition of equality. For instance, in number theory, $s(0)+x = s(0)+x$ (in the future we will just write $1$ in place of $s(0)$ and so forth) is valid. We generalize this to it's extreme below:
+\begin{fact}
+    Suppose that $t_1,...,t_k,t_1',...,t_k'$ are terms. Then any expression of the form $t_1 = t_1$, or $(t_1 = t_1' \wedge,...,\wedge t_k = t_k') \Rightarrow (f(t_1,...,t_k) = f(t_1',...,t_k'))$ or $(t_1 = t_1' \wedge ... \wedge t_k = t_k') \Rightarrow (R(t_1,,...,t_k) \Rightarrow R(t_1',...,t_k'))$ is valid. 
+\end{fact}
+The third reason is the important one: quantifiers. For example, in graph theory, $G(x,1) \Rightarrow \exists z G(x,z)$ is valid, but this has nothing to do with it's Boolean form (which would just be $x_1 \Rightarrow x_2$), nor because of the fixed equality relation. This is a tautology which is unique to quantification. Another example is $\forall x G(x,y) \Rightarrow G(z,y)$, for a slightly different reason. We would also like to generalize this to its extreme, and to do that we define some additional notation. For any expression $\phi$, and variable $x$, and any term $t$, define the \textbf{substitution of $t$ for $x$}, denoted $\phi_t^x$ to be the expression obtained by replacing each free occurrence of the variable $x$ by the term $t$. More formally,
+\begin{itemize}
+    \item If $\phi$ is atomic, then $\phi_t^x$ is $\phi$ where every instance of $x$ is replaced by the term $t$.
+    \item $(\neg \phi)_t^x = \neg \phi_t^x$
+    \item $(\phi \vee \psi)_t^x = \phi_t^x \vee \psi_t^x$, and similar for $\wedge$.
+    \item $(\forall y \phi)_t^x = \begin{cases}
+                                     \forall y \phi & \textrm{ if $x = y$} \\
+                                     \forall y \phi_t^x & \textrm{ if $x \neq y$}
+                                  \end{cases}$
+\end{itemize}
+In the last case, we define it this way because if $x = y$ then $x$ doesn't appear free in the expression at all, so it we leave it alone. It should be noted that even with this restriction, substitution is not always something we would always view as 'legal' to do in our own mathematics, or at least 'ethical'. For instance, if $\phi = (x=1) \Rightarrow \exists y (x=y)$, and $t = y+1$, then $\phi_t^x = (y \Rightarrow \exists y (y+1 = y)$. The issue here is that we are replacing a free occurrence of $x$ with a term containing a variable which will immediately become bounded by a quantifier. It is plain to see that the expression prior to the substitution is very reasonable, and yet the result from this kind of 'unethical' substitution is something which is equally \textit{un}reasonable. We state a formal definition of which substitutions are 'legal':
+\begin{definition}
+    We say that a term $t$ is \textbf{substitutible} for $x$ in $\phi$ iff it is \textit{not} the case that a variable in $t$ is bounded by a quantifier, and substitution will place this variable within that quantifier. More formally: 
+    \begin{itemize}
+        \item For atomic $\phi$, $t$ is always substitutible for $x$ in $\phi$.
+        \item $t$ is substitutible for $x$ in $\neg \phi$ if $t$ is substitutible for $x$ in $\phi$, and is substitutible in $\phi \vee \psi$ if it is substitutible for $x$ in both $\phi$ and $\psi$. Similar for $\wedge$.
+        \item $t$ is substitutible in $\forall y \phi$ iff either
+        \begin{enumerate}
+            \item $x$ does not occur free in $\forall y \phi$, or
+            \item $y$ does not occur in $t$ and $t$ is substitutible for $x$ in $\phi$
+        \end{enumerate}
+    \end{itemize}
+\end{definition}
+\par With all of that out of the way, there are three ways in which an expression can be valid due to quantifiers. The first two are too obvious to bother saying much about. The third one is really nice and often overlooked in practice.
+\begin{fact}
+    Any expression of the form $\forall x \phi \Rightarrow \phi_t^x$ is valid. Contrapositively, any expression of the form $\phi_t^x \Rightarrow \exists x \phi$ is also valid.
+\end{fact}
+\begin{fact}
+    If $\phi$ is valid, then so is $\forall x \phi$ (regardless of whether $x$ is free or bound). Also, if $x$ does not appear free in $\phi$, then $\phi \Rightarrow \forall x \phi$ is valid, regardless of $\phi$.
+\end{fact}
+\begin{fact}
+    Universal quantifiers distribute over conditionals. That is to say, for any two expressions $\phi$ and $\psi$, the expression \[ (\forall x (\phi \Rightarrow \psi)) \Rightarrow ((\forall x \phi) \Rightarrow (\forall x \psi)) \]
+    is valid.
+\end{fact}
+I made the mistake of forgetting this not two hours ago. The reason that this last one is true is that in order for a model to fail to satisfy an expression of the above form would be if $M \models \forall x(\phi \Rightarrow \psi)$, \textit{and} $M \models \forall x \phi$ \textit{and} $M \nvDash \forall x \psi$. That third statement is to say that there exists a $u \in U$ such that $M_{x = u} \nvDash \psi$. However $M_{x=u} \models \phi$, by the second statement, and $M_{x=u} \models (\phi \Rightarrow \psi)$, so by modus ponens $M_{x=u} \models \psi$, a contradiction.
+\par In practice we are usually seeking to prove facts about specific models, that is showing that a particular model satisfies an expression. Obviously though, if we can show that an expression is valid, that will do the trick. The ways in which expressions are valid is a vacuous kind of truth, one that is purely syntactical. Truth within specific models, that is to say, truth in application, is far more messy, and we will see the truth of that very shortly.
+%Need to talk about prenex normal form here
+\par Now that we have a model of first order truth, we turn towards a model of first order proof. We begin by summarizing the types of valid first order expressions in a numbered list:
+\begin{definition}
+    The \textbf{basic logical axioms} are a set of valid first order expressions, $\Lambda$, defined to contain the following:
+    \begin{enumerate}
+        \item Any expression whose Boolean form is valid
+        \item Any expression of one of the following forms:
+            \begin{enumerate}
+                \item $t_1 = t_1$
+                \item $(t_1 = t_1' \wedge,...,\wedge t_k = t_k') \Rightarrow (f(t_1,...,t_k) = f(t_1',...,t_k'))$
+                \item $(t_1 = t_1' \wedge ... \wedge t_k = t_k') \Rightarrow (R(t_1,,...,t_k) \Rightarrow R(t_1',...,t_k'))$
+            \end{enumerate}
+            Where $t_1,...,t_k$ are terms
+        \item Any expression of the form $\phi_t^x \Rightarrow \exists x \phi$ or of the form $\forall x \phi \Rightarrow \phi_t^x$.
+        \item Any expression of the form $\forall x \phi$, with $x$ not free in $\phi$
+        \item Any expression of the form $(\forall x (\phi \Rightarrow \psi)) \Rightarrow ((\forall x \phi) \Rightarrow (\forall x \psi))$
+    \end{enumerate}
+\end{definition}
+

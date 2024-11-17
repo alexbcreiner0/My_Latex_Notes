@@ -1,0 +1,84 @@
+\section{Boolean Logic}
+This first sections contains basic definitions and results from other areas of math which I wouldn't call a direct part of computability theory. A reader is encouraged to return to this section as needed throughout the notes, using this section as a reference.
+\begin{definition}
+Fix a countably infinite set of \textbf{Boolean variables} $X = \{x_1,x_2,x_3,...\}$. These are variables that take on one of two values. Typically we call these values 0 and 1, but sometimes we will also refer to them as true amd false. A \textbf{Boolean expression} is defined inductively as follows:
+\begin{itemize}
+\item Any Boolean variable by itself $x_i$ is a Boolean expression
+\item Any expression of the form $\neg \phi$, where $\phi$ is a Boolean expression.
+\item Any expression of the form $(\phi_1 \vee \phi_2)$, or of the form $(\phi_1 \vee \phi_2)$, where $\phi_1$ and $\phi_2$ are Boolean expressions.
+\end{itemize}
+Expressions of the form $x_i$ or $\neg x_i$ are called \textbf{literals}. $\neg \phi$ is called the \textbf{negation} of $\phi$. $(\phi_1 \vee \phi_2)$ is called the \textbf{disjunction} of $\phi_1$ and $\phi_2$. $(\phi_1 \vee \phi_2)$ is called the \textbf{conjunction} of $\phi_1$ and $\phi_2$. For any Boolean expression $\phi$, let $X(\phi)$ denote the set of Boolean variables appearing in $\phi$, which technically needs it's own inductive definition but nah fuck that.
+\par A \textbf{truth assignment} is a mapping $T:X' \to \{0,1\}$, where $X' \subseteq X$ is a finite set of Boolean variables. If $\phi$ is a Boolean expression and $X(\phi) \subseteq X'$, then we say that the truth assignment T is \textbf{appropriate} for $\phi$. We next define inductively what it means for a truth assignment T appropriate for $\phi$ to \textbf{satisfy} $\phi$, written $T \models \phi$:
+\begin{itemize}
+    \item If $\phi=x_i$ then $T \models \phi$ if $T(x_i)=1$.
+    \item If $\phi=\neg \psi$ then $T \models \phi$ if $T \models \psi$.
+    \item If $\phi = (\psi_1 \vee \psi_2)$ then $T \models \phi$ if $T \models \phi_1$ or $T \models \phi_2$. 
+    \item If $\phi = (\psi_1 \wedge \psi_2)$ then $T \models \phi$ if $T \models \phi_1$ and $T \models \phi_2$
+\end{itemize}
+If a Boolean expression $\phi$ is \textbf{satisfiable} by some truth assignment, then we say it is the thing in bold. If \textit{any} truth assignment appropriate to $\phi$ satisfies it, then we say that $\phi$ is \textbf{valid} (otherwise known as a \textbf{tautology}), and write $\models \phi$. Note that since by definition $T \models \neg \phi$ iff $T \nvDash \phi$, the reader should take a moment to make sure they agree that
+\begin{center}
+    $\phi$ is unsatisfiable if and only if it's negation is valid.
+\end{center}
+\par The expression $(\phi_1 \Rightarrow \phi_2)$ is taken to be shorthand for $(\neg \phi_1 \vee \phi_2)$. The expression $(\phi_1 \iff \phi_2)$ is taken to be shorthand for $(\phi_1 \Rightarrow \phi_2) \wedge (\phi_2 \Rightarrow \phi_1)$. We also will occasionally take truth assignments $T$ to be sets rather than functions, particularly the set of Boolean variables such that T maps to 1. We say that two expressions $\phi_1$ and $\phi_2$ are \textbf{equivalent}, and write $\phi_1 \equiv \phi_2$, if for any truth assignment T appropriate to both of them, $T \models \phi_1$ iff $T \models \phi_2$. We regard equivalent Boolean expressions as being different representations of the same mathematical object. (Meaning following this definition we'll use the $\equiv$ notation virtually never again and use $=$ instead.) The following equivalence identities are easily seen to be true or confirmed by brute force by just looking through all of the possible truth assignments:
+\begin{enumerate}
+    \item $(\phi_1 \wedge \phi_2) \equiv (\phi_2 \wedge \phi_1)$
+    \item $(\phi_1 \vee \phi_2) \equiv (\phi_2 \vee \phi_1)$
+    \item $\neg \neg \phi \equiv \phi$
+    \item $((\phi_1 \wedge \phi_2) \wedge \phi_3) \equiv (\phi_1 \wedge (\phi_2 \wedge \phi_3))$
+    \item $((\phi_1 \vee \phi_2) \vee \phi_3) \equiv (\phi_1 \vee (\phi_2 \vee \phi_3))$
+    \item $((\phi_1 \vee \phi_2) \wedge \phi_3) \equiv ((\phi_1 \wedge \phi_3) \vee (\phi_2 \wedge \phi_3))$
+    \item $((\phi_1 \wedge \phi_2) \vee \phi_3) \equiv ((\phi_1 \vee \phi_3) \wedge (\phi_2 \vee \phi_3))$
+    \item $\neg(\phi_1 \wedge \phi_2) \equiv (\neg \phi_1 \vee \neg \phi_2)$
+    \item $\neg(\phi_1 \vee \phi_2) \equiv (\neg \phi_1 \wedge \neg \phi_2)$
+    \item $(\phi \wedge \phi) \equiv (\phi \vee \phi) \equiv \phi$
+\end{enumerate}
+Identities 1 and 2 are known as \textbf{commutativity}. Identity 3 tells us, among other things, that the negation of a literal is itself always a literal. Identities 4 and 5 are known as \textbf{associativity}, and allows us to abuse notation and often write things like $(\phi_1 \vee \phi_2 \vee \phi_3)$ with only one set of parentheses, without any worry of ambiguity. 6 and 7 are known as \textbf{distributivity}, and one should note that, unlike addition and multiplication of numbers, in which multiplication distributes over addition but not conversely, here it goes both ways. 8 and 9 are known as \textbf{DeMorgan's Laws}. 10 allows us to view any single Boolean variable as a conjunction or a disjunction, which is important to the next definition. 
+\par We say that $\phi$ is in \textbf{conjunctive normal form} (or \textbf{CNF}) if $\phi = \bigwedge_{i=1}^{n} D_i$, where each $D_i$ is the disjunction of one or more literals. E.g. $D_i = (x_1 \vee x_8 \vee \neg x_2 \vee x_1)$. We refer to the $D_i$ as \textbf{clauses}. Alternatively, we say that $\phi$ is in \textbf{disjunctive normal form} (or \textbf{DNF}) if $\phi = \bigvee_{i=1}^{n} C_i$, where each $C_i$ is a conjunction of one or more literals. We refer to the $C_i$ as \textbf{implicants}.
+\end{definition}
+The following fact about Boolean expressions allows us to standardize the most important problem in complexity theory:
+\begin{fact}
+    Every Boolean expression $\phi$ is equivalent to a Boolean expression in conjunctive normal form, and to one in disjunctive normal form.
+\end{fact}
+\begin{proof}
+If $\phi = x_i$ for some $x_i \in X$, then it's already in both CNF and DNF by identity 10 above. If $\phi = \neg \psi$, then by way of induction assume that $\psi$ is in DNF, and therefore by DeMorgan's laws,
+\begin{align}
+    \phi = \neg \bigvee_{i=1}^{n} C_i = \bigwedge_{i=1}^n \neg C_i
+\end{align}
+But since each $C_i$ is a disjunction of literals, by a second application of DeMorgan and equivalence 3, $\neg C_i$ is a conjunction of literals, and thus $\neg \psi$ is a CNF formula. By using the inductive hypothesis to write $\psi$ as a CNF formula, an identical argument shows that $\phi$ can also be written in DNF. Next, suppose that $\phi = (\psi_1 \vee \psi_2)$. Inductively we can assume that $\psi_1$ and $\psi_2$ are in DNF, in which case $\phi$ can be plainly seen to already be in DNF. To write $phi$ in CNF, use the alternative inductive hypothesis to assume $\psi_1$ and $\psi_2$ are in CNF, i.e. $\psi_1 = \bigwedge_{i=1}^{n} C_{1i}$ and $\psi_2 = \bigwedge_{j=1}^{m} C_{2j}$. Then, invoking our distributive identities, we see that
+\begin{align}
+    (\psi_1 \vee \psi_2) &= (\bigwedge_{i=1}^{n} C_{1i} \vee \bigwedge_{j=1}^{m} C_{2j}) \\
+                        &= \bigwedge_{i=1}^{n} \bigwedge_{j=1}^{m} (C_{1i} \vee C_{2j}) 
+\end{align}
+By associativity we can easily see the terms being conjuncted together are disjunctions of literals, so this expression is seen to be in CNF. The case $(\psi_1 \wedge \psi_2)$ is identical. 
+\end{proof}
+
+\begin{definition}
+An \textbf{n-ary Boolean function} is a function $f:\{0,1\}^n \to \{0,1\}$. Note that $\neg$ is a unary Boolean function, i.e. $\neg:\{0,1\} \to \{0,1\}$, and similarly $\vee$ and $\wedge$ are binary functions $\vee,\wedge:\{0,1\}^2 \to \{0,1\}$. In fact it is plain to see that any Boolean expression $\phi$ can be seen as a $|X(\phi)|$-ary Boolean function. Formally, we say that a Boolean expression $\phi$ with $|X(\phi)|=\{x_1,...,x_n\}$ \textbf{expresses} an n-ary Boolean function $f$ if, for any n-tuple $\textbf{t} = (t_1,t_2,...,t_n)$, if we define the truth assignment $T$ by $T(x_i)=t_i$ for $i=1,...,n$, then we have 
+\[f(\textbf{t}) = 1 \iff T \models \phi \]
+\end{definition}
+The following fact probably wont feel very significant when you first see it. It will likely take on some more profoundness in hindsight, after you see how we use it in the proof of the Cook-Levin theorem:
+\begin{fact}
+    Any n-ary Boolean function $f$ can be expressed as a Boolean expression $\phi_f$ involving the variables $x_1,...,x_n$.
+\end{fact}
+\begin{proof}
+    Let $F \subseteq \{0,1\}^n$ be the set of all n-tuples \textbf{t} such that $f(\textbf{t}) = 1$. For each tuple $\textbf{t}$, define an implicant of the form $(\underset{i:t_i=0}{\bigwedge}\neg x_i) \wedge (\underset{j:t_j=1}{\bigwedge} x_j)$. e.g. if $\textbf{t}=(0,1,1,0,1)$, we let $D_t = (\neg x_1 \wedge x_2 \wedge x_3 \wedge \neg x_4 \wedge x_5)$. Then we define $\phi_f = \underset{\textbf{t} \in F}{\bigwedge}D_t$. A moments thought will confirm that $T \models \phi_f \iff f(\textbf{f})=1$, where $T(x_i) := t_i$ for each i.
+\end{proof}
+\begin{definition}
+    A \textbf{Boolean circuit} is a triple $C=(V,E,s)$ where $(V,E)$ is a finite directed acyclic graph, and $s$ is a function which maps vertices in the graph to the set $\{0,1,\neg,\wedge,\vee\} \cup X$. For $i \in V$, we call $s(i)$ the \textbf{sort} of the vertex i, and we refer to vertices as \textbf{gates}. Since the graph is acyclic, we may always without loss of generality assume that $(i,j) \in E \Rightarrow i<j)$. We require that all vertices have \textbf{indigree} (that is, number of incoming edges) either 0,1,or 2, and also that the sort function $s$ has the following characteristics:
+    \begin{itemize}
+        \item If $s(i) \in \{0,1\}\cup X$ then i has indigree 0.
+        \item If $s(i) = \neg$ then i has indigree 1
+        \item if $s(i) \in \{\vee,\wedge\}$, then i has indigree 2. 
+    \end{itemize}
+    We call gates with no incoming edges the \textbf{inputs} of the circuit, or sometimes as \textbf{nodes}, and we call the highest indexed node n the \textbf{output} of the circuit. We let $X(C)$ denote the set of Boolean variables that 'appear' in the circuit. (More formally, $X(C) = \{x \in X: s(i)=x\textrm{ for some } i\in V\}$.)
+    \par For the semantics, we say that a truth assignment $T:X' \to \{0,1\}$ is \textbf{appropriate} for C if $X(C) \subseteq X'$. We take the truth assignment T as assigning truth values to the gates, which we denote $T(i)$ as follows:
+    \begin{itemize}
+        \item If $s(i)=1$, then $T(i)=1$, and if $s(i)=0$ then $T(i)=0$.
+        \item If $s(i) \in X$, then $T(i)=T(s(i))$.
+        \item If $s(i) = \neg$, then i has indigree 1, so there exists a unique gate j such that $(j,i) \in E$. We say $T(i)=1$ iff $T(j)=0$.
+        \item If $s(i) \in \{\vee,\wedge\}$, the i has indigree 2, so there are two unique gates j and k such that $(j,i),(k,i) \in E$. Then for $s(i)=\vee$ $T(i)=1$ iff $T(j)=1$ or $T(k)=1$, and for $s(i)=\wedge$, $T(i)=1$ iff $T(j)=1$ and $T(k)=1$.
+    \end{itemize}
+    Finally, we define $T(C) := T(n)$, and call this the \textbf{value of the circuit}. If $T(n)=1$, then we say T \textbf{satisfies} C, and write $T \models C$.
+\end{definition}
+\par It should come as no surprise that given any Boolean expression $\phi$, there is a Boolean circuit $C$ such tha for any truth assignment T, $T \models \phi \iff T \models C$, and vice versa. Of course, this is not at all a 1 to 1 relationship. Just as there are many equivalent ways to write the 'same' Boolean expression, there are many equivalent Boolean circuits, and no natural 1-1 association between these. Boolean circuits are in some sense more descriptive than Boolean expressions, since it models a computation along with an expression.
+

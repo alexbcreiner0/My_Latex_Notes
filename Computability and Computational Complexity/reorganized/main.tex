@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsthm}
+% Package for making turing machine diagrams %
+\usepackage{tikz}
+\usetikzlibrary{chains,fit,shapes}
+% Packages for algorithms %
+\usepackage{algorithm}
+\usepackage{algorithmic}
+% Package which has the nice looking empty set symbol (\varnothing)
+\usepackage{amssymb}
+% Package with the ceiling function
+%\usepackage{mathtools}
+%\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\usepackage{braket}
+\usepackage{amsmath} 
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{comment}
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\usepackage{bm}
+
+\usepackage{biblatex}
+\addbibresource{library.bib}
+
+% Makes table of contents links clickable in pdf readers
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue]{hyperref}
+
+% recursive subtraction
+\makeatletter
+\newcommand{\prc}{\mathbin{\mathpalette\prc@inner\relax}}
+\newcommand{\prc@inner}[2]{%
+  \vbox{\offinterlineskip\m@th
+    \ialign{%
+      ##\cr
+      \hidewidth\raisebox{-1.5\height}[0pt][0pt]{$#1.$}\hidewidth\cr
+      $#1-$\cr
+    }%
+  }%
+}
+\makeatother
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{problem}{Problem}
+\newtheorem{thesis}{The Church-Turing Thesis}
+
+\theoremstyle{plain}
+\newtheorem{example}{Example}[section]
+\newtheorem{exercise}{Exercise}[section]
+
+\theoremstyle{theorem}
+\newtheorem{fact}{Fact}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{claim}{Claim}[section]
+
+% TO DO
+% UTM construction
+% Nondeterministic Time Hierarchy Theorem (ugh)
+% Cook Levin Proof
+% Alternating Machine, ATIME and ASPACE classes
+% Circuit model, P/poly, Karp Lipton
+% AM/MA, BPP, bounding within PH, Graph Isomorphism likely NP-intermediate
+% P sharp, Toda
+% IP = PSPACE, MIP = NEXP
+% BQP
+% Generic complete problems for a class, syntactic vs semantic classes
+
+\title{Computability Notes}
+\author{Alex Creiner}
+\date{}
+
+\sloppy
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+% \part{Models of Computation}
+There are many different models of computation, and the notion 'a model of computation' is itself vague and only mostly rigorously defined. The closest we can get to a rigorous definition would be to call it a subset of functions which take finite strings as input and return finite strings as output, which meet some criteria. The criteria will involve a lot of words and symbols, but semantically will always boil down to just saying "$f$ is computable if it can be implemented within the model." 
+
+The central model we are concerned about is the Turing machine model, since it lends itself best to the study of the "natural" computational resources - time and space. For the study of computation itself though, we will turn to the recursive functions. The recursive functions could certainly be called a computational model, since basically anything can, but they are conspicuous because there is no 'machine' to be found anywhere in the definition. They are simply a set of functions defined in a very conventional mathy way, via some simple inductive rules. The amazing fact about computation is that every model of computation ever devised has proven to be equivalent to the recursion 'model' in the sense that they end up defining the exact same set of functions. Establishing this connection between Turing machines and the recursive functions rigorously is the central aim of this section. Doing so carefully will prove fruitful in ways far beyond the mission statement, however.
+
+\include{sections/turing-machines}
+\include{sections/semicomputability}
+\include{sections/recursive-functions}
+\include{sections/ackerman}
+\include{sections/first-order-logic}
+\include{sections/arithmetic}
+
+\appendix
+\include{appendices/boolean-logic}
+
+\printbibliography
+
+\iffalse
+\section{Forward to Potential Readers}
+	There is no way to compare how I learn to how anyone else learns. Personally, though, I learn primarily through explaining things to myself, multiple times, with my focus and detailing change with each pass over. In the fields of computability and complexity, I am almost entirely self taught, and these notes were and are a part of that teaching process. Teaching myself these two fields specifically as a mathematician has been often quite frustrating. To define things rigorously is very, for three reasons. The first is tedium. To truly build a foundation, one needs to prove many, many small lemmas, and address many, many smaller technical details - more so in my experience than your average field of math. To an author writing a textbook for the average reader, I can empathize with the thought that working all of this detail out would not make for a cohesive or balanced reading experience to a first time learner of the subject. Not only that, these fields are truly enormous, to the point where a truly rigorous approach would quickly produce a page count too high to publish. The end result is a field in which most of the books end up reading more as broad surveys to get someone interested in the subject, rather than as tools to actually learn out of. 
+    \par Cooper, in particular, seems like a lovely person, and is obviously truly knowledgeable. However, his textbook on computability is truly one of the strangest things I've ever read. As a logically ordered dictionary which lists words, theorems, papers, and sections of other textbooks, that one can choose to google search and piece together for oneself, it is indispensible. As a textbook, it is nothing short of awful. I have no idea if the book is trying to be rigorous or not. Sometimes it seems to pretend to be, especially when attempting to pitch the proof of something as trivially relying on previous results which the book earlier failed to properly elaborate on. Sometimes it doesn't pretend to be. At one point, he writes something along the lines of saying 'I would love to tell the reader the story behind the universal Turing machine', and then, rather than actually doing this, there follows a paragraph of references to other textbooks and papers, and then the book just simply moves on to the next topic. The book functions as a textbook in a similar way to proof sketch. It feels like something that he hastically threw together as scaffolding for a textbook, and then just left it at that. 
+	\par My notes are an attempt to be the opposite of that. They are not a textbook. There are no exercises - these notes are for me, and any would-be exercises are stated and proven as lemmas by me. Because of this, a reader of these notes might want to consider periodically trying to write proofs out for themselves prior to reading my proofs. That said, everything is written out with as much rigor as I find satisfying. This may include indulgences or stupid things that I'm having as I write. 
+\fi
+
+\end{document}

@@ -1,0 +1,142 @@
+\section{Arithmetic - The Language of Computation}
+\par We begin by working towards yet another characterization of what it means to be computable. We fix our focus on the vocabulary of number theory. As before, we let $\mathbb{N}$ denote the 'true' model of number theory, and for the remainder of this section, when we speak about any natural number stuff, it will be implicitly be working with this model, as has been the case for your entire life. In what follows, we will be working under the definition of model which doesn't assign it's own meaning to the variable symbols (i.e. we introduce a meaning function $s$ when necessary).
+We begin by listing a set of axioms for number theory:
+\newpage
+\begin{definition}[Axioms of Peano Arithmetic]
+    The axioms of \textbf{Peano arithmetic} are the following:
+    \begin{itemize}
+        \item[(S1)] $\forall x S(x) \neq 0$
+        \item[(S2)] $\forall x \forall y (S(x) = S(y)) \Rightarrow x = y$
+        \item[(L1)] $(x < S(y)) \iff (x \leq y)$
+        \item[(L2)] $\forall x( x \nless 0)$
+        \item[(L3)] $\forall x \forall y (x < y) \vee (x=y) \vee (y < x)$
+        \item[(A1)] $\forall x (x+0 = x)$
+        \item[(A2)] $\forall x \forall y (x+S(y) = S(x+y)) \textrm{[i.e. } +(x,S(y)) = S(+(x,y))$\textrm{]}
+        \item[(M1)] $\forall x (x \times 0 = x)$
+        \item[(M2)] $\forall x \forall y (x \times S(y) = x \times y + x)$
+        \item[(E1)] $\forall x (xE0 = 1)$
+        \item[(E2)] $\forall x \forall y (x E S(y)) = (x E y) \times x$
+    \end{itemize}
+    Finally, there is an infinite set of \textbf{induction axioms}: for any formula $\phi(x)$, the following expression is an axiom \[[\phi(0) \wedge \forall x (\phi(x) \Rightarrow \phi(S(x))] \Rightarrow \forall x \phi(x) \]
+    We will let $PA$ denotes this entire (recursively enumerable) set. The (finite) subset of $PA$ which excludes the induction axioms will be denoted $F$.  
+\end{definition}
+Take a minute to acknowledge that $F$ is just about the most innocent set of assumptions about the natural numbers that could ever be conceived of. It is nearly impossible to conceive of a theory of $\mathbb{N}$ which does not satisfy $F$. Thus, we will assume that the 'true model' $\mathbb{N}$ satisfies both $F$ and $PA$.
+\par Next, note that despite vocabularies having their own relation symbols, these are not actually relations. Relations themselves are of course subsets of $U^n$ for some $n$, where $U$ is the universe of a \textit{particular} model. Thus, relations are \textit{model dependent.} Furthermore, any formula implicitly defines a relation, but it should be noted that the same formula will define different relations under different models. Nonetheless, the central focus will be the true model, $\mathbb{N}$, and towards that end we define what it means for a relation in this model to be definable by the vocabulary:
+\begin{definition}
+    Fix a particular model of number theory, say $\mathbb{N}$, and suppose that $R \subseteq \mathbb{N}^n$ is a relation. We say that $R$ is \textbf{definable} if there exists an expression $\phi(v_1,...,v_n)$ with free variables $v_1,...,v_n$ such that for any $x_1,...,x_n \in \mathbb{N}$ 
+    \begin{align}
+        R(x_1,...,x_n) &\iff \mathbb{N} \models \phi(x_1,...,x_n) \\
+                       & \iff \mathbb{N} \models \phi(S^{x_1}(0),...,S^{x_n}(0))
+    \end{align}
+    (Need to go back and show this second iff is valid)
+\end{definition}
+Thus relations which are definable in number theory are effectively those which the vocabulary is rich enough to allow us to talk about. We now show that there is a deep relationship between computable functions and definable relations in number theory. 
+\begin{theorem}
+    All quantifier free formulas are primitive recursive. (That is to say, the relation which is implicitly defined by a formula has a characteristic function which is PRIM.)
+\end{theorem}
+\begin{proof}
+    Most of the legwork of this has been done already, we just need to inspect it from a new angle. When we proved earlier that $=$ and $<$ were PRIM relations, we were implicitly working within the true model $\mathbb{N}$, and so we proved that the relations $x = y$ and $x < y$ were recursive, where $x,y$ are variables. However, if we substitute $x$ or $y$ for terms, we obtain different relations. Note that since by definition primitive recursive functions are closed under function composition, and since $+,\times,$ and $\uparrow$ were all shown to be PRIM earlier, we have easily that for any term $t(x_1,...,x_n)$, the function $f_t(x_1,...,x_n) := t^{\mathbb{N}}(x_1,...,x_n)$ is PRIM. (More precisely, we define $f_t$ to be the unique $m$ such that $\mathbb{N} \models t(s^{a_1}(0),...,s^{a_k}(0)) = S^m(0)$.) Thus, it follows easily that for any terms $t,s$, the formulas $t < s$ and $t = s$ are PRIM: The former has characteristic function $\chi_<(f_t,f_s)$, and the latter is similar. So all atomic formulas are PRIM. Our previous results about PRIM functions being closed under logical connectives and bounded quantification in turn give us the rest of the proof. 
+\end{proof}
+Recall our definition of the arithmetic hierarchy. When we defined it, it wasn't clear at all why it was called this. Why not the recursive hierarchy? An alternative definition of this hierarchy is sometimes given not in terms of languages, but in terms of formulas in the vocabulary of number theory. We state that here:
+\begin{definition}
+    We say that a formula is $\Delta_0$ if it is equivalent to an expression which is quantifier free (so quantifiers are allowed, but only the fake, bounded kind). Let $\Sigma_0 = \Pi_0 = \Delta_0$. For $n \geq 1$, we say that a formula $\phi$ is $\Sigma_n$ if it is equivalent to an expression of the form $\exists x_1 \exists x_2 ... \exists x_n \psi$, where $\psi$ is a $\Pi_{n-1}$ formula. We say that a formula is $\Pi_{n-1}$ if it is equivalent to the negation of a $\Sigma_n$ formula, producing alternation like that seen in the arithmetic hierarchy. Finally, we say that a formula is $\Delta_n$ if it is both $\Sigma_n$ and $\Pi_n$.
+\end{definition}
+Note that since formulas implicitly define relations, and relations can be viewed simply as sets, and in turn as decision problems/languages, formulas and languages don't need to be viewed as fundamentally different objects. Thus, when we say that a relation $R$ is, say, $\Pi_4$, what we are technically saying is that $R$ is a relation which is \textit{definable} by a $\Delta_4$ expression. Furthermore, we are less and less often going to make a distinction between languages, that is, sets of finite strings over an alphabet, and sets of natural numbers. Note that, despite $\Delta_0 = \Delta_1$ in our definition of the arithmetic hierarchy, that doesn't have to be the case here. $\Delta_1$ formulas do \textit{not} have to be $\Delta_0$. Despite this, these hierarchy's very naturally coincide, and the difference between $\Delta_0$ and $\Delta_1$ is already well documented by these notes:
+\begin{theorem}
+    A relation is recursive iff it is $\Delta_1$. Furthermore, a relation is primitive recursive iff it is $\Delta_0$
+\end{theorem}
+\begin{proof}
+    \par We already showed that all $\Delta_0$ relations are PRIM in the above lemma, and it is a straightforward induction to show that any PRIM relation is $\Delta_0$.
+    \par Suppose first that $R \in \Delta_1$. Then there exist $\Delta_0$ formulas $P,Q$ such that $R(n) \iff \exists m P(n,m)$ and $R(n) \iff \forall m Q(n,m) \iff \neg \exists m \neg Q(n,m)$. Since $P,\neg Q$ are quantifier free, they are primitive recursive, and so the function $f(n) = \mu m [P(n,m) \vee \neg Q(n,m)]$ is partial recursive and clearly total, so it is recursive. (One can easily see how to put this in the exact form of a legal use of the $\mu$ operator.) Thus the relation $P(n,f(n))$ is obviously recursive, and therefore $R(n) \iff P(n,f(n))$, so $R$ is recursive.
+    \par Conversely, suppose that $R$ is recursive, i.e. it's characteristic function $chi_R$ is recursive. By the Kleene Normal Form theorem, there exist primitive recursive functions $f,g$ such that $\chi_R(n) = f(\mu m [g(n,m)=0])$, i.e.
+    \begin{align}
+        R(n) &\iff (f(\mu m [g(n,m)=0]) = 1) \\
+             &\iff \exists m ((g(n,m) = 0) \wedge (f(m) = 1)) \\
+             &\iff \exists m S(n,m)
+    \end{align}
+    Where $S(n,m) \iff ((g(n,m) = 0) \wedge (f(m) = 1))$ is clearly PRIM by the existence of the PRIM $\overline{sg}$ and $sg$ functions. By the equivalence between PRIM functions and $\Delta_0$ formulas, we have that $R(n)$ is equivalent to a $\Sigma_1$ formula. To show that $R$ is also $\Pi_1$, just recall that recursive relations are closed under complements, repeat the same argument with $\neg R$, and then negate both sides. Thus, $R$ is $\Delta_1$.
+\end{proof}
+Thus, we have reason number one why it's called the arithmetic hierarchy: It is quite literally the collection of all relations which are definable in number theory, organized in terms of descriptive complexity. Reason number two is deeper, and requires us to turn away from definability, and towards a more general notion known as representability. Let $\Delta$ be a set of axioms in the vocabulary of number theory. Then we call the set $Th(\Delta) = \{\phi: \Delta \vdash \phi \}$ the \textbf{theory} of $\Delta$. Suppose a relation $R$ is definable in number theory, i.e. there exists a formula $\phi$ with free variables $x_1,...,x_n$ such that for all $\vec{a} \in \mathbb{N}^n$, $R(\vec{a}) \iff \mathbb{N} \models \phi(\vec{a})$. Note that this claim is in no way equivalent to the claim that $F \vdash \phi(\vec{a})$, or if $PA \vdash \phi(\vec{a})$. If we decide to call $Th(\mathbb{N}) = \{\phi: \mathbb{N} \models \phi\}$ the \textbf{true theory} of $\mathbb{N}$, then the assumption that $\mathbb{N}$ models both $F$ and $PA$ means that $Th(F)$ and $Th(PA)$ are \textit{sub-theories} of $Th(\mathbb{N})$, but to assume that either of these encompasses the entire true theory would be equivalent to claiming that $\mathbb{N}$ is fully axiomatizable. We now address this question directly.
+Earlier, we found value in coding finite strings with integers, using a primitive recursive coding function which we worked hard to build carefully. We now employ it again, using it on expressions in number theory.
+\par Let $g$ be a bijection between the finitely many symbols in the vocabulary of number theory, including the logical symbols, with the set of natural numbers $\{0,1,...,n_0-1\}$. (Recall that the infinitely many variable symbols are not actually part of the vocabulary.) Extend this bijection to the variable symbols by $g(x_k) = n_0+k$. Then $g$ is a bijection of all symbols in number theory. Furthermore, the graph of $g$ is clearly recursive. 
+\begin{definition}
+    If $\phi = s_0s_1...s_k$ is a string of symbols in the language of number theory, then the \textbf{Godel code} of $\phi$ is defined 
+    \[\#\phi = \langle g(s_0),g(s_1),...,g(s_k) \rangle \]
+    Where $\langle \vec{s} \rangle$ is the recursive coding function from earlier. By the recursiveness of $g$, it is clear that $\#$ is also recursive. (PRIM in fact, but we are past caring about that.) For a formula $\phi$, when we write $\langle \phi \rangle$, we are referring to the code of the sequence of characters. Extending it further, if $T$ is a set of formulas, then we let $\#T$ denote the set of all codings of formulas in $T$.
+\end{definition}
+ With this definition we are now on a direct collision course with the incompleteness theorem. Recall that $Th(\mathbb{N})$ denoted the collection of all formulas which were satisfied by $\mathbb{N}$. Considering $\#Th(\mathbb{N})$, we can now view this set as \textit{itself} a set of natural numbers. The central question that we wanted an answer to was whether or not it was possible to fully axiomatize this true model with a recursively enumerable set of axioms. We can now show, in only a few lines, that the answer is a resounding no.
+\begin{theorem}[Godel's First Incompleteness Theorem]
+    $\#Th(\mathbb{N})$ is not recursively enumerable. 
+\end{theorem}
+\begin{proof}
+    Suppose that it were, and let $M$ be a Turing machine which accepts this language. The fundamental problem with this assumption is that it necessitates that the set must then also be recursive, because models are "concrete" in the sense that every sentence is either true or false. More formally, if $\phi \notin Th(\mathbb{N})$, then $\mathbb{N} \models \neg \phi$, and so if we simply let $M^c$ be the Turing machine which, on input $\phi$ (really an integer $n$ which codes, $\phi$ but going back an forth is trivial now) simulates the machine $M$ on $\neg \phi$, accepting if $M$ accepts, then $M^c$ accepts $\#Th(\mathbb{N})^c$, meaning that $\#Th(\mathbb{N}) \in \textbf{RE} \cap \textbf{coRE} = \textbf{R}$. Since $\#Th(\mathbb{N})$ is recursive, it must be definable by a $\Delta_1$ formula, call it $\psi$.
+    \par But there are some uncomfortable consequences to this. Let $R$ be \textit{any} relation, anywhere in the arithmetic hierarchy, and let $\phi_R$ be the relation defining it. Then by definition, \[ R(n) \iff \mathbb{N} \models \phi_R(n) \iff \phi_R(n) \in Th(\mathbb{N}) \iff \langle \phi_R(n) \rangle \in \#Th(\mathbb{N}) \]
+    Thus, \textit{every definable relation in the vocabulary of number theory is reducible to $\#Th(\mathbb{N})$, which is recursive}: For any natural number $n$, we can decide $R(n)$ by coding the sentence $\phi_R(n)$ and calling the Turing machine which decides $\#Th(\mathbb{N})$, on that integer.
+    \par This is problematic, because not everything is computable. For instance, the halting problem $H$ is absolutely not recursive, yet $\#H$ very comfortably sits in $\Sigma^0_1$, and is thus definable by a $\Sigma_1$ expression, and is therefore decidable by way of reduction to $\#Th(\mathbb{N})$. This contradiction completes the proof.
+\end{proof}
+We should look at this from a computability standpoint and from a logical standpoint. From a computability standpoint, it is a consequence of Post's theorem (proven... somewhere in these notes... eventually...) that the arithmetic hierarchy does not collapse at any finite level. What we showed above is effectively that the decision problem $\#Th({\mathbb{N}})$ is hard for every level of the hierarchy, and then used that fact, along with our knowledge of the halting problem, to show that this implies a collapse of the hierarchy to $\Delta_1$. There was nothing special about the halting problem though, other then that we knew explicitly that it was not in any level beneath it. In a similar manner, if we supposed that $\#Th({\mathbb{N}})$ was contained in $\Sigma^0_k$ for any $k \geq 0$, then the hierarchy would collapse to $\Delta^0_k$, a contradiction by Post's theorem. Thus we actually have proven a stronger result, stated as a corollary:
+\begin{corollary}
+    $Th({\mathbb{N}})$ is not contained in \textit{any} finite level of the arithmetic hierarchy.
+\end{corollary}
+The $\Sigma^0_1$ relations are those which are "one $\exists$ away from being computable". So these relations aren't computable, but they are much "closer" to what are computable than, say, the $\Pi_8$ relations. What the above corollary shows is essentially that $\#Th({\mathbb{N}})$ is \textit{infinitely many degrees removed from anything computable}. Heavy stuff. \\
+\par Next, we turn to the logical implications of this theorem. Note that $\#Th(\mathbb{N})$ is recursively enumerable iff there exists a recursively enumerable set of axioms which fully axiomatizes $\#Th(\mathbb{N})$, by our previous results regarding the $THEOREMHOOD$ problem. This highlights some more general truths about mathematics, however. Note that if we assume that $\mathbb{N}$ models $F$, then since $F$ is recursively enumerable, it must be the case that there exists a sentence $\phi$ such that $F \nvdash \phi$ and $F \nvdash \neg \phi$. In other words, $Th(F)$ is \textbf{incomplete}: There are sentences which are neither provable nor disprovable, and \textit{this is despite the fact} that, by the completeness theorem, anything true within this axiom system is provable. In other words, the completeness theorem confirms that is a fundamental limitation of \textit{formal systems of deduction in general}, and \textit{not} simply a limitation of the particular system of deduction which we have focused on. Our system is provably as good as these things get, and yet still not enough.
+\par Note also that, since $F \subseteq PA$, $PA$ will also be incomplete: \textit{any consistent set of axioms containing $F$ and modelling $\mathbb{N}$ will be incomplete.} But we can go further still. With very little extra effort, we can extend this result to show that the vast majority of all axiom systems in arbitrary vocabularies, whether it be graph theory, set theory, group theory, or dog theory, are incomplete.
+\par To see this, we need to formalize what it means to "interpret" number theory within another vocabulary. Let $V$ be an arbitrary vocabulary. Suppose that in this vocabulary we have expressions an expression $\alpha_{\mathbb{N}}$ with one free variable, defining a unary relation under any model. Intuitively, this expression will assert the claim "I am a natural number". As a concrete example, in the vocabulary of set theory, the natural candidate for this relation would be the relation $x \in \omega$, i.e. the sentence, which, under the standard model of ZFC set theory, would define the unary relation (i.e. the set of) finite ordinals. Then, we define the expressions $\alpha_+,\alpha_{\times}$, and $\alpha_{\uparrow}$, intuitively representing the claims that "$x+y = z$", and so forth. Continuing our concrete example of finite ordinals, $\alpha_+$, in the vocabulary of set theory, and under the standard model of ZFC, would be the assertion that $z$ is the disjoint union of $x$ and $y$, and so forth. Continuing in this trend we have expressions $\alpha_<, \alpha_0, and \alpha_S$. \textit{This can be done in any vocabulary with at least one binary relation.} (See a book on ZFC set theory to dive into this.)
+\par Next, let $\Delta$ be a recursively enumerable set of axioms in $V$, such that $Th(\Delta) \vdash \exists x \alpha_{N}(x)$ (i.e. the set $\mathbb{N}$ is nonempty), and such that for each axiom in $\psi \in F$, $\Delta \vdash \psi'$, where $\psi'$ is the "appropriate" interpretation of $\psi$ into $V$, by way of the expressions $\alpha$ defined above. (For example, an atomic formula of the form $x+(y \times z) = w$ would be replaced by $\exists z_1 \exists z_2 (\alpha_{\mathbb{N}}(z_1) \wedge \alpha_{\mathbb{N}}(z_2) \wedge \alpha_{\times}(y,z,z_1) \wedge \alpha_+(x,z_1,z_2) \wedge (z_2 = w))$.) I.e. each formula $\phi$ of number theory is replaced by a formula $\psi'$ in $V$ such that $F \vdash \psi \Rightarrow \Delta \vdash \psi'$. Note that it could very well be the case that $\Delta$ proves much more about $\mathbb{N}$ than $F$ does. For example, within the ZFC axioms of set theory one can define the finite ordinals, which are an intepretation of $F$ in the sense just described, yet since they include more general facts about set theory, and can be shown to prove much more about $\mathbb{N}$ then $F$ or even $PA$.
+\par In any case, if $\Delta \vdash \psi'$ for each of the corresponding $\psi \in F$, and $M$ is \textit{any model of set theory}, then implicitly $M$ defines a model of $\mathbb{N}$, which by the results above directly carry down to $M$. $\Delta$ is incomplete, as a result of $F$ being incomplete. This is the significance of defining $F$. In order to show that \textit{any} consistent formal system (that is, a recursively enumerable collection of axioms along with a system of deduction) is incomplete, it suffices to show that that one can "interpret" the theory of $F$ within that system, in the sense we described above. We will be in a better position to formalize this paragraph a little later, when we are ready to prove what is known as the second incompleteness theorem. To this end, among others, define the notion of representability, which is the proof analog of definability.
+\begin{definition}
+    We say that a relation $R \subseteq \mathbb{N}^n$ is \textbf{representable} in $F$ (or in $PA$) if there is an expression $\phi$ with $n$ free variables such that for all $\vec{a} \in \mathbb{N}^n$
+    \[\vec{a} \in R \Rightarrow F \vdash \phi(\vec{a}) \]
+    \[\vec{a} \notin R \Rightarrow F \vdash \neg\phi(\vec{a}) \]
+    We say that a function is representable if its graph is representable.
+\end{definition}
+It is a little confusing to think about why both of these conditions need to be mentioned seperately, rather than condensing it to a single statement using an $\iff$ symbol. The reason for this is the same as the reason that $Th(F)$ might not be equal to $Th(\mathbb{N})$: If $F \nvdash \phi(\vec{a})$ i.e. $F$ is insufficient to prove something, that doesn't mean the thing is false. In the \textit{true} model of $\mathbb{N}$ everything is explicitly true or false, but there could certainly be and likely are expressions which are not provable from a fixed set of axioms. 
+\begin{theorem}
+    Any relation or function which is representable (in either $F$ or $PA$) is also recursive
+\end{theorem}
+\begin{proof}
+    We can cover both $F$ and $PA$ at the same time by noting that both of these axiom sets are recursively enumerable. This means that both $THEOREMHOOD_F$ and $THEOREMHOOD_{PA}$ are in \textbf{RE} by previous results. WLOG we focus on $F$, and let $M$ be the Turing machine which accepts $THEOREMHOOD_F$. Now, if $R$ is an $n$-ary representable relation, then by definition there is an expression $\phi$ with $n$ free variables such that if $R(\vec{x})$, then $F \vdash \phi(\vec{x})$, and if $\neg R(\vec{x})$, then $F \vdash \neg \phi(\vec{x})$. Thus, to decide if $R(\vec{x})$, we can have a Turing machine simulate steps of $M(\phi(\vec{x}))$ and steps of $M(\neg \phi(\vec{x}))$ back and forth, until one of these processes halts. If the former of these processes is the ones that halts, then we have our machine output a $1$, and otherwise we have it output a $0$. By hypothesis, this Turing machine we have built is guaranteed to halt, so it computes a recursive function, and that function is clearly $\chi_R$. Thus, $R$ is recursive.
+    \par If $f$ is a representable function, i.e. it's graph is representable, then by the above we have that the graph of $f$ is recursive, but by a previous lemma we know that a function is recursive iff it's graph is recursive, so $f$ itself must be recursive.
+\end{proof}
+We have from this a slightly surprising corollary which points out just how limited the collection of representable relations really is:
+\begin{corollary}
+   Any relation not definable by a $\Delta_1$ formula can't be representable (in $F$ or in $PA$). 
+\end{corollary}
+\begin{proof}
+    We know now that representable relations are recursive, and recursive relations are definable by $\Delta_1$ formulas. The statement above is just the contrapositive of this observation.
+\end{proof}
+We now begin to pursue the other direction of this. This takes some building.
+\begin{lemma}
+    Let $t$ be a term containing no free variables. Then there is an $n \in \mathbb{\omega}$ such that $F \vdash (t = S^n(0))$.
+\end{lemma}
+\begin{proof}
+    If $t = 0$, then $(0 = 0)$ is a first order theorem, so of course $F \vdash (0=0)$, so $n=0$ works. Next, if $t = S(u)$ for some term $u$, then by the inductive hypothesis $F \vdash (u = S^n(0))$ for some $n$, and so $F \vdash t = S(S^n(0)) = S^{n+1}(0)$, so $n+1$ works. Next suppose $t = u+v$. By induction we have that $u = S^n(0)$ and $v = S^m(0)$ for some $n,m \in \omega$. Note that it suffices to show that $F \vdash S^n(0)+S^m(0) = S^{n+m}(0)$. (Need to finish)
+\end{proof}
+Need to fill in details, eventually showing that every computable function and relation is representable in $F$.
+
+\begin{theorem}
+    A function or relation is computable iff it is representable in Peano Arithmetic. (In $F$, specifically, meaning this is true Without even having the induction axioms!)
+\end{theorem}
+This is a wildly different characterization of what it means to be computable from either Turing machines or recursive functions. It essentially states that the most basic aspects of what we do on paper with the most basic assumptions about what it means to add, multiply, and exponentiate numbers, are enough to fully capture all aspects of computation. It also characterizes what is computable completely in terms of what is provable, establishing a very concrete parallel between the theory of mathematical logic and computability theory. 
+\par Next we turn to the incompleteness theorem. 
+\begin{lemma}
+    Let $\theta(x)$ be a formula in the vocabulary of number theory with one free variable. Then there is a sentence $\sigma$ such that $F \vdash (\sigma \iff \theta(S^{\#\sigma}(0)))$. 
+\end{lemma}
+\begin{proof}
+    We begin by defining a function $f: \omega \to \omega$, in the following way:
+    \begin{align}
+        f(n) = \begin{cases}
+                   \langle \psi(S^{\#\psi}(0)) \rangle & \textrm{if $n$ is the code of a formula $psi$ which has one free variable.} \\
+                   0 & \textrm{else}
+        \end{cases}
+    \end{align}
+    [Finish, need strong representability to do so]
+\end{proof}
+\begin{theorem}[Godel's Incompleteness Theorem, Version 1]
+    Let $T$ be a consistent set of axioms containing $F$. Then $T$ is incomplete - that is to say, there exists a sentence $\sigma$ such that $T \nvdash \sigma$ and $T \neg \nvdash \neg \sigma$
+\end{theorem}
+\begin{proof}
+    We go by contradiction, assuming that $T$ is complete. Let $R = \{\# \phi: T \vdash \phi\}$. Note that this set is clearly in $\textbf{RE}$, because after decoding the expression $\phi$, one can just simulate a Turing machine which decides $THEOREMHOOD_T$. However, since we are assuming that $T$ is complete, this set is in fact not just recursively enumerable but \textit{also} recursive! Because if $T$ is complete, then we can expect, as we go through all possible proofs, to eventually find either a proof of $\phi$, in which case we accept, or a proof of $\neg \phi$, in which case we reject. Thus, since $R$ is closed under complementation, $\neg R$ is also recursive. 
+    Since $R$ is recursive, it representable in $F$, and subsequently in $T$. Let $\theta$ be the formula which represents $\neg R$.
+\end{proof}
+

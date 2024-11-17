@@ -1,0 +1,89 @@
+\section{Semicomputability, and Beyond}
+\par We now have a well defined notion of what it means for a Turing machine to 'solve a problem', and by the Church Turing Thesis (which again, you'll be more convinced of later), good reason to believe that this definition coincides directly with the set of all problems which are solvable by an algorithm, under any reasonable model of computation. We next define a weaker notion of 'solving' a problem, one that is impractical but theoretically critical: 
+\begin{definition}
+Let L be a language, and M be a Turing machine. We say that M \textbf{accepts} L if for all inputs $x\in\Sigma^*$,
+\begin{align*}
+    & x \in L \Rightarrow \textrm{M accepts x in k steps for some k} \\
+    & x \in L \Rightarrow M(x)=\nearrow                     
+\end{align*}
+\end{definition}
+If L is acceptable by some Turing machine, we say that the language is \textbf{recursively enumerable} (or \textbf{computably enumerable}). The class of all recursive languages is denoted \textbf{R}, and the class of all recursively enumerable languages is denoted \textbf{RE}.
+\par
+There is one thing which we should immediately note about the class \textbf{RE}, which spells out it's significance. Note that every Turing machine implicitly defines a language:
+\[ L(M) := \{x: M\textrm{ accepts }x\} \]
+It is tempting, but slightly irresponsible to call this \textit{the language accepted by M}. The reason it would be irresponsible is because it's technically a lie: If the machine $M$ halts in denial on even a single input, then $L$ isn't actually accepted by $M$ as we have defined it above. It is a triviality though to construct out of $M$ a Turing machine which does accept $L$, however: Just redefine the transition function to enter some new state, $q_i$, and then define the Turing machine to move it's cursor endlessly rightward where it would otherwise halt in rejection. The bottom line though is that any enumeration of all Turing machines implicitly defines an enumeration of \textbf{RE}, which is one good reason for our choice of terminology. Not to be liars, we will call $L(M)$ as defined above the \textbf{language defined by L}, since at the very least we can be sure that $L$ is defined by $M$ uniquely. A quick modification of the above observation yields the following:
+\begin{fact}
+    $\textbf{R} \subseteq \textbf{RE}$
+\end{fact}
+\begin{proof}
+    Let $L \in \textbf{R}$, and let $M$ be a machine which decides $L$. Use the same trick above to modify $M$ so which whenever $M$ would normally enter a rejection state, instead moves it's cursor right forever. This creates a new Turing machine which accepts $L$. 
+\end{proof}
+\par Note that if a Turing machine \textit{didn't} ever halt in rejection, then $L(M)$ would in fact be the languages accepted by $M$. Likewise if $M$ \textit{did} halt on every input, then $L(M)$ still wouldn't be the language accepted by $M$, but it would be the language \textit{decided} by $M$. The dividing line then, between \textbf{R} and \textbf{RE}, is encapsulated in the following decision problem: Given a Turing machine $M$, does it halt? We have apparently stumbled upon the following very metamotivated language:
+\begin{problem} The halting problem
+    \begin{center}
+        $HALTING$: Given a Turing machine $M$ and an input to that Turing machine $x$, does $M(x)$ halt? I.e.
+        \[HALTING = \{M;x: M(x) \neq \nearrow\} \]
+    \end{center}
+\end{problem}
+\begin{fact}
+    $HALTING \in \textbf{RE}$  
+\end{fact}
+\begin{proof}
+    In fact, we \textit{have already defined } the Turing machine which accepts $HALTING$ - the universal Turing machine! Well, this isn't quite true, it only needs a slight, trivial modification. Consider the Turing machine $H$ which simulates the universal Turing machine on input $M;x$, and if the machine ever halts, be it in rejection or acceptance, then we have $H$ itself halt and accept. (Note that we are in fact simulating our simulation of $M$, which is fun.) Clearly $H(x) = \nearrow \iff M(x) = \nearrow$, so $H$ accepts $HALTING$.
+\end{proof}
+Not only this, $HALTING$ is our first example an \textit{undecidable problem}. 
+\begin{theorem}
+    $HALTING \notin \textbf{R}$
+\end{theorem}
+\begin{proof}
+    Suppose by way of contradiction that $HALTING \in \textbf{R}$, i.e. there exists a machine $H$ which decides $HALTING$. Out of $H$ we define a new Turing machine $D$. Note that every input string defines a Turing machine (just consider the $code$ function defined earlier). On input $x$, the machine $D$ simulates the machine $H$ on the input $x;x$ - that is, it considers the Turing machine $x$ on the input $x$. If $H(x;x)$ halts in rejection, then $D(x)$ \textit{accepts}, and if $H(x;x)$ halts in acceptance, then $D(x)$ enters a state in which it moves it's cursor right forever, never halting. That is, in this case we define $D(x) = \nearrow$.
+    \par Consider $D(D)$. Suppose $D$ accepts $D$. Then $H$ rejects the input $D;D$, which would imply that $D(D) = \nearrow$ does not halt - but we just said that it halted and accepted! So this cannot be. Suppose that $D(D)$. Then $H$ accepts the input $D;D$, which would mean that $D(D)$ halts, but we just said this was not the case! So we have a contradiction. The machine $D$ cannot exist, and so the machine $H$ from which it was made cannot exist either.
+\end{proof}
+Think about what this means for a moment: \textit{Not all problems in the world can be solved by an algorithm.} In fact, \textit{most of them can't.} The argument we just made was a \textbf{diagonalization argument} - one of many. There is plenty of philosophizing to do about these, but for now we should note that these kinds of arguments tend to be good for fishing out contradictions that are obtained from assuming that a set that is small was way too big. You can make an almost identical diagonalization argument to show that the set of real numbers are uncountable - i.e. too big to be countable. To assume that all problems were computable was to claim that the set of all Turing machines (of which we now know there are only countably many) is quite large. Too large - as we have just shown.
+\begin{corollary}
+     \textbf{R} $\neq$ \textbf{RE}. \textbf{R} is in fact properly contained in \textbf{RE}.
+\end{corollary}
+
+\par Another reason that we call these languages recursively enumerable is that the property makes it possible to, in a sense, do exactly what the name implies. Suppose a language $L$ is accepted by some Turing machine $M$, and suppose we had all the time in the world to \textit{generate} $L$. We can do this in the following way: Lexicographically order the entire set $\Sigma*$ so that we think of each input as a number. Defining the Turing machine $E$ which first simulates a step of $M(1)$, followed by a step of $M(2)$, followed by the second step of $M(1)$, followed by the third step of $M(1)$, followed by the second step of $M(2)$, followed by first step of $M(3)$, etcetera. Effectively we are running through every step of every Turing machine in an interlaced fashion. If you arrange the possible inputs as rows and the steps of the Turing machine input as columns, then you see that what we're doing is an identical construction to how one typically enumerates the rational numbers. In this fashion we're running $M$ on \textit{every input at the same time}. If $M(x)$ ever halts for any $x$, we add it to the list and keep going with the other inputs. Continuing in this way, every string in the language will eventually be added to the set by this process, and we've effectively come up with a computable way to generate the set $L$. 
+\par It's important to always keep in mind that what we are really interested in is not Turing machines but languages. We are seeking to classify the difficulty of a computational problem, and are using Turing machines as tools for doing so. This is already getting blurry though, because we are seeing that every Turing machine has a language associated with it. For instance, suppose we are handed an arbitrary Turing machine, and asked if the language defined by that Turing machine is decidable - that is, if $L(M) \in \textbf{R}$. The undecidability of halting tells me that this task of figuring out whether an arbitrary machine always halts, or equivalently of telling the difference between a partial recursive function and one which is truly recursive, is undecidable. It is important to note that while this property is one of the \textit{the machine} $M$, it is also a property of \textit{the language} $L(M)$, \textit{and as a property of $L$, it could have been talked about without any mention of $M$ itself.} Properties like this - those that describe a Turing machine \textit{as well as} the language defined by the Turing machine, are said to be \textbf{semantic} properties. On the other end, properties of a Turing machine which don't correspond to the language without mention of the machine, will be called \textbf{syntactic} properties. Halting on every input is an example of a semantic property, because in the context of languages it is equivalent to asking if a language is recursive. In contrast, the question of whether or not a Turing machine has 5 states, or whether or not a Turing machine takes more than 1000 steps on a particular input, are syntactic properties. This distinction between syntax and semantics generalizes naturally to other models of computation as well. For instance, the question of whether or not a program in Java has an if-then statement is a purely syntactic property of the program. The question of whether or not the Java program accepts only finitely many inputs, however, is semantic. Note that this discussion of syntax versus semantics only applies to languages in \textbf{RE}, and not languages in general.
+\par As we saw already, $HALTING$ is an example of a semantic property of Turing machines which is undecidable. What the next theorem shows is that \textit{any} nontrivial semantic property of Turing machines is undecidable.
+\par To begin to formalize this, note that any property of Turing machines can be discussed via the set of all Turing machine which have that property. If this property is truly semantic as described above, then instead of thinking of the property as a set of Turing machines, we can instead think about the set of languages which have that property, and since these are necessarily languages defined by Turing machines, we can take them to be a subset of $\textbf{RE}$. Of course, \textbf{RE} itself is a property of Turing machines - it's the trivial one which every Turing machine has - that of simply being a machine. Thus it is decidable by a Turing machine which simply accepts every input after a single step. Similarly, $\varnothing$ is the property which no Turing machine has, and is decidable by a Turing machine which immediately halts in rejection on every input. Note that neither \textbf{RE} nor $\varnothing$ can be easily thought of as properties that a language has - they are syntactic. The next theorem addresses everything else.
+\begin{theorem}[Rice's Theorem]
+    Let \textbf{C} be a nonempty proper subset of \textbf{RE}. Then the decision problem: "Given a Turing machine $M$, is $L(M) \in \textbf{C}$?" is undecidable.
+\end{theorem}
+\begin{proof}
+    What we are going to do is define a recursive mapping from strings $x$ to Turing machines $M_x$, which will have the property that $x \in HALTING \iff L(M_x) \in \textbf{C}$. Later, we will call these kinds of mappings \textbf{reductions}. To show this would be to show that the problem of determining if $L \in \textbf{C}$ is \textit{at least as hard} as $HALTING$, since if it were decidable, then we could use the recursive algorithm for it, along with our recursive mapping, to decide $HALTING$, which is a contradiction because $HALTING$ is undecidable.
+    Assume for the moment that $\varnothing \notin \textbf{C}$. Let $L \in \textbf{C} \subseteq \textbf{RE}$. Then $L$ is accepted by some Turing machine $M_L$. Let $H$ be the Turing machine which accepts $HALTING$. (\textit{Accepts}, not decides.) Let $x$ be a string. We define the Turing machine $M_x$ as follows: On input $y$, $M_x$ simulates $H(x)$. If $H$ accepts $x$, then $M_x$ continues to simulate $M_L$ on input $y$. 
+    \par Suppose that $x \in HALTING$. Then for any input $y$, $H(x)$ always eventually halts, so the machine $M_x$ effectively behaves identically to the machine $M_L$ with a bit of time delay, and so $L(M_x) = L(M_L) = L \in \textbf{C}$. Thus $x \in HALTING \Rightarrow L(M_x) \in \textbf{C}$.
+    \par To show the reverse direction, we go contrapositively. Suppose that $x \notin HALTING$, i.e.  $H(x) = \nearrow$. Then $M_x(y)$ will never even reach it's second computation, so $L(M_x) = \varnothing \notin \textbf{C}$ by hypothesis. 
+    \par If $\varnothing \in \textbf{C}$, then $\textbf{C}^c$ is a proper nonempty subset of $\textbf{RE}$, which by the argument above cannot be decidable. It follows that \textbf{C} itself cannot be decidable, for if there were a Turing machine which decided it, then by simply simulating that Turing machine and returning the opposite answer, we would have created a Turing machine deciding \textbf{C} itself.
+\end{proof}
+Notice that we only needed a single element to be in the class \textbf{C} to arrive at a contradiction - even the simplest of nontrivial properties - those seeking to determine if the Turing machine in question defines a specific unique language, is undecidable. And yet, we ourselves have already done this \textit{multiple times}, and will continue to do this nonstop throughout these notes. To show that any Turing machine or algorithm that we define solves any specific problem is something that no Turing machine could ever do itself!
+\par Hopefully anyone reading this has realized at this point that $HALTING$ is a very special problem. It isn't just some curiosity which shows that not everything is computable. It's in some sense emblematic of the class $\textbf{RE}$ itself. We can solidify this by noting the following:
+\begin{fact}
+    $HALTING$ is \textbf{RE-complete}. That is to say, if $HALTING$ were recursive, then so too would every other problem in \textbf{RE}, i.e. it would be the case that $\textbf{RE} = \textbf{R}$
+\end{fact}
+\begin{proof}
+    Let $L \in \textbf{RE}$, and let $M_L$ be the Turing machine which accepts it. Suppose that $HALTING \in \textbf{R}$. (It isn't, but we can dream.) Let $H$ be the machine which decides $HALTING$. Then we can use these two machines in conjunction to decide $L$. We define the machine $N$ which, on the input $x$, just returns the output $H(M_L,x)$. If $H(M_L,x)$ halts in rejection, then $M_L(x)=\nearrow$, so it must be that $x \notin L$. And if $H(M_L,x)$ halts in acceptance, then $M_L$ eventually accepts $x$, confirming that $x \in L$. Thus, $N$ decides $L$, so $L \in \textbf{R}$. 
+\end{proof}
+\par Next, we define complementary classes of languages.
+\begin{definition}
+    For any collection of languages $\textbf{C}$, we define $\textbf{coC}$ to be the collection of languages $L$ such that $L^c \in \textbf{C}$ (where $L^c$ denotes the complement of $L$)
+\end{definition}
+So, viewed as a problem, $L^c$ always represents the complementary decision problem: "Is $x \notin L$?" The following fact should be clear:
+\begin{fact}
+    $\textbf{coR} = \textbf{R}$
+\end{fact}
+\begin{proof}
+    Just define the Turing machine with the two halting states swapped around, so where it would halt in rejection it would instead halt in acceptance, and vice versa.
+\end{proof}
+The class $\textbf{coRE}$ is much more interesting. If \textbf{RE} is the class of problems for which there exist algorithms which eventually confirm the 'yes' answers, then \textbf{coRE} is the class of problems for which there exist algorithms to eventually reject the 'no' answers. To see this, just note that if a language $L^c$ in \textbf{RE}, then that is exactly what you have.
+\par If you're unsure about how different these two types of problems could possibly be, just consider our friend, the halting problem. It was clear that $HALTING \in \textbf{RE}$. We could confirm that a machine halted on an input by having our universal Turing machine simulate it and patiently wait. The case for $HALTING^c$ is not at all as obvious: Nobody is patient enough to wait for a machine to never halt! 
+\begin{fact}
+    $\textbf{coRE} \cap \textbf{RE} = \textbf{R}$
+\end{fact}
+\begin{proof}
+    Suppose $L \in \textbf{coRE}$, and $L \in \textbf{RE}$. $L^c \in \textbf{RE}$, then, so let $M_a$ be the Turing machine which accepts $L$, and $M_r$ be the Turing machine which accepts $L^c$. A machine $M$ which decides $L$ is one which first simulates a step of $M_a$, followed by a step of $M_r$, then the second step of $M_r$, and so on, back and forth. Eventually, one of these will halt in acceptance. If the accepting machine is $M_a$, then we have $M$ halt and accept. Else, we have $M$ halt and reject.
+\end{proof}
+Thus, $HALTING^c \notin \textbf{RE}$, for if it were, then by the above fact we would have that $HALTING$ were decidable. Also by the above fact, is that $\textbf{R} \subseteq \textbf{coRE}$. We now have the three centrally important classes in computability theory, their structural relationship to one another, and have confirmation that none of them are equal. However, do there exist languages which are beyond computation in \textit{any} of these three senses? The answer is yes, but to find an example, we must turn to first order logic. Before that, however, we wish to pin down more precisely what the recursive functions really are. 
+
